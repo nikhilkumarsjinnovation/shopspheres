@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
     path === '/checkout' ||
     path === '/orders';
   const isSellerRoute = path.startsWith('/seller');
-  const isAdminRoute = path.startsWith('/admin');
+  const isAdminRoute = path.startsWith('/admin') || path === '/dashboard';
 
   if (!isCustomerRoute && !isSellerRoute && !isAdminRoute) {
     return response;
