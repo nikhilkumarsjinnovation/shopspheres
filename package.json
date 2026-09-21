@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -13,6 +13,8 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
+    "@vanilla-extract/css": "^1.21.2",
+    "@vanilla-extract/next-plugin": "^2.5.2",
     "next": "^16.3.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
