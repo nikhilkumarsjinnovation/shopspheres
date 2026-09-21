@@ -53,6 +53,17 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/login?verified=true`);
         }
 
+        const next = searchParams.get('next');
+        const type = searchParams.get('type');
+
+        if (next) {
+          return NextResponse.redirect(`${origin}${next}`);
+        }
+
+        if (type === 'recovery') {
+          return NextResponse.redirect(`${origin}/reset-password`);
+        }
+
         const destination = getRoleDashboardUrl(role);
         return NextResponse.redirect(`${origin}${destination}`);
       }

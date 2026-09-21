@@ -19,7 +19,12 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const isAuthPage = path === '/login' || path === '/signup' || path.startsWith('/auth');
+  const isAuthPage =
+    path === '/login' ||
+    path === '/signup' ||
+    path === '/forgot-password' ||
+    path === '/reset-password' ||
+    path.startsWith('/auth');
 
   // If authenticated user visits /login or /signup, route directly to their dashboard
   if (user && (path === '/login' || path === '/signup')) {

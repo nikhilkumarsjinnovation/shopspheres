@@ -22,8 +22,11 @@ function LoginForm() {
   useEffect(() => {
     const errorParam = searchParams.get('error');
     const verifiedParam = searchParams.get('verified');
+    const resetParam = searchParams.get('reset');
 
-    if (verifiedParam === 'true') {
+    if (resetParam === 'success') {
+      setSuccessMessage('Password reset successfully! Please sign in with your new password.');
+    } else if (verifiedParam === 'true') {
       setSuccessMessage('Email verified successfully! Please log in to continue.');
     } else if (errorParam === 'account_inactive') {
       setErrorMessage('Your account is deactivated. Please contact support.');
@@ -135,7 +138,16 @@ function LoginForm() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="password">Password</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label className={styles.label} htmlFor="password">Password</label>
+            <Link
+              href="/forgot-password"
+              className={styles.link}
+              style={{ fontSize: '0.8rem' }}
+            >
+              Forgot password?
+            </Link>
+          </div>
           <input
             id="password"
             type="password"
