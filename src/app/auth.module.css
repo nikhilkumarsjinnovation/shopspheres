@@ -11,7 +11,7 @@
 
 .card {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   background: #ffffff;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -173,6 +173,11 @@
   border-color: #94a3b8;
 }
 
+.buttonGoogle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .errorAlert {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
@@ -208,4 +213,90 @@
 
 .link:hover {
   text-decoration: underline;
+}
+
+/* Password Strength Meter */
+.meterTrack {
+  width: 100%;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.meterFill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.meterFillWeak {
+  width: 33%;
+  background-color: #ef4444;
+}
+
+.meterFillNormal {
+  width: 66%;
+  background-color: #f59e0b;
+}
+
+.meterFillStrong {
+  width: 100%;
+  background-color: #10b981;
+}
+
+.meterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.meterLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.meterBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+.badgeWeak {
+  color: #991b1b;
+  background-color: #fee2e2;
+}
+
+.badgeNormal {
+  color: #92400e;
+  background-color: #fef3c7;
+}
+
+.badgeStrong {
+  color: #065f46;
+  background-color: #d1fae5;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.checklistItem {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checklistItemValid {
+  color: #166534;
+  font-weight: 500;
 }

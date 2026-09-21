@@ -17,13 +17,18 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const errorParam = searchParams.get('error');
-    if (errorParam === 'account_inactive') {
+    const verifiedParam = searchParams.get('verified');
+
+    if (verifiedParam === 'true') {
+      setSuccessMessage('Email verified successfully! Please log in to continue.');
+    } else if (errorParam === 'account_inactive') {
       setErrorMessage('Your account is deactivated. Please contact support.');
     } else if (errorParam === 'auth_callback_failed') {
-      setErrorMessage('Google authentication could not be completed. Please try again.');
+      setErrorMessage('Authentication could not be completed. Please try again.');
     }
   }, [searchParams]);
 
@@ -112,6 +117,7 @@ function LoginForm() {
       <h1 className={styles.title}>Welcome Back</h1>
       <p className={styles.subtitle}>Sign in to your ShopSphere account</p>
 
+      {successMessage && <div className={styles.successAlert}>{successMessage}</div>}
       {errorMessage && <div className={styles.errorAlert}>{errorMessage}</div>}
 
       <form onSubmit={handleEmailLogin} className={styles.form}>

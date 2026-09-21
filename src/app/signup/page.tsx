@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { getRoleDashboardUrl } from '@/lib/auth/roles';
 import type { UserRole } from '@/types/database.types';
 import styles from '../auth.module.css';
+
+type PasswordStrength = 'Weak' | 'Normal' | 'Strong';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -20,14 +22,76 @@ export default function SignupPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Real-time password evaluation
+  const passwordAnalysis = useMemo(() => {
+    if (!password) {
+      return {
+        strength: null as PasswordStrength | null,
+        hasMinLength: false,
+        hasUpper: false,
+        hasLower: false,
+        hasNumber: false,
+        hasSpecial: false,
+        isValid: false,
+      };
+    }
+
+    const hasMinLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>_~-]/.test(password);
+
+    const matchCount = [hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
+
+    let strength: PasswordStrength = 'Weak';
+
+    if (!hasMinLength || matchCount < 2) {
+      strength = 'Weak';
+    } else if (hasMinLength && matchCount >= 4) {
+      strength = 'Strong';
+    } else if (hasMinLength && matchCount >= 2) {
+      strength = 'Normal';
+    }
+
+    const isValid = hasMinLength && strength !== 'Weak';
+
+    return {
+      strength,
+      hasMinLength,
+      hasUpper,
+      hasLower,
+      hasNumber,
+      hasSpecial,
+      isValid,
+    };
+  }, [password]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    // Strict client-side security validation
+    if (!passwordAnalysis.hasMinLength) {
+      setErrorMessage('Password must be at least 8 characters long.');
+      setLoading(false);
+      return;
+    }
+
+    if (passwordAnalysis.strength === 'Weak') {
+      setErrorMessage(
+        'Password is too weak. Please combine uppercase letters, lowercase letters, numbers, or special characters.'
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
-      // 1. Sign up with Supabase Auth including role in user metadata
+      const origin = window.location.origin;
+
+      // 1. Sign up with Supabase Auth including role and email verification redirect
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -36,6 +100,8 @@ export default function SignupPage() {
             role,
             full_name: fullName,
           },
+          // Directs verification email click to callback which redirects to /login?verified=true
+          emailRedirectTo: `${origin}/auth/callback?verified=true`,
         },
       });
 
@@ -52,8 +118,7 @@ export default function SignupPage() {
         return;
       }
 
-      // 2. Ensure record exists in public.users table
-      // (Trigger handles it automatically, but we ensure existence with selected role)
+      // 2. Ensure record exists in public.users table with selected role
       const { data: existingProfile } = await supabase
         .from('users')
         .select('role')
@@ -71,7 +136,6 @@ export default function SignupPage() {
 
       // 3. If session is immediately active (e.g. Email Confirmations disabled)
       if (authData.session) {
-        // Query users table for confirmed role
         const { data: profile } = await supabase
           .from('users')
           .select('role')
@@ -84,11 +148,38 @@ export default function SignupPage() {
         router.refresh();
       } else {
         // Email confirmation is required by Supabase project settings
-        setSuccessMessage('Account registered successfully! Please check your email to confirm your account, then log in.');
+        setSuccessMessage(
+          'Account created successfully! A confirmation link has been sent to your email. Click the link in your email to verify and continue.'
+        );
         setLoading(false);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setErrorMessage(message);
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const origin = window.location.origin;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          // Pass the selected role to callback so the profile is created with customer or seller role
+          redirectTo: `${origin}/auth/callback?role=${role}`,
+        },
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        setLoading(false);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Google sign up failed.';
       setErrorMessage(message);
       setLoading(false);
     }
@@ -130,17 +221,84 @@ export default function SignupPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="password">Password</label>
+            <label className={styles.label} htmlFor="password">Password (min. 8 characters)</label>
             <input
               id="password"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               className={styles.input}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+
+            {/* Real-time Password Strength Meter */}
+            {password.length > 0 && (
+              <div>
+                <div className={styles.meterTrack}>
+                  <div
+                    className={`${styles.meterFill} ${
+                      passwordAnalysis.strength === 'Strong'
+                        ? styles.meterFillStrong
+                        : passwordAnalysis.strength === 'Normal'
+                        ? styles.meterFillNormal
+                        : styles.meterFillWeak
+                    }`}
+                  />
+                </div>
+
+                <div className={styles.meterHeader}>
+                  <span className={styles.meterLabel}>Password Strength:</span>
+                  <span
+                    className={`${styles.meterBadge} ${
+                      passwordAnalysis.strength === 'Strong'
+                        ? styles.badgeStrong
+                        : passwordAnalysis.strength === 'Normal'
+                        ? styles.badgeNormal
+                        : styles.badgeWeak
+                    }`}
+                  >
+                    {passwordAnalysis.strength}
+                  </span>
+                </div>
+
+                <div className={styles.checklist}>
+                  <div
+                    className={`${styles.checklistItem} ${
+                      passwordAnalysis.hasMinLength ? styles.checklistItemValid : ''
+                    }`}
+                  >
+                    <span>{passwordAnalysis.hasMinLength ? '✓' : '•'}</span>
+                    <span>At least 8 characters</span>
+                  </div>
+                  <div
+                    className={`${styles.checklistItem} ${
+                      passwordAnalysis.hasUpper && passwordAnalysis.hasLower
+                        ? styles.checklistItemValid
+                        : ''
+                    }`}
+                  >
+                    <span>
+                      {passwordAnalysis.hasUpper && passwordAnalysis.hasLower ? '✓' : '•'}
+                    </span>
+                    <span>Uppercase and lowercase letters</span>
+                  </div>
+                  <div
+                    className={`${styles.checklistItem} ${
+                      passwordAnalysis.hasNumber || passwordAnalysis.hasSpecial
+                        ? styles.checklistItemValid
+                        : ''
+                    }`}
+                  >
+                    <span>
+                      {passwordAnalysis.hasNumber || passwordAnalysis.hasSpecial ? '✓' : '•'}
+                    </span>
+                    <span>Numbers or symbols</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -174,12 +332,41 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (password.length > 0 && !passwordAnalysis.isValid)}
             className={styles.buttonPrimary}
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
+
+        <div className={styles.divider}>Or</div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignup}
+          disabled={loading}
+          className={styles.buttonGoogle}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+            />
+          </svg>
+          Continue with Google as {role === 'seller' ? 'Seller' : 'Customer'}
+        </button>
 
         <p className={styles.footerText}>
           Already have an account?{' '}
