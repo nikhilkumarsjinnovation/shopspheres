@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import ProductThumbnail from '@/components/ProductThumbnail';
 import styles from '../seller.module.css';
 
 export default async function SellerDashboardPage() {
@@ -101,19 +102,7 @@ export default async function SellerDashboardPage() {
                   return (
                     <tr key={product.id} className={styles.tr}>
                       <td className={styles.td}>
-                        {firstImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={firstImage}
-                            alt={product.title}
-                            className={styles.productThumb}
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className={styles.placeholderThumb}>No Img</div>
-                        )}
+                        <ProductThumbnail src={firstImage} alt={product.title} />
                       </td>
                       <td className={styles.td}>
                         <div style={{ fontWeight: 600, color: '#0f172a' }}>{product.title}</div>
