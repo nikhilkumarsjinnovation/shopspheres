@@ -106,7 +106,16 @@ export default function SignupPage() {
       });
 
       if (signUpError) {
-        setErrorMessage(signUpError.message);
+        if (
+          signUpError.message?.toLowerCase().includes('rate limit') ||
+          (signUpError as { code?: string }).code === 'over_email_send_rate_limit'
+        ) {
+          setErrorMessage(
+            'Email rate limit reached: Supabase limits default verification emails to ~3/hour. You can disable "Confirm email" in Supabase Dashboard (Authentication > Providers > Email) for instant testing.'
+          );
+        } else {
+          setErrorMessage(signUpError.message);
+        }
         setLoading(false);
         return;
       }

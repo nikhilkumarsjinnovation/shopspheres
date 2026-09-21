@@ -8,6 +8,12 @@ export default function SignOutButton() {
   const supabase = createClient();
 
   const handleSignOut = async () => {
+    try {
+      localStorage.removeItem('shopsphere_cart');
+      localStorage.removeItem('shopsphere_cart_guest');
+    } catch {
+      // Ignore
+    }
     await supabase.auth.signOut();
     router.push('/login');
     router.refresh();

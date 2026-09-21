@@ -29,7 +29,7 @@ export default async function CustomerLayout({
   }
 
   return (
-    <CartProvider>
+    <CartProvider key={user.id} userId={user.id}>
       <div className={styles.layout}>
         <CustomerNavbar email={user.email} />
         <main className={styles.mainContent}>{children}</main>

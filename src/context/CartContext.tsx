@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 export interface CartItem {
   id: string; // product_id
@@ -31,33 +32,85 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [mounted, setMounted] = useState(false);
+interface CartProviderProps {
+  children: React.ReactNode;
+  userId?: string;
+}
 
-  // Hydrate from localStorage on initial mount
+export function CartProvider({ children, userId: propUserId }: CartProviderProps) {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [activeUserId, setActiveUserId] = useState<string | null>(propUserId ?? null);
+  const [loadedUserId, setLoadedUserId] = useState<string | null | undefined>(undefined);
+
+  // Keep activeUserId synchronized with propUserId
   useEffect(() => {
+    if (propUserId) {
+      setActiveUserId(propUserId);
+    }
+  }, [propUserId]);
+
+  // Auth listener to detect login, logout, or account switches
+  useEffect(() => {
+    const supabase = createClient();
+
+    if (!propUserId) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setActiveUserId(user?.id ?? null);
+      });
+    }
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setActiveUserId(null);
+        setLoadedUserId(undefined);
+        setCart([]);
+      } else if (session?.user) {
+        setActiveUserId(session.user.id);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [propUserId]);
+
+  // Hydrate cart from localStorage whenever activeUserId is determined or changed
+  useEffect(() => {
+    // Clean up legacy un-scoped key if present
     try {
-      const stored = localStorage.getItem('shopsphere_cart');
+      localStorage.removeItem('shopsphere_cart');
+    } catch {
+      // Ignore
+    }
+
+    const storageKey = activeUserId ? `shopsphere_cart_${activeUserId}` : 'shopsphere_cart_guest';
+    try {
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         setCart(JSON.parse(stored));
+      } else {
+        setCart([]);
       }
     } catch {
-      // Ignore localStorage read error
+      setCart([]);
     }
-    setMounted(true);
-  }, []);
+    setLoadedUserId(activeUserId);
+  }, [activeUserId]);
 
-  // Persist to localStorage
+  // Persist cart to localStorage only when cart belongs to the loaded user
   useEffect(() => {
-    if (mounted) {
-      try {
-        localStorage.setItem('shopsphere_cart', JSON.stringify(cart));
-      } catch {
-        // Ignore localStorage write error
-      }
+    if (loadedUserId === undefined || loadedUserId !== activeUserId) {
+      return;
     }
-  }, [cart, mounted]);
+    const storageKey = activeUserId ? `shopsphere_cart_${activeUserId}` : 'shopsphere_cart_guest';
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(cart));
+    } catch {
+      // Ignore localStorage write error
+    }
+  }, [cart, activeUserId, loadedUserId]);
 
   const addToCart = (product: {
     id: string;
@@ -105,6 +158,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setCart([]);
+    const storageKey = activeUserId ? `shopsphere_cart_${activeUserId}` : 'shopsphere_cart_guest';
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      // Ignore
+    }
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
