@@ -7,7 +7,7 @@ const MAX_RETRIES = 3;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description } = body;
+    const { title, description, condition } = body;
 
     if (!title || typeof title !== 'string' || !title.trim()) {
       return NextResponse.json(
@@ -33,10 +33,11 @@ export async function POST(request: NextRequest) {
     // Retry Loop: MAX_RETRIES = 3
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const rawJsonText = await callGeminiAI(
+        const rawJsonText = await callMasterDataEntryAI(
           apiKey,
           title.trim(),
           description ? String(description).trim() : '',
+          condition ? String(condition).trim() : 'New',
           lastError,
           attempt
         );
@@ -49,6 +50,20 @@ export async function POST(request: NextRequest) {
 
         // 1. JSON parse
         const parsedJson = JSON.parse(cleanedText);
+
+        // Defensive normalization: ensure attributes are string-string mappings
+        if (parsedJson && typeof parsedJson.attributes === 'object' && parsedJson.attributes !== null) {
+          for (const [key, val] of Object.entries(parsedJson.attributes)) {
+            if (typeof val !== 'string') {
+              parsedJson.attributes[key] = String(val);
+            }
+          }
+        }
+
+        // Defensive normalization: ensure suggested_price is numeric
+        if (parsedJson && typeof parsedJson.suggested_price === 'string') {
+          parsedJson.suggested_price = parseFloat(parsedJson.suggested_price) || 0;
+        }
 
         // 2. Strict Zod schema validation
         const validated: CategoryResponse = CategoryResponseSchema.parse(parsedJson);
@@ -66,7 +81,7 @@ export async function POST(request: NextRequest) {
           lastError = 'Unknown error during AI generation or parsing.';
         }
 
-        console.warn(`[AI Categorizer] Attempt ${attempt}/${MAX_RETRIES} failed:`, lastError);
+        console.warn(`[AI Data Entry Agent] Attempt ${attempt}/${MAX_RETRIES} failed:`, lastError);
 
         // If not the final attempt, brief delay before retrying
         if (attempt < MAX_RETRIES) {
@@ -90,39 +105,64 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Invokes the Gemini API with structured JSON output instructions
+ * Invokes Gemini LLM acting as Master E-commerce Data Entry Agent
+ * Generates 10+ technical specifications and realistic suggested pricing.
  */
-async function callGeminiAI(
+async function callMasterDataEntryAI(
   apiKey: string,
   title: string,
   description: string,
+  condition: string,
   previousError: string | null,
   attempt: number
 ): Promise<string> {
-  const prompt = `You are an expert e-commerce taxonomist.
-Your job is to analyze the product title and description to categorize it into standardized marketplace taxonomy.
+  const prompt = `You are a Master E-commerce Data Entry Agent for a world-class marketplace (similar to Amazon / Flipkart).
+Your task is to analyze the product title, brief description, and condition, and use your comprehensive internal catalog knowledge to enrich this product into an enterprise-grade listing.
 
-Product Title: "${title}"
-Product Description: "${description || 'None provided'}"
+Product Details:
+- Title: "${title}"
+- Brief Description: "${description || 'Standard product specifications'}"
+- Item Condition: "${condition}"
+
+Strict Instructions:
+1. Deduce the appropriate top-level platform category (e.g. "Electronics", "Apparel & Accessories", "Home & Kitchen", "Health & Beauty", "Sports & Outdoors", "Books & Media", "Automotive", "Toys & Games").
+2. Deduce the fine-grained sub_category (e.g. "Over-Ear Headphones", "Men's Athletic Shoes", "Espresso Machines", "Moisturizers").
+3. Generate 3 to 7 relevant searchable lowercase keywords/tags.
+4. Provide a confidence score between 0.0 and 1.0.
+5. Provide a realistic suggested_price in USD (number).
+6. CRITICAL: Generate a comprehensive list of 10 or more technical specifications and physical attributes in the "attributes" object. Key names must be readable titles (e.g. "Brand", "Model Number", "Color", "Material", "Dimensions", "Weight", "Warranty", "Manufacturer", "Country of Origin", "Connectivity", "Power Source", "Included Components"). All values in "attributes" must be strings.
 
 Strict Schema Requirement:
 You MUST return ONLY a valid raw JSON object conforming strictly to this schema:
 {
-  "category": string (e.g. "Electronics", "Apparel & Accessories", "Home & Kitchen", "Health & Beauty", "Sports & Outdoors", "Books & Media"),
-  "sub_category": string (e.g. "Headphones & Audio", "Men's Footwear", "Kitchenware", "Skincare"),
-  "tags": array of strings (maximum 5 concise lowercase or title-case tags, e.g. ["wireless", "bluetooth", "noise-cancelling"]),
-  "confidence": number between 0.0 and 1.0 (representing classification certainty)
+  "category": string,
+  "sub_category": string,
+  "tags": string[],
+  "confidence": number,
+  "suggested_price": number,
+  "attributes": {
+    "Brand": string,
+    "Model": string,
+    "Color": string,
+    "Material": string,
+    "Dimensions": string,
+    "Weight": string,
+    "Warranty": string,
+    "Manufacturer": string,
+    "Country of Origin": string,
+    "Package Contents": string
+    ... (and any additional category-specific specs, at least 10 in total)
+  }
 }
 
 ${
   previousError
-    ? `IMPORTANT: Attempt ${attempt - 1} failed with this validation error: "${previousError}". Fix the issue and ensure the JSON strictly matches the schema.`
+    ? `IMPORTANT: Attempt ${attempt - 1} failed with this validation error: "${previousError}". Fix the issue and ensure the output strictly matches the required types.`
     : ''
 }
 
-Do NOT wrap in markdown block (no \`\`\`json). Return raw JSON only.`;
+Do NOT wrap the output in markdown code fences (no \`\`\`json). Return raw JSON only.`;
 
-  // Use gemini-3.6-flash or fallback model
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
@@ -138,7 +178,7 @@ Do NOT wrap in markdown block (no \`\`\`json). Return raw JSON only.`;
       ],
       generationConfig: {
         response_mime_type: 'application/json',
-        temperature: 0.1,
+        temperature: 0.15,
       },
     }),
   });

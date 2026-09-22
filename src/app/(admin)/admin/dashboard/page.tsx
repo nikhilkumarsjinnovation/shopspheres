@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Database } from '@/types/database.types';
+import type { Database, Product } from '@/types/database.types';
+import AdminApprovalQueue from '@/components/AdminApprovalQueue';
 import * as styles from '../../admin.css';
 
 type OrderRow = Database['public']['Tables']['orders']['Row'];
@@ -53,8 +54,17 @@ export default async function AdminDashboardPage() {
     .from('products')
     .select('*', { count: 'exact', head: true });
 
-  // 5. Recent Orders Table: Fetch the most recent 10 orders across platform
-  const { data: recentOrdersData, error: ordersError } = await supabase
+  // 5. Query Products Awaiting Administrator Review (approval_status = 'pending')
+  const { data: pendingProductsData } = await supabase
+    .from('products')
+    .select('*')
+    .eq('approval_status', 'pending')
+    .order('created_at', { ascending: false });
+
+  const pendingProducts = (pendingProductsData || []) as Product[];
+
+  // 6. Recent Orders Table: Fetch the most recent 10 orders across platform
+  const { data: recentOrdersData } = await supabase
     .from('orders')
     .select('id, customer_id, total_amount, status, is_gift, recipient_email, created_at')
     .order('created_at', { ascending: false })
@@ -96,9 +106,9 @@ export default async function AdminDashboardPage() {
     <div>
       {/* Header */}
       <div className={styles.header}>
-        <h1 className={styles.headerTitle}>Platform Health & Metrics</h1>
+        <h1 className={styles.headerTitle}>Platform Health & Governance</h1>
         <p className={styles.headerSubtitle}>
-          Real-time platform telemetry, Gross Merchandise Value (GMV), user base analytics, and transaction audits.
+          Enterprise marketplace operations, product approval moderation, revenue telemetry, and transaction audits.
         </p>
       </div>
 
@@ -135,11 +145,29 @@ export default async function AdminDashboardPage() {
           </div>
           <div className={styles.metricValue}>{totalOrdersCount ?? 0}</div>
           <div className={styles.metricSubtext} style={{ color: '#c084fc' }}>
-            <span>●</span> All orders across all sellers
+            <span>●</span> Transactions across all sellers
           </div>
         </div>
 
-        {/* Metric 3: Total Active Users */}
+        {/* Metric 3: Pending Product Approvals */}
+        <div className={styles.metricCard}>
+          <div className={styles.metricTopRow}>
+            <span className={styles.metricLabel}>Pending Approvals</span>
+            <div className={styles.metricIconContainer} style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+          </div>
+          <div className={styles.metricValue} style={{ color: pendingProducts.length > 0 ? '#fbbf24' : '#ffffff' }}>
+            {pendingProducts.length}
+          </div>
+          <div className={styles.metricSubtext} style={{ color: '#fbbf24' }}>
+            <span>●</span> Items awaiting review
+          </div>
+        </div>
+
+        {/* Metric 4: Total Active Users */}
         <div className={styles.metricCard}>
           <div className={styles.metricTopRow}>
             <span className={styles.metricLabel}>Total Active Users</span>
@@ -154,28 +182,13 @@ export default async function AdminDashboardPage() {
           </div>
           <div className={styles.metricValue}>{activeUsersCount ?? 0}</div>
           <div className={styles.metricSubtext}>
-            <span>●</span> Verified active user accounts
-          </div>
-        </div>
-
-        {/* Metric 4: Platform Catalog Size */}
-        <div className={styles.metricCard}>
-          <div className={styles.metricTopRow}>
-            <span className={styles.metricLabel}>Catalog Products</span>
-            <div className={styles.metricIconContainer}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
-                <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                <polyline points="2 17 12 22 22 17" />
-                <polyline points="2 12 12 17 22 12" />
-              </svg>
-            </div>
-          </div>
-          <div className={styles.metricValue}>{totalProductsCount ?? 0}</div>
-          <div className={styles.metricSubtext} style={{ color: '#f59e0b' }}>
-            <span>●</span> Listed items in marketplace
+            <span>●</span> Verified active accounts
           </div>
         </div>
       </div>
+
+      {/* NEW SECTION: Enterprise Admin Approval Queue */}
+      <AdminApprovalQueue initialPendingProducts={pendingProducts} />
 
       {/* Recent Orders Section */}
       <div className={styles.sectionTitle}>

@@ -119,12 +119,14 @@ export type Database = {
       products: {
         Row: {
           ai_categorized: boolean
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          attributes: Json
           category: string
+          condition: string
           created_at: string
           description: string
           id: string
           image_urls: string[]
-          is_published: boolean
           price: number
           seller_id: string
           stock: number
@@ -135,12 +137,14 @@ export type Database = {
         }
         Insert: {
           ai_categorized?: boolean
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          attributes?: Json
           category: string
+          condition?: string
           created_at?: string
           description: string
           id?: string
           image_urls?: string[]
-          is_published?: boolean
           price: number
           seller_id: string
           stock?: number
@@ -151,12 +155,14 @@ export type Database = {
         }
         Update: {
           ai_categorized?: boolean
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          attributes?: Json
           category?: string
+          condition?: string
           created_at?: string
           description?: string
           id?: string
           image_urls?: string[]
-          is_published?: boolean
           price?: number
           seller_id?: string
           stock?: number
@@ -217,6 +223,7 @@ export type Database = {
       is_seller: { Args: never; Returns: boolean }
     }
     Enums: {
+      approval_status: "pending" | "approved" | "rejected"
       order_status:
         | "pending"
         | "processing"

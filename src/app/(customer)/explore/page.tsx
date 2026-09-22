@@ -5,11 +5,11 @@ import * as styles from '../customer.css';
 export default async function ExplorePage() {
   const supabase = await createClient();
 
-  // Query all published products from the marketplace
+  // Query all approved products from the marketplace
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
-    .eq('is_published', true)
+    .eq('approval_status', 'approved')
     .order('created_at', { ascending: false });
 
   const productList = products || [];

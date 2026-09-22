@@ -162,13 +162,15 @@ CREATE TABLE public.order_items (
 * Automatic insertion of profile record upon initial authentication via Postgres trigger.
 
 ### 5.2 Functional Seller Dashboard
-* **Product Catalog View:** Minimalist table displaying inventory items, prices, and stock counts.
-* **Add Product Form:** Inputs for Title, Description, Price, Stock, and Image URL/Upload.
-* Action button: *"Auto-Categorize with AI"* adjacent to the category inputs.
+* **Dynamic Product Catalog View:** Inventory dynamically grouped by distinct category tabs using Radix UI Tabs primitives with live status indicators (`pending`, `approved`, `rejected`).
+* **Multi-Step Onboarding Wizard:**
+  * **Step 1 (Path Selection):** Choice between *Manual Entry* or *AI-Assisted (Fast)*.
+  * **Step 2 (AI Mini-Form):** Streamlined input for `title`, `brief_description`, `condition` ('New', 'Renewed', 'Used'), and `stock` with skeleton loading state.
+  * **Step 3 (Verification & Rich Form):** Comprehensive editable form with dynamic 10+ specification attribute rows, strict seller consent verification checkbox, and submission into `pending` approval status.
 
-### 5.3 Seller-Side AI Auto-Categorizer (Strict JSON Validation)
-* **Pipeline:** Next.js Route Handler (`/api/ai/categorize`) receives product `title` and `description`.
-* **LLM Prompting:** System prompt enforces output conforming strictly to JSON schema.
+### 5.3 Seller-Side AI Auto-Categorizer (Master E-commerce Data Entry Agent)
+* **Pipeline:** Next.js Route Handler (`/api/ai/categorize`) receives product `title`, `description`, and `condition`.
+* **LLM Prompting:** System prompt enforces output conforming strictly to JSON schema, synthesizing 10+ technical specifications into the `attributes` object and calculating suggested retail pricing.
 * **Zod Schema Enforcement:**
 ```typescript
 import { z } from "zod";
@@ -176,16 +178,18 @@ import { z } from "zod";
 export const CategoryResponseSchema = z.object({
   category: z.string().min(1),
   sub_category: z.string().min(1),
-  tags: z.array(z.string()).max(5),
-  confidence: z.number().min(0).max(1)
+  tags: z.array(z.string()).max(10),
+  confidence: z.number().min(0).max(1),
+  attributes: z.record(z.string()),
+  suggested_price: z.number().min(0)
 });
 
 export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
 ```
-* If LLM returns malformed JSON or schema validation fails, the API returns a deterministic error status prompting manual category selection.
+* **Self-Healing Retry Loop:** 3-attempt retry loop with diagnostic error feedback before returning a deterministic fallback.
 
 ### 5.4 Customer Browsing & Checkout Flow
-* **Discovery:** Grid listing of active products with basic search and category filter.
+* **Discovery:** Grid listing of approved products (`approval_status = 'approved'`) with search and category filtering.
 * **Product Details:** Lightweight modal or page with description, stock indicator, and "Add to Cart" button.
 * **Cart & Checkout:**
   * Cart drawer calculating itemized subtotal.
@@ -197,11 +201,12 @@ export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
 * Requires Recipient Email and optional Reveal Date (default: 24 hours before estimated delivery).
 * **Delayed Tracking Enforcement:** Recipient order lookup or notification hides delivery status until `gift_reveal_date` has elapsed. Sender retains full real-time visibility.
 
-### 5.6 Centralized Admin Dashboard (Platform Health)
+### 5.6 Centralized Admin Dashboard (Platform Health & Governance)
 * **Metrics Cards (Lightweight UI):**
   * Total Platform Gross Merchandise Value (GMV).
   * Total Orders Count & Active Users Count.
-  * System Success Rate & AI Auto-Categorizer error count.
+  * Catalog Inventory and Pending Approvals queue count.
+* **Pending Approvals Queue:** Real-time moderation table for products in `pending` status with instant "Approve" (makes product live to customers) and "Reject" actions.
 * **Recent System Orders Table:** Real-time stream of all orders across the platform with customer email, seller ID, total price, and status.
 
 ---

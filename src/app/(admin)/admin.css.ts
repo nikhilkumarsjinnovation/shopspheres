@@ -362,3 +362,95 @@ export const emptyState = style({
   textAlign: 'center',
   color: '#64748b',
 });
+
+/* Admin Approval Queue Styles */
+export const approvalSection = style({
+  marginBottom: '3rem',
+});
+
+export const actionButtonGroup = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+});
+
+export const approveBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+  padding: '0.4rem 0.75rem',
+  backgroundColor: '#059669',
+  color: '#ffffff',
+  border: 'none',
+  borderRadius: '6px',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'background-color 0.15s ease',
+  ':hover': {
+    backgroundColor: '#047857',
+  },
+  ':disabled': {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+});
+
+export const rejectBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.35rem',
+  padding: '0.4rem 0.75rem',
+  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+  color: '#f87171',
+  border: '1px solid rgba(239, 68, 68, 0.3)',
+  borderRadius: '6px',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'all 0.15s ease',
+  ':hover': {
+    backgroundColor: '#ef4444',
+    color: '#ffffff',
+  },
+  ':disabled': {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+});
+
+export const specCountChip = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.25rem',
+  padding: '0.2rem 0.5rem',
+  backgroundColor: '#1e293b',
+  color: '#38bdf8',
+  borderRadius: '4px',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+});
+
+export const queueBadge = style({
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  padding: '0.2rem 0.6rem',
+  borderRadius: '9999px',
+  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+  color: '#fbbf24',
+  border: '1px solid rgba(245, 158, 11, 0.3)',
+});
+
+export const queueSuccessToast = style({
+  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  border: '1px solid rgba(16, 185, 129, 0.3)',
+  color: '#34d399',
+  padding: '0.75rem 1rem',
+  borderRadius: '8px',
+  fontSize: '0.875rem',
+  marginBottom: '1rem',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+});
+
