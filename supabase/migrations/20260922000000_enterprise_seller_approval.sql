@@ -16,7 +16,13 @@ ALTER TABLE public.products
   ADD COLUMN IF NOT EXISTS condition TEXT NOT NULL DEFAULT 'New',
   ADD COLUMN IF NOT EXISTS attributes JSONB NOT NULL DEFAULT '{}'::jsonb;
 
--- 3. Safely migrate existing records and drop legacy is_published boolean
+-- 3. Drop existing policies that depend on legacy columns before dropping is_published
+DROP POLICY IF EXISTS "products_read_policy" ON public.products;
+DROP POLICY IF EXISTS "products_insert_policy" ON public.products;
+DROP POLICY IF EXISTS "products_update_policy" ON public.products;
+DROP POLICY IF EXISTS "products_delete_policy" ON public.products;
+
+-- 4. Safely migrate existing records and drop legacy is_published boolean
 DO $$ BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns 
@@ -30,14 +36,13 @@ DO $$ BEGIN
       ELSE 'pending'::approval_status 
     END;
     
-    ALTER TABLE public.products DROP COLUMN is_published;
+    ALTER TABLE public.products DROP COLUMN is_published CASCADE;
   END IF;
 END $$;
 
--- 4. Recreate Row Level Security (RLS) Policies on public.products
+-- 5. Recreate Row Level Security (RLS) Policies on public.products
 
--- 4.1 Read Policy: Customers see approved only; Sellers see their own; Admins see all
-DROP POLICY IF EXISTS "products_read_policy" ON public.products;
+-- 5.1 Read Policy: Customers see approved only; Sellers see their own; Admins see all
 CREATE POLICY "products_read_policy" ON public.products
   FOR SELECT
   TO public
@@ -47,8 +52,7 @@ CREATE POLICY "products_read_policy" ON public.products
     OR public.is_admin()
   );
 
--- 4.2 Insert Policy: Authenticated sellers inserting their own products
-DROP POLICY IF EXISTS "products_insert_policy" ON public.products;
+-- 5.2 Insert Policy: Authenticated sellers inserting their own products
 CREATE POLICY "products_insert_policy" ON public.products
   FOR INSERT
   TO authenticated
@@ -57,8 +61,7 @@ CREATE POLICY "products_insert_policy" ON public.products
     AND seller_id = auth.uid()
   );
 
--- 4.3 Update Policy: Sellers update their own; Admins can update any product (e.g. approve/reject)
-DROP POLICY IF EXISTS "products_update_policy" ON public.products;
+-- 5.3 Update Policy: Sellers update their own; Admins can update any product (e.g. approve/reject)
 CREATE POLICY "products_update_policy" ON public.products
   FOR UPDATE
   TO authenticated
@@ -71,8 +74,7 @@ CREATE POLICY "products_update_policy" ON public.products
     OR public.is_admin()
   );
 
--- 4.4 Delete Policy: Sellers delete their own; Admins can delete
-DROP POLICY IF EXISTS "products_delete_policy" ON public.products;
+-- 5.4 Delete Policy: Sellers delete their own; Admins can delete
 CREATE POLICY "products_delete_policy" ON public.products
   FOR DELETE
   TO authenticated
