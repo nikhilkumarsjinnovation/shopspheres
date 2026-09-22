@@ -11,6 +11,15 @@ interface SellerInventoryTabsProps {
   products: Product[];
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function formatDate(isoString?: string | null) {
+  if (!isoString) return '—';
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return isoString;
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
 export default function SellerInventoryTabs({ products }: SellerInventoryTabsProps) {
   // Dynamically extract distinct categories that actually exist in the seller's inventory
   const uniqueCategories = Array.from(
@@ -144,8 +153,12 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
                     {getStatusBadge(product.approval_status || 'pending')}
                   </td>
 
-                  <td className={styles.td} style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                    {new Date(product.created_at).toLocaleDateString()}
+                  <td
+                    className={styles.td}
+                    style={{ fontSize: '0.8rem', color: '#94a3b8' }}
+                    suppressHydrationWarning
+                  >
+                    {formatDate(product.created_at)}
                   </td>
                 </tr>
               );
