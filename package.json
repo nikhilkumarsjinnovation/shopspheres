@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:types": "supabase gen types typescript --local > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
+    "db:link": "supabase link --project-ref lzvvfbaswwxgfdvmqzod",
+    "db:push": "supabase db push"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.15",
