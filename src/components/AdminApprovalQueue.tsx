@@ -88,7 +88,7 @@ export default function AdminApprovalQueue({
             {pendingProducts.length} Awaiting Review
           </span>
         </div>
-        <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 400 }}>
+        <span style={{ fontSize: '0.8rem', color: '#8a8a8a', fontWeight: 400 }}>
           Enterprise Merchant Compliance Gate
         </span>
       </div>
@@ -99,9 +99,9 @@ export default function AdminApprovalQueue({
           style={{
             backgroundColor: 'rgba(239, 68, 68, 0.15)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
-            color: '#f87171',
+            color: '#8a8a8a',
             padding: '0.75rem 1rem',
-            borderRadius: '8px',
+            borderRadius: 0,
             fontSize: '0.875rem',
             marginBottom: '1rem',
           }}
@@ -113,8 +113,8 @@ export default function AdminApprovalQueue({
       <div className={styles.tableWrapper}>
         {pendingProducts.length === 0 ? (
           <div className={styles.emptyState}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✨</div>
-            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, color: '#f8fafc', fontSize: '1.05rem' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}></div>
+            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, color: '#f2f2f2', fontSize: '1.05rem' }}>
               Approval Queue Cleared
             </p>
             <p style={{ margin: 0, fontSize: '0.875rem' }}>
@@ -157,11 +157,11 @@ export default function AdminApprovalQueue({
                     </td>
 
                     <td className={styles.td}>
-                      <div style={{ fontWeight: 600, color: '#f8fafc' }}>
+                      <div style={{ fontWeight: 600, color: '#f2f2f2' }}>
                         <Link href={`/admin/catalog/${product.id}`}>{product.title}</Link>
                       </div>
                       {product.sub_category && (
-                        <div style={{ fontSize: '0.8rem', color: '#38bdf8', marginTop: '2px' }}>
+                        <div style={{ fontSize: '0.8rem', color: '#8a8a8a', marginTop: '2px' }}>
                           {product.sub_category}
                         </div>
                       )}
@@ -177,7 +177,7 @@ export default function AdminApprovalQueue({
                       </div>
                     </td>
 
-                    <td className={styles.td} style={{ color: '#cbd5e1' }}>
+                    <td className={styles.td} style={{ color: '#cccccc' }}>
                       {product.category}
                     </td>
 
@@ -186,10 +186,10 @@ export default function AdminApprovalQueue({
                         style={{
                           fontSize: '0.75rem',
                           fontWeight: 600,
-                          backgroundColor: '#1e293b',
-                          color: '#f1f5f9',
+                          backgroundColor: '#161616',
+                          color: '#f2f2f2',
                           padding: '0.15rem 0.5rem',
-                          borderRadius: '4px',
+                          borderRadius: 0,
                         }}
                       >
                         {product.condition || 'New'}
@@ -197,10 +197,10 @@ export default function AdminApprovalQueue({
                     </td>
 
                     <td className={styles.td}>
-                      <div style={{ fontWeight: 600, color: '#f8fafc' }}>
+                      <div style={{ fontWeight: 600, color: '#f2f2f2' }}>
                         ${Number(product.price).toFixed(2)}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#8a8a8a' }}>
                         {product.stock} units
                       </div>
                     </td>

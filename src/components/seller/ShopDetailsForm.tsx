@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import layoutStyles from '@/app/seller/seller.module.css';
 
 export default function ShopDetailsForm({
   shop,
@@ -34,18 +35,19 @@ export default function ShopDetailsForm({
   };
 
   return (
-    <form onSubmit={(event) => { void save(event); }}>
+    <form className={layoutStyles.formStack} onSubmit={(event) => { void save(event); }}>
+      <p className={layoutStyles.muted}>Address and pickup settings can be changed anytime.</p>
       <label>Address <input value={addressLine} onChange={(event) => setAddressLine(event.target.value)} /></label>
       <label>City <input value={city} onChange={(event) => setCity(event.target.value)} /></label>
       <label>State <input value={state} onChange={(event) => setState(event.target.value)} /></label>
       <label>PIN <input value={postalCode} onChange={(event) => setPostalCode(event.target.value)} /></label>
-      <label>Pickup radius km <input type="number" value={pickupRadiusKm} onChange={(event) => setPickupRadiusKm(Number(event.target.value))} /></label>
-      <label>
+      <label>Pickup radius (km) <input type="number" value={pickupRadiusKm} onChange={(event) => setPickupRadiusKm(Number(event.target.value))} /></label>
+      <label style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
         <input type="checkbox" checked={allowsBopis} onChange={(event) => setAllowsBopis(event.target.checked)} />
         Buy online, pick up in store
       </label>
-      <button type="submit">Save shop details</button>
-      {message ? <p role="status">{message}</p> : null}
+      <button type="submit" className={layoutStyles.buttonPrimary}>Save shop details</button>
+      {message ? <p role="status" className={layoutStyles.statusNote}>{message}</p> : null}
     </form>
   );
 }

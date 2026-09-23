@@ -57,10 +57,10 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
       return (
         <div className={styles.emptyState}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📦</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem 0' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#161616', margin: '0 0 0.5rem 0' }}>
             No products in this category
           </h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem 0' }}>
+          <p style={{ fontSize: '0.9rem', color: '#737373', margin: '0 0 1.5rem 0' }}>
             List a new product under this category to populate this inventory tab.
           </p>
           <Link href="/seller/add-product" className={styles.buttonPrimary}>
@@ -106,14 +106,14 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
                   </td>
 
                   <td className={styles.td}>
-                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{product.title}</div>
+                    <div style={{ fontWeight: 600, color: '#111111' }}>{product.title}</div>
                     {product.sub_category && (
-                      <div style={{ fontSize: '0.8rem', color: '#2563eb', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#111111', marginTop: '2px' }}>
                         {product.sub_category}
                       </div>
                     )}
                     {specCount > 0 && (
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#737373', marginTop: '4px' }}>
                         ⚡ {specCount} enterprise specifications
                       </div>
                     )}
@@ -126,13 +126,13 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
                   </td>
 
                   <td className={styles.td}>
-                    <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
+                    <span style={{ fontSize: '0.85rem', color: '#525252', fontWeight: 500 }}>
                       {product.category}
                     </span>
                   </td>
 
                   <td className={styles.td}>
-                    <strong style={{ color: '#0f172a' }}>
+                    <strong style={{ color: '#111111' }}>
                       ${Number(product.price).toFixed(2)}
                     </strong>
                   </td>
@@ -142,7 +142,7 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
                       style={{
                         fontSize: '0.85rem',
                         fontWeight: 600,
-                        color: product.stock > 0 ? '#059669' : '#dc2626',
+                        color: product.stock > 0 ? '#111111' : '#111111',
                       }}
                     >
                       {product.stock} in stock
@@ -155,7 +155,7 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
 
                   <td
                     className={styles.td}
-                    style={{ fontSize: '0.8rem', color: '#94a3b8' }}
+                    style={{ fontSize: '0.8rem', color: '#8a8a8a' }}
                     suppressHydrationWarning
                   >
                     {formatDate(product.created_at)}
@@ -174,10 +174,10 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
       <div className={styles.tableContainer}>
         <div className={styles.emptyState}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem 0' }}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#161616', margin: '0 0 0.5rem 0' }}>
             No products in your catalog yet
           </h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem 0' }}>
+          <p style={{ fontSize: '0.9rem', color: '#737373', margin: '0 0 1.5rem 0' }}>
             Start onboarding products using our AI-assisted enterprise pipeline or manual entry.
           </p>
           <Link href="/seller/add-product" className={styles.buttonPrimary}>

@@ -9,61 +9,48 @@ interface SellerSidebarProps {
   email?: string;
 }
 
+const links = [
+  { href: '/seller/dashboard', label: 'Overview', index: '01', match: (p: string) => p === '/seller/dashboard' },
+  { href: '/seller/branding', label: 'Identity', index: '02', match: (p: string) => p === '/seller/branding' },
+  { href: '/seller/shop', label: 'Storefront', index: '03', match: (p: string) => p === '/seller/shop' },
+  { href: '/seller/orders', label: 'Fulfillment', index: '04', match: (p: string) => p.startsWith('/seller/orders') },
+  { href: '/seller/add-product', label: 'New listing', index: '05', match: (p: string) => p === '/seller/add-product' },
+];
+
 export default function SellerSidebar({ email }: SellerSidebarProps) {
   const pathname = usePathname();
-
-  const isDashboardActive = pathname === '/seller/dashboard';
-  const isAddProductActive = pathname === '/seller/add-product';
 
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
         <h2 className={styles.brandTitle}>ShopSphere</h2>
-        <span className={styles.brandBadge}>Seller</span>
+        <span className={styles.brandBadge}>Atelier</span>
       </div>
 
-      <nav className={styles.nav}>
-        <Link
-          href="/seller/dashboard"
-          className={`${styles.navItem} ${isDashboardActive ? styles.navItemActive : ''}`}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-          </svg>
-          Dashboard
-        </Link>
-        <Link href="/seller/branding" className={`${styles.navItem} ${pathname === '/seller/branding' ? styles.navItemActive : ''}`}>
-          Branding
-        </Link>
-        <Link href="/seller/shop" className={`${styles.navItem} ${pathname === '/seller/shop' ? styles.navItemActive : ''}`}>
-          Shop details
-        </Link>
-        <Link href="/seller/orders" className={`${styles.navItem} ${pathname.startsWith('/seller/orders') ? styles.navItemActive : ''}`}>
-          Orders
-        </Link>
-
-        <Link
-          href="/seller/add-product"
-          className={`${styles.navItem} ${isAddProductActive ? styles.navItemActive : ''}`}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="16" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-          </svg>
-          Add Product
-        </Link>
+      <nav className={styles.nav} aria-label="Seller">
+        {links.map((link) => {
+          const active = link.match(pathname);
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+            >
+              <span style={{ fontSize: '0.6rem', letterSpacing: '0.08em', opacity: 0.55, minWidth: 18 }}>
+                {link.index}
+              </span>
+              {link.label}
+            </Link>
+          );
+        })}
       </nav>
 
       <div className={styles.sidebarFooter}>
-        {email && (
+        {email ? (
           <div className={styles.userEmail} title={email}>
             {email}
           </div>
-        )}
+        ) : null}
         <SignOutButton />
       </div>
     </aside>

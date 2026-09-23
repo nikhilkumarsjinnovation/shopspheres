@@ -5,6 +5,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { categoryKey } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import SellerOrderActions from '@/components/seller/SellerOrderActions';
+import layoutStyles from '../seller.module.css';
 
 export default async function SellerOrdersPage({
   searchParams,
@@ -42,28 +43,36 @@ export default async function SellerOrdersPage({
   }
 
   return (
-    <main>
-      <h1>Orders</h1>
-      <p>
-        <Link href="/seller/orders">All</Link>
-        {category ? ` · ${category}` : ''}
-      </p>
-      {Array.from(grouped.entries()).map(([orderId, bucket]) => {
-        const order = (orders ?? []).find((row) => row.id === orderId);
-        const address = order?.shipping_address;
-        const city = address && typeof address === 'object' && !Array.isArray(address) && 'city' in address && typeof address.city === 'string'
-          ? address.city
-          : 'City not set';
-        return (
-          <article key={orderId}>
-            <h2>SS-{orderId.slice(0, 8).toUpperCase()}</h2>
-            <p>{order?.status ?? 'pending'} · {city}</p>
-            <ul>{bucket.lines.map((line) => <li key={line}>{line}</li>)}</ul>
-            <SellerOrderActions orderId={orderId} categories={bucket.categories} />
-          </article>
-        );
-      })}
-      {grouped.size === 0 ? <p>No orders for this view.</p> : null}
-    </main>
+    <>
+      <header className={layoutStyles.topBar}>
+        <div>
+          <h1 className={layoutStyles.pageHeading}>Orders</h1>
+          <p className={layoutStyles.muted} style={{ marginTop: '0.25rem' }}>
+            <Link href="/seller/orders">All</Link>
+            {category ? ` · ${category}` : ''}
+          </p>
+        </div>
+      </header>
+      <div className={layoutStyles.pageBody}>
+        {Array.from(grouped.entries()).map(([orderId, bucket]) => {
+          const order = (orders ?? []).find((row) => row.id === orderId);
+          const address = order?.shipping_address;
+          const city = address && typeof address === 'object' && !Array.isArray(address) && 'city' in address && typeof address.city === 'string'
+            ? address.city
+            : 'City not set';
+          return (
+            <article key={orderId} className={layoutStyles.orderCard}>
+              <h2>SS-{orderId.slice(0, 8).toUpperCase()}</h2>
+              <p className={layoutStyles.muted}>{order?.status ?? 'pending'} · {city}</p>
+              <ul className={layoutStyles.muted} style={{ margin: 0, paddingLeft: '1.1rem' }}>
+                {bucket.lines.map((line) => <li key={line}>{line}</li>)}
+              </ul>
+              <SellerOrderActions orderId={orderId} categories={bucket.categories} />
+            </article>
+          );
+        })}
+        {grouped.size === 0 ? <div className={layoutStyles.panel}><p className={layoutStyles.muted}>No orders for this view.</p></div> : null}
+      </div>
+    </>
   );
 }

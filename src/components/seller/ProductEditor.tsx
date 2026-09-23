@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import { formatINR } from '@/lib/formatters';
 import type { Json } from '@/types/database.types';
+import layoutStyles from '@/app/seller/seller.module.css';
 
 type AttributeItem = { id: string; key: string; value: string };
 
@@ -96,21 +97,22 @@ export default function ProductEditor({
   };
 
   return (
-    <div>
-      <section>
-        <h2>Status</h2>
-        <p>Status: {product.approval_status}. Resubmits used: {product.resubmit_count} of 3.</p>
-        {product.rejection_reason ? <p>Rejection note: {product.rejection_reason}</p> : null}
-        <p>AI categorized: {product.ai_categorized ? 'Yes' : 'No'}</p>
-        <p>Rating: {product.average_rating} ({product.review_count} reviews)</p>
-        <p>Created: {new Date(product.created_at).toLocaleString('en-IN')}</p>
-        <p>Updated: {new Date(product.updated_at).toLocaleString('en-IN')}</p>
-        {product.compare_at_price != null ? <p>Compare at: {formatINR(product.compare_at_price)}</p> : null}
-        {locked ? <p>This listing is approved. You can view every field, not edit it.</p> : null}
-      </section>
+    <div className={layoutStyles.formStack}>
+      <div className={layoutStyles.statusNote}>
+        Status: {product.approval_status}. Resubmits used: {product.resubmit_count} of 3.
+        {product.rejection_reason ? ` Rejection note: ${product.rejection_reason}` : ''}
+      </div>
+      <p className={layoutStyles.muted}>
+        AI categorized: {product.ai_categorized ? 'Yes' : 'No'} · Rating {product.average_rating} ({product.review_count})
+        {product.compare_at_price != null ? ` · Compare at ${formatINR(product.compare_at_price)}` : ''}
+      </p>
+      {locked ? <p className={layoutStyles.muted}>This listing is approved. You can view every field, not edit it.</p> : null}
 
-      <form onSubmit={(event) => { event.preventDefault(); void save(false); }}>
-        <h2>Details</h2>
+      <form
+        className={layoutStyles.formStack}
+        onSubmit={(event) => { event.preventDefault(); void save(false); }}
+      >
+        <h2 className={layoutStyles.panelTitle}>Details</h2>
         <label>Title <input value={title} onChange={(event) => setTitle(event.target.value)} disabled={locked} /></label>
         <label>Description <textarea value={description} onChange={(event) => setDescription(event.target.value)} disabled={locked} /></label>
         <label>Price <input type="number" value={price} onChange={(event) => setPrice(Number(event.target.value))} disabled={locked} /></label>
@@ -129,12 +131,12 @@ export default function ProductEditor({
         <label>Image URL <input value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} disabled={locked} /></label>
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt={title} style={{ maxWidth: 220, marginTop: '0.5rem' }} />
+          <img src={imageUrl} alt={title} style={{ maxWidth: 220, borderRadius: 0, border: '1px solid #e6e6e6' }} />
         ) : null}
 
-        <h2>Specifications</h2>
+        <h2 className={layoutStyles.panelTitle}>Specifications</h2>
         {attributesList.map((item) => (
-          <div key={item.id} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <div key={item.id} className={layoutStyles.actionRow}>
             <input
               value={item.key}
               placeholder="Name"
@@ -148,10 +150,7 @@ export default function ProductEditor({
               onChange={(event) => setAttributesList((prev) => prev.map((row) => row.id === item.id ? { ...row, value: event.target.value } : row))}
             />
             {!locked ? (
-              <button
-                type="button"
-                onClick={() => setAttributesList((prev) => prev.filter((row) => row.id !== item.id))}
-              >
+              <button type="button" className={layoutStyles.buttonGhost} onClick={() => setAttributesList((prev) => prev.filter((row) => row.id !== item.id))}>
                 Remove
               </button>
             ) : null}
@@ -160,18 +159,27 @@ export default function ProductEditor({
         {!locked ? (
           <button
             type="button"
+            className={layoutStyles.buttonGhost}
             onClick={() => setAttributesList((prev) => [...prev, { id: String(Date.now()), key: '', value: '' }])}
           >
             Add specification
           </button>
         ) : null}
 
-        {(product.approval_status === 'pending' || product.approval_status === 'rejected') && !locked ? (
-          <button type="submit">Save</button>
+        <div className={layoutStyles.actionRow}>
+          {(product.approval_status === 'pending' || product.approval_status === 'rejected') && !locked ? (
+            <button type="submit" className={layoutStyles.buttonPrimary}>Save</button>
+          ) : null}
+          {canResubmit ? (
+            <button type="button" className={layoutStyles.buttonPrimary} onClick={() => { void save(true); }}>
+              Send for approval again
+            </button>
+          ) : null}
+        </div>
+        {product.approval_status === 'rejected' && !canResubmit ? (
+          <p className={layoutStyles.muted}>This listing cannot be sent again. Contact an admin.</p>
         ) : null}
-        {canResubmit ? <button type="button" onClick={() => { void save(true); }}>Send for approval again</button> : null}
-        {product.approval_status === 'rejected' && !canResubmit ? <p>This listing cannot be sent again. Contact an admin.</p> : null}
-        {message ? <p role="status">{message}</p> : null}
+        {message ? <p role="status" className={layoutStyles.statusNote}>{message}</p> : null}
       </form>
     </div>
   );

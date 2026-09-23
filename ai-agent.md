@@ -1,177 +1,180 @@
-# ShopSphere Phase 1 — Seller AI Auto-Categorization Architecture
+# ShopSphere — Comprehensive AI Subsystem Architecture & Agents Specification
 
-**Role:** AI Integration Engineer  
-**Subsystem:** Merchant Catalog Intelligence (Auto-Categorization & Enrichment)  
-**Status:** Architecture Specification & Integration Blueprint  
-
----
-
-## 1. System Overview & Objective
-
-The Seller Auto-Categorization subsystem empowers merchants to onboard merchandise rapidly by transforming minimal inputs—a raw product title and an image—into a fully structured, enriched, and classified catalog listing.
-
-### Core Objectives
-1. **Multimodal Understanding:** Ingest both unstructured textual titles and product imagery to deduce accurate product taxonomy, descriptions, and metadata.
-2. **Strict Determinism:** Eliminate non-deterministic LLM text drift by requiring strict JSON output conforming directly to the Supabase database schema.
-3. **Automated Error Recovery:** Intercept schema violations via runtime Zod validation and execute an automatic self-healing retry loop (up to 3 attempts) before surfacing errors to the merchant.
+**Document Version:** 2.0.0  
+**Subsystem:** Intelligent Platform Intelligence & Autonomous Agent Network  
+**Philosophy:** *"Build the foundation with bricks, cement, stones, and metal first; paints and tiles come later."*  
+**Status:** Approved Engineering Blueprint
 
 ---
 
-## 2. End-to-End Processing Pipeline
+## 1. Architectural Overview & The AI Agent Ecosystem
+
+ShopSphere incorporates a multi-agent AI architecture spanning both customer and merchant operations:
+
+```mermaid
+flowchart TD
+    User([Customer Interaction]) --> PersonalAI[Personal AI Shopping Companion\n/api/ai/chat]
+    PersonalAI --> MemoryGraph[(ai_user_profiles\nContext Memory)]
+    MemoryGraph --> FeedEngine[Dynamic Feed Personalization\n/api/feed/personalized]
+    FeedEngine --> CustomerFeed([Personalized Explore Feed])
+
+    User --> VoiceAgent[Accessibility Voice Agent\nSaksham STT / TTS]
+    VoiceAgent --> PersonalAI
+
+    Seller([Merchant Listing]) --> AutoCategorizer[Seller Auto-Categorizer\n10+ Attribute Extractor\n/api/ai/categorize]
+    AutoCategorizer --> ZodValidator{Zod Schema Validator\n& Self-Healing Loop}
+    ZodValidator -->|Valid| ProductCatalog[(products table)]
+    ZodValidator -->|Retry| AutoCategorizer
+```
+
+---
+
+## 2. Agent 1: The Personal AI Shopping Companion (Living Concierge)
+
+### 2.1 Mission & Core Capabilities
+The Personal AI Companion is a continuous-learning conversational guide that understands each user's unique context, provides objective purchasing recommendations, answers complex compatibility questions, and **autonomously mutates the customer's home explore feed in real time**.
+
+### 2.2 Living Memory & User Context Extraction
+* **Context Vector Stored in `ai_user_profiles`:**
+  * **Explicit Profile:** Budget limits, dietary restrictions (vegan, keto, gluten-free), clothing/shoe sizes, brand preferences.
+  * **Implicit Affinity Graph:** Top categories browsed, dwell time on listings, search keywords, price points, conversion history.
+  * **Conversational Intent Log:** Extracted entities from recent chat interactions.
+
+### 2.3 Tool-Calling Architecture (`/api/ai/chat`)
+The assistant interacts with platform data via structured tool definitions:
+1. `search_catalog(query, category?, max_price?, in_stock?, condition?)`: Queries the approved products database.
+2. `compare_products(product_ids)`: Generates side-by-side spec comparison highlighting differences and trade-offs.
+3. `check_local_availability(product_id, pincode)`: Checks whether an item is within 30 km for immediate hub/store pickup.
+4. `update_user_preference(category, weight_delta, intent_tag)`: Mutates `ai_user_profiles.feed_weights` to immediately personalize the customer's home feed.
+
+---
+
+## 3. Dynamic Feed Personalization Engine ("Change His Feed Accordingly")
+
+### 3.1 Overview & Architecture
+The customer explore feed (`/customer/explore`) is not a static list. It is driven by the dynamic feed calculation endpoint (`/api/feed/personalized`), which merges general popularity with the user's active AI memory profile.
+
+### 3.2 Feed Weight Scoring Algorithm
+Every approved product $P$ receives a real-time relevance score $S(P, U)$ for user $U$:
+
+$$S(P, U) = W_{\text{base}} \cdot \text{Rating}(P) + W_{\text{cat}} \cdot C(P, U) + W_{\text{intent}} \cdot I(P, U) + W_{\text{price}} \cdot D_{\text{price}}(P, U)$$
+
+Where:
+* $C(P, U)$ is the user's affinity score for the product's category from `ai_user_profiles.feed_weights`.
+* $I(P, U)$ is the match score between the product's tags/attributes and recent AI chat intents.
+* $D_{\text{price}}(P, U)$ rewards products that fall within the user's typical purchasing price band.
+
+### 3.3 Dynamic Carousel Generation
+The feed API dynamically synthesizes customized carousels based on the user's latest interaction signals:
+* **Signal (User chats about hiking gear):**
+  * Carousel generated: *"Curated for Your Outdoor Trail Adventure"*
+  * Category boost: *Sports & Outdoors*, *Waterproof Footwear*, *Backpacks*.
+* **Signal (User searches for kitchen gadgets under ₹2,000):**
+  * Carousel generated: *"Top Rated Kitchen Essentials in Your Budget"*
+
+---
+
+## 4. Agent 2: Accessibility Voice & Navigation Agent (Saksham Framework)
+
+### 4.1 Speech-to-Text (STT) Voice Command Engine
+* Ingests microphone audio stream, transcribes queries, and classifies navigation or purchasing intents.
+* Supported commands:
+  * *"Search for stainless steel water bottles under five hundred rupees"*
+  * *"Add the second product to my cart"*
+  * *"Read the specifications of this item"*
+  * *"Proceed to checkout with my default home address"*
+  * *"Where is my order?"*
+
+### 4.2 Text-to-Speech (TTS) Audible Guidance
+* Generates clear, concise natural language audio descriptions.
+* Strips marketing clutter and announces crucial parameters:
+  * *"Drift ANC Headphones. Priced at ₹3,499. Rated 4.8 stars by 142 buyers. In stock at Sound & Co. Delivery in 42 minutes."*
+
+---
+
+## 5. Agent 3: Category Specialist Personas (PRO Feature)
+
+When enabled, the assistant adopts specialized domain expertise:
+
+| Persona | Domain | Reasoning Focus | Example Query Resolution |
+| :--- | :--- | :--- | :--- |
+| **Tech & Electronics Guru** | Audio, Computing, Smart Home | Specs, compatibility, benchmarks, battery life | *"Will these headphones support low-latency gaming on a PS5 without a dongle?"* |
+| **Fashion Stylist** | Apparel, Footwear, Accessories | Color harmony, occasion dressing, sizing fits | *"Recommend shoes that pair with an emerald linen blazer for a summer evening."* |
+| **Gourmet Sommelier** | Groceries, Coffee, Pantry | Origin, dietary allergies, shelf life, pairings | *"Suggest medium-roast beans roasted within 10 days that work well with French press."* |
+| **Beauty Consultant** | Skincare, Cosmetics | Active ingredients, skin tolerance, clean formula | *"Find a daytime moisturizer with niacinamide for sensitive combination skin."* |
+
+---
+
+## 6. Agent 4: Seller Auto-Categorization & 10+ Attribute Extractor
+
+### 6.1 Pipeline Architecture
+The endpoint `/api/ai/categorize` transforms minimal seller inputs into an enterprise listing draft.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Seller
-    participant Client as Merchant Dashboard (Vanilla Extract UI)
-    participant Server as Next.js API Gateway (/api/ai/categorize)
-    participant Storage as Supabase Storage (Product Bucket)
-    participant LLM as Vision LLM (Multimodal Inference)
+    participant API as /api/ai/categorize
+    participant LLM as Multimodal Vision Model
     participant Zod as Zod Schema Validator
-    participant DB as Supabase DB (products table)
+    participant DB as products table
 
-    Seller->>Client: Inputs raw title & uploads image
-    Client->>Storage: Upload image asset & retrieve signed URL
-    Storage-->>Client: Return secure image URL
-    Client->>Server: POST /api/ai/categorize { raw_title, image_url }
-    
-    loop Retry Cycle (Max 3 Attempts)
-        Server->>LLM: Send Vision Prompt (raw_title, image_url, JSON Schema)
-        LLM-->>Server: Return raw JSON response string
-        Server->>Server: Parse JSON payload
-        Server->>Zod: Validate parsed payload against ProductCategorizationSchema
-        alt Validation Success
-            Zod-->>Server: Validated typed data
-            Server-->>Client: 200 OK (Structured product draft)
-            Client-->>Seller: Auto-fill product listing form for review
-        else Validation Failure (ZodError)
-            Zod-->>Server: Validation error details (path, issues)
-            Note over Server: Increment attempt counter.<br/>If attempt < 3: Append error feedback to retry prompt.<br/>If attempt >= 3: Exit loop and fail.
+    Seller->>API: POST { title, description, condition, image_url }
+    loop Retry Cycle (Up to 3 Attempts)
+        API->>LLM: Ingest multimodal prompt & strict JSON Schema
+        LLM-->>API: Raw JSON Output
+        API->>Zod: Validate against CategoryResponseSchema
+        alt Schema Valid
+            Zod-->>API: Typed CategoryResponse
+            API-->>Seller: 200 OK (10+ Attributes, Taxonomy, Suggested Price)
+        else Schema Violation
+            Zod-->>API: ZodError (Path, Validation Rule)
+            Note over API: Feed error diagnostic back into prompt & retry
         end
     end
+```
 
-    opt Exceeded 3 Attempts
-        Server-->>Client: 422 Unprocessable Entity (Friendly fallback notification)
-        Client-->>Seller: Prompt manual categorization fallback
-    end
+### 6.2 Strict Zod Schema Contract
+```typescript
+import { z } from "zod";
+
+export const CategoryResponseSchema = z.object({
+  category: z.string().min(1, "Primary category is required"),
+  sub_category: z.string().min(1, "Sub-category is required"),
+  tags: z.array(z.string()).min(3).max(10),
+  confidence: z.number().min(0).max(1),
+  attributes: z.record(z.string()).refine(
+    (attrs) => Object.keys(attrs).length >= 5,
+    "At least 5 detailed specification attributes are required"
+  ),
+  suggested_price: z.number().min(0, "Price must be positive")
+});
+
+export type CategoryResponse = z.infer<typeof CategoryResponseSchema>;
 ```
 
 ---
 
-## 3. Input & Multimodal Prompt Specifications
+## 7. Agent 5: Customer Review Summarizer & Comparison Engine
 
-### 3.1 Input Payload to Integration Service
-The integration endpoint accepts a lightweight JSON payload:
-* `raw_title`: Unprocessed product name provided by seller (e.g., `"sony wh-1000xm5 black"` or `"nike air zoom 10.5"`).
-* `image_url`: Public or time-bound pre-signed URL to the uploaded product image hosted in Supabase Storage.
+### 7.1 Verified Review Distillation
+* Ingests verified buyer reviews from `product_reviews`.
+* Outputs concise structural overview:
+  * **Top Highlights:** Key praised features (e.g. *"Long battery life (35+ hrs)", "Soft ear cushions"*).
+  * **Watch Outs:** Common critical notes (e.g. *"Microphone is average in noisy outdoor environments"*).
+  * **Buyer Verdict:** One-sentence summary for rapid decision-making.
 
-### 3.2 Model Ingestion Constraints
-* **Output Format:** Strict JSON mode enabled (`response_format: { type: "json_object" }` or equivalent schema-guided decoding).
-* **Sampling Parameters:** Deterministic temperature (`temperature: 0.1` to `0.2`) to suppress creative hallucinations while retaining taxonomic accuracy.
-* **System Prompt Guardrails:**
-  * System instruction explicitly mandates outputting *only* valid JSON.
-  * System instruction defines allowed top-level platform categories (e.g., *Electronics, Apparel & Accessories, Home & Kitchen, Health & Beauty, Sports & Outdoors, Digital Goods*).
-  * Explicit prohibition of Markdown fences (no ````json ... ```` wrapper), preamble, or postscript.
+### 7.2 Multi-Product Comparison Matrix
+* Evaluates 2 (Free) or up to 5 (PRO) products side-by-side.
+* Generates clear comparison grid comparing Price, Rating, Battery, Dimensions, Warranty, and Value Score.
 
 ---
 
-## 4. Supabase Database Alignment & Zod Schema Requirements
+## 8. Latency Budgets, Fallbacks & Error Recovery
 
-The output produced by the AI model must directly map to the Phase 1 `public.products` relational table without data loss or intermediate type casting.
-
-### 4.1 Database Column Target Mapping
-| AI Generated Field | Database Target (`public.products`) | Data Type & Constraint |
+| Operation | Target Latency | Fallback Strategy on Failure |
 | :--- | :--- | :--- |
-| `title` | `products.title` | `TEXT NOT NULL` (Cleaned, professional product headline) |
-| `description` | `products.description` | `TEXT NOT NULL` (Structured specifications & marketing copy) |
-| `category` | `products.category` | `TEXT NOT NULL` (Standardized top-level platform taxonomy) |
-| `sub_category` | `products.sub_category` | `TEXT` (Fine-grained classification) |
-| `tags` | `products.tags` | `TEXT[] NOT NULL` (Array of 3 to 7 searchable metadata tags) |
-| `confidence_score` | *Telemetry / Metadata* | Float between `0.00` and `1.00` representing model certainty |
-| `suggested_price_range` | *Advisory / Metadata* | Object with `min` and `max` numeric values for seller guidance |
-
-### 4.2 Zod Schema Architecture Specification
-The validation layer applies strict structural, type, and boundary rules:
-
-* **Title Rules:**
-  * Non-empty string, trimmed, between 5 and 150 characters.
-* **Description Rules:**
-  * Informative string between 20 and 2,000 characters.
-* **Category Rules:**
-  * Restricted enum of verified platform categories to prevent taxonomic fragmentation.
-* **Sub-Category Rules:**
-  * Non-empty string, maximum 50 characters.
-* **Tags Rules:**
-  * Array of strings with a minimum of 3 and a maximum of 7 tags.
-  * Each tag must be lowercase, alphanumeric with hyphens, and between 2 and 30 characters.
-* **Confidence Score Rules:**
-  * Floating-point number between `0.0` and `1.0`.
-* **Suggested Price Range Rules:**
-  * Optional numeric object with `min >= 0` and `max >= min`.
-
----
-
-## 5. Self-Healing Retry Loop & Error Handling Architecture
-
-When integrating with large language models, structural drift, malformed JSON, or field omission can occur. The application handles this through a 3-tier validation and recovery cycle.
-
-### 5.1 The 3-Attempt Retry Protocol
-
-```
-[Initial Request] Attempt 1
-        │
-        ├──> AI Ingestion & Response
-        ├──> JSON Parsing & Zod Schema Validation
-        │
-        ├──[Valid] ───────────────> Return Enriched Listing (Success)
-        │
-        └──[ZodError / Parse Error]
-                │
-                ├── Log Error Details & Issues
-                ├── Format Diagnostic Feedback Payload
-                │
-                ▼
-        [Retry Attempt 2]
-                │
-                ├── Include: Original Inputs + Failed Output + Exact Schema Errors
-                ├── Model Corrects Formatting Errors
-                │
-                ├──[Valid] ───────────────> Return Enriched Listing (Success)
-                │
-                └──[ZodError / Parse Error]
-                        │
-                        ▼
-                [Retry Attempt 3] (Final Remediation)
-                        │
-                        ├── Highest Strictness System Prompt
-                        │
-                        ├──[Valid] ───────────────> Return Enriched Listing (Success)
-                        │
-                        └──[Failed]
-                                │
-                                ▼
-                        [Trigger User-Facing Fallback & Log Incident]
-```
-
-### 5.2 Dynamic Diagnostic Feedback Generation
-On validation failure, the retry prompt is augmented with the exact Zod failure trace:
-1. **Identified Path:** The exact JSON key that failed validation (e.g., `tags[4]`, `category`).
-2. **Failure Reason:** The specific schema constraint violated (e.g., `Expected array with <= 7 elements, received 11`, `Invalid category enum`).
-3. **Corrective Command:** Explicit instruction for the model to rectify the identified paths without modifying valid fields.
-
-### 5.3 Failure Containment & Graceful Degradation
-If all 3 attempts fail:
-* **Circuit Breaker / Abort:** The system halts automated attempts to prevent runaway API billing and latency degradation.
-* **Admin Health Telemetry:** A metric increment is recorded to Supabase or observability logs tracking `ai_categorization_failure` with error metadata (used by the Centralized Admin Dashboard).
-* **User-Facing Response:** The API returns an HTTP `422 Unprocessable Entity` containing:
-  * A clear, non-technical explanation: *"We couldn't automatically categorize this product. Please select a category manually."*
-  * The seller's raw title is preserved in the form so that manual entry requires minimal extra effort.
-
----
-
-## 6. Security, Rate Limiting & Latency Controls
-
-1. **Authentication Guard:** Only authenticated users with the `seller` role verified through Supabase session middleware can invoke the categorization endpoint.
-2. **Rate Limiting:** Per-seller rate throttling (e.g., 20 categorization requests per 10-minute rolling window) to prevent abuse and API exhaustion.
-3. **Timeout Safeguards:** Individual AI invocation timeout set to 8 seconds; total timeout for the entire 3-step retry loop capped at 25 seconds.
-4. **Image Sanitization:** Image URLs are checked against trusted Supabase Storage origins and verified for MIME types (`image/jpeg`, `image/png`, `image/webp`) before transmission to the vision model.
+| **Personal AI Chat (`/api/ai/chat`)** | < 1,500 ms | Standard semantic search fallback with rule-based recommendations. |
+| **Feed Personalization (`/api/feed/personalized`)** | < 250 ms | Falls back to global top-rated popularity ordering if profile is cold or query times out. |
+| **Voice Command Parsing (STT)** | < 800 ms | Standard text search query fallback with error confirmation. |
+| **Seller Auto-Categorization (`/api/ai/categorize`)** | < 2,500 ms | 3-attempt self-healing retry loop; falls back to manual merchant form on failure. |

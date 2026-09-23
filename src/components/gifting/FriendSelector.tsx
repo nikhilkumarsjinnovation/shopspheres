@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import * as styles from '@/app/(customer)/customer.css';
 
 export default function FriendSelector({
   onSelect,
@@ -44,15 +45,19 @@ export default function FriendSelector({
   };
 
   return (
-    <section aria-label="Choose a friend">
-      <label>
-        Friend email
-        <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
-      </label>
-      <button type="button" onClick={() => { void send(email); }}>Send request</button>
-      <label>
-        Import contacts
+    <section className={styles.stack} aria-label="Choose a friend">
+      <div className={styles.formGroup}>
+        <label className={styles.label} htmlFor="friend-email">Friend email</label>
+        <input id="friend-email" className={styles.input} value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
+      </div>
+      <div className={styles.inlineActions}>
+        <button type="button" className={styles.buttonSecondary} onClick={() => { void send(email); }}>Send request</button>
+      </div>
+      <div className={styles.formGroup}>
+        <label className={styles.label} htmlFor="import-contacts">Import contacts</label>
         <input
+          id="import-contacts"
+          className={styles.input}
           type="file"
           accept=".txt,.csv"
           onChange={(event) => {
@@ -64,16 +69,20 @@ export default function FriendSelector({
             });
           }}
         />
-      </label>
-      {notice ? <p role="status">{notice}</p> : null}
-      <h3>Requests you sent</h3>
-      <ul>
-        {outgoing.map((row) => <li key={row.id}>{row.label} · {row.status}</li>)}
-      </ul>
-      <h3>Friends</h3>
-      <ul>
-        {friends.map((row) => <li key={row.id}>{row.label}</li>)}
-      </ul>
+      </div>
+      {notice ? <p role="status" className={styles.listMeta}>{notice}</p> : null}
+      <h3 className={styles.sectionLabel} style={{ fontSize: '1rem' }}>Requests you sent</h3>
+      <div className={styles.stack}>
+        {outgoing.length === 0 ? <p className={styles.listMeta}>None yet.</p> : outgoing.map((row) => (
+          <div key={row.id} className={styles.listMeta}>{row.label} · {row.status}</div>
+        ))}
+      </div>
+      <h3 className={styles.sectionLabel} style={{ fontSize: '1rem' }}>Friends</h3>
+      <div className={styles.stack}>
+        {friends.length === 0 ? <p className={styles.listMeta}>No friends yet.</p> : friends.map((row) => (
+          <div key={row.id} className={styles.listMeta}>{row.label}</div>
+        ))}
+      </div>
     </section>
   );
 }

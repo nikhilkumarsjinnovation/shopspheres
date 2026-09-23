@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { Store } from 'lucide-react';
+import * as styles from '../customer.css';
 
 export default async function ShopsPage() {
   const supabase = await createClient();
@@ -13,21 +15,28 @@ export default async function ShopsPage() {
     .order('name');
 
   return (
-    <main>
-      <h1>Shops</h1>
-      <p>Browse products by the shop that sells them.</p>
-      <ul>
-        {(shops ?? []).map((shop) => (
-          <li key={shop.id}>
-            <Link href={`/shops/${shop.id}`}>
-              {shop.name} · {shop.city}, {shop.state} · {shop.rating.toFixed(1)}
-              {shop.is_verified ? ' · Verified' : ''}
+    <div>
+      <div className={styles.headerContainer}>
+        <h1 className={styles.heading}>Shops</h1>
+        <p className={styles.subheading}>Browse products by the shop that sells them.</p>
+      </div>
+      {(shops ?? []).length === 0 ? (
+        <div className={styles.emptyState}>No shops are listed yet.</div>
+      ) : (
+        <div className={styles.shopGrid}>
+          {(shops ?? []).map((shop) => (
+            <Link key={shop.id} href={`/shops/${shop.id}`} className={styles.listCard} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className={styles.inlineActions}>
+                <Store size={16} aria-hidden />
+                <strong>{shop.name}</strong>
+                {shop.is_verified ? <span className={styles.listMeta}>Verified</span> : null}
+              </div>
+              <p className={styles.listMeta}>{shop.city}, {shop.state} · {shop.rating.toFixed(1)}</p>
+              {shop.description ? <p className={styles.listMeta}>{shop.description}</p> : null}
             </Link>
-            {shop.description ? <p>{shop.description}</p> : null}
-          </li>
-        ))}
-      </ul>
-      {(shops ?? []).length === 0 ? <p>No shops are listed yet.</p> : null}
-    </main>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

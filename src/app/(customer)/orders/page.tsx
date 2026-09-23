@@ -71,17 +71,14 @@ export default async function OrdersPage() {
 
       {orderList.length === 0 ? (
         <div className={styles.emptyState}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
-          <h2 style={{ fontSize: '1.25rem', color: '#0f172a', margin: '0 0 0.5rem 0' }}>
-            No orders placed yet
-          </h2>
-          <p style={{ margin: '0 0 1.5rem 0' }}>When you complete a purchase, your tracking details will appear here.</p>
+          <h2 className={styles.sectionLabel} style={{ marginBottom: '0.5rem' }}>No orders yet</h2>
+          <p className={styles.listMeta} style={{ marginBottom: '1.25rem' }}>When you complete a purchase, tracking appears here.</p>
           <Link
             href="/explore"
             className={styles.buttonAddToCart}
-            style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', display: 'inline-block' }}
+            style={{ textDecoration: 'none', padding: '0.75rem 1.5rem', display: 'inline-flex' }}
           >
-            Start Shopping
+            Explore products
           </Link>
         </div>
       ) : (
@@ -100,7 +97,7 @@ export default async function OrdersPage() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'flex-start',
-                    borderBottom: '1px solid #f1f5f9',
+                    borderBottom: '1px solid #f2f2f2',
                     paddingBottom: '1rem',
                     marginBottom: '1rem',
                     flexWrap: 'wrap',
@@ -108,15 +105,15 @@ export default async function OrdersPage() {
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>ORDER</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>SS-{order.id.slice(0, 8).toUpperCase()}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{dateStr}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#737373' }}>ORDER</div>
+                    <div style={{ fontWeight: 700, color: '#111111' }}>SS-{order.id.slice(0, 8).toUpperCase()}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#737373' }}>{dateStr}</div>
                     <OrderTrack status={order.status} />
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>TOTAL</div>
-                    <div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#0f172a' }}>
+                    <div style={{ fontSize: '0.8rem', color: '#737373' }}>TOTAL</div>
+                    <div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#111111' }}>
                       {formatINR(order.total_amount)}
                     </div>
                     <span
@@ -126,19 +123,10 @@ export default async function OrdersPage() {
                         fontWeight: 600,
                         textTransform: 'uppercase',
                         padding: '0.15rem 0.5rem',
-                        borderRadius: '4px',
-                        backgroundColor:
-                          order.status === 'delivered'
-                            ? '#ecfdf5'
-                            : order.status === 'shipped'
-                            ? '#eff6ff'
-                            : '#fef3c7',
-                        color:
-                          order.status === 'delivered'
-                            ? '#065f46'
-                            : order.status === 'shipped'
-                            ? '#1d4ed8'
-                            : '#92400e',
+                        borderRadius: 0,
+                        backgroundColor: '#ffffff',
+                        color: '#111111',
+                        border: '1px solid #111111',
                       }}
                     >
                       {order.status}
@@ -167,21 +155,21 @@ export default async function OrdersPage() {
                 {order.is_gift && (
                   <div
                     style={{
-                      backgroundColor: '#eff6ff',
-                      border: '1px solid #bfdbfe',
-                      color: '#1e40af',
+                      backgroundColor: '#f2f2f2',
+                      border: '1px solid #cccccc',
+                      color: '#111111',
                       padding: '0.6rem 0.85rem',
-                      borderRadius: '6px',
+                      borderRadius: 0,
                       fontSize: '0.85rem',
                       marginBottom: '1rem',
                     }}
                   >
-                    🎁 <strong>Gift Order:</strong> Sent to {order.recipient_email}. Surprise tracking is active.
+                    <strong>Gift order · </strong> Sent to {order.recipient_email}. Surprise tracking is active.
                   </div>
                 )}
 
                 <div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#525252', marginBottom: '0.5rem' }}>
                     Items in Order:
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -199,7 +187,7 @@ export default async function OrdersPage() {
                           <span style={{ fontWeight: 500 }}>
                             {item.product?.title || 'Product'}
                           </span>
-                          <span style={{ color: '#64748b', marginLeft: '0.5rem' }}>
+                          <span style={{ color: '#737373', marginLeft: '0.5rem' }}>
                             × {item.quantity}
                           </span>
                         </div>

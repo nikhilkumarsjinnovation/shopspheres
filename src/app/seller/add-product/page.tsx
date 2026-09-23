@@ -340,10 +340,10 @@ export default function AddProductPage() {
         {step === 1 && (
           <div>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111111', margin: '0 0 0.5rem 0' }}>
                 How would you like to onboard this product?
               </h2>
-              <p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>
+              <p style={{ color: '#737373', margin: 0, fontSize: '0.95rem' }}>
                 Choose between automated Amazon-grade AI catalog generation or standard manual entry.
               </p>
             </div>
@@ -400,16 +400,16 @@ export default function AddProductPage() {
                   </p>
                   <ul className={styles.pathFeaturesList}>
                     <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Complete Granular Control
+                      <span style={{ color: '#111111' }}>✓</span> Complete Granular Control
                     </li>
                     <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Add Custom Specifications Manually
+                      <span style={{ color: '#111111' }}>✓</span> Add Custom Specifications Manually
                     </li>
                     <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Set Own Pricing & Tags
+                      <span style={{ color: '#111111' }}>✓</span> Set Own Pricing & Tags
                     </li>
                     <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Standard Admin Approval Workflow
+                      <span style={{ color: '#111111' }}>✓</span> Standard Admin Approval Workflow
                     </li>
                   </ul>
                 </div>
@@ -449,7 +449,7 @@ export default function AddProductPage() {
                 <div className={styles.sectionHeader}>
                   <div>
                     <h2 className={styles.sectionTitle}>AI Fast-Track Input</h2>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
+                    <p style={{ color: '#737373', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
                       Give us the basics. The AI Agent will handle the heavy catalog enrichment.
                     </p>
                   </div>
@@ -550,7 +550,7 @@ export default function AddProductPage() {
                     ? 'Verify & Refine AI-Enriched Listing'
                     : 'Product Specification Form'}
                 </h2>
-                <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
+                <p style={{ color: '#737373', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
                   Review all specifications. You maintain complete control to edit any field before
                   submitting for administrator approval.
                 </p>
@@ -569,7 +569,7 @@ export default function AddProductPage() {
             <form onSubmit={handleSubmitProduct} className={styles.form}>
               {/* Section 1: Core Catalog Information */}
               <div className={styles.formSection}>
-                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111111', margin: 0 }}>
                   1. Core Catalog Details
                 </h3>
 
@@ -707,7 +707,7 @@ export default function AddProductPage() {
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#737373' }}>
                         Image Asset Verified
                       </span>
                     </div>
@@ -748,10 +748,10 @@ export default function AddProductPage() {
               <div className={styles.formSection}>
                 <div className={styles.sectionHeader}>
                   <div>
-                    <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#111111', margin: 0 }}>
                       2. Dynamic Technical Specifications ({attributesList.length} Attributes)
                     </h3>
-                    <p style={{ color: '#64748b', fontSize: '0.8rem', margin: '0.2rem 0 0 0' }}>
+                    <p style={{ color: '#737373', fontSize: '0.8rem', margin: '0.2rem 0 0 0' }}>
                       Enterprise specifications displayed on product detail pages. Edit keys or values
                       freely.
                     </p>

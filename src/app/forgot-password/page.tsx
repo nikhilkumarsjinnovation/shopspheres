@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
           </form>
         ) : (
           <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '0.9rem', color: '#737373', marginBottom: '1.25rem' }}>
               Didn&apos;t receive an email? Check your spam folder or try again with a different email.
             </p>
             <button
