@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { ensureCsrfCookie } from '@/lib/csrf';
 import { getRoleDashboardUrl } from '@/lib/auth/roles';
 import type { UserRole } from '@/types/database.types';
 
@@ -10,6 +11,7 @@ interface ProfileRecord {
 
 export async function middleware(request: NextRequest) {
   const { response, user, supabase } = await updateSession(request);
+  ensureCsrfCookie(request, response);
   const path = request.nextUrl.pathname;
 
   // Assets and API endpoints

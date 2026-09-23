@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import { AccessibilityProvider } from '@/context/AccessibilityContext';
+import './accessibility.css';
 
 export const metadata: Metadata = {
-  title: 'ShopSphere',
-  description: 'ShopSphere E-Commerce Platform',
+  title: 'ShopSphere | Amazon-Scale Marketplace & Personal AI',
+  description: 'ShopSphere E-Commerce Platform - Hyperlocal Marketplace with Real-Time Personal AI and Saksham Inclusive Accessibility',
 };
 
 export default function RootLayout({
@@ -12,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AccessibilityProvider>{children}</AccessibilityProvider>
+      </body>
     </html>
   );
 }

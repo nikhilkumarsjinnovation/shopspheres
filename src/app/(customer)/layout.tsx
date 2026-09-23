@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth';
 import { CartProvider } from '@/context/CartContext';
 import CustomerNavbar from '@/components/CustomerNavbar';
+import PersonalAiAssistant from '@/components/PersonalAiAssistant';
 import * as styles from './customer.css';
 
 export default async function CustomerLayout({
@@ -10,29 +12,22 @@ export default async function CustomerLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getAuthenticatedUser(supabase);
 
-  if (!user) {
+  if (!session) {
     redirect('/login');
   }
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || !profile.is_active) {
+  if (!session.profile.is_active) {
     redirect('/login?error=account_inactive');
   }
 
   return (
-    <CartProvider key={user.id} userId={user.id}>
+    <CartProvider key={session.user.id} userId={session.user.id}>
       <div className={styles.layout}>
-        <CustomerNavbar email={user.email} />
+        <CustomerNavbar email={session.user.email} />
         <main className={styles.mainContent}>{children}</main>
+        <PersonalAiAssistant />
       </div>
     </CartProvider>
   );

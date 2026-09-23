@@ -6,6 +6,7 @@ import Link from 'next/link';
 import * as Separator from '@radix-ui/react-separator';
 import { createClient } from '@/lib/supabase/client';
 import type { CategoryResponse } from '@/lib/validations/ai';
+import { fetchWithCsrf } from '@/lib/csrf-client';
 import * as styles from '../seller.css';
 import layoutStyles from '../seller.module.css';
 
@@ -85,7 +86,7 @@ export default function AddProductPage() {
     setErrorMessage(null);
 
     try {
-      const res = await fetch('/api/ai/categorize', {
+      const res = await fetchWithCsrf('/api/ai/categorize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -625,7 +626,7 @@ export default function AddProductPage() {
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label className={styles.label} htmlFor="final_price">
-                      Unit Price ($ USD) *
+                      Unit Price (₹ INR) *
                     </label>
                     <input
                       id="final_price"
@@ -634,7 +635,7 @@ export default function AddProductPage() {
                       min="0"
                       required
                       className={styles.input}
-                      placeholder="29.99"
+                      placeholder="1499.00"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                     />

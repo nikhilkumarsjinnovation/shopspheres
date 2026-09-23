@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth';
 import SellerSidebar from '@/components/SellerSidebar';
 import styles from './seller.module.css';
 
@@ -9,25 +10,15 @@ export default async function SellerLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await getAuthenticatedUser(supabase);
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || !profile.is_active || (profile.role !== 'seller' && profile.role !== 'admin')) {
+  if (!session || !session.profile.is_active || (session.profile.role !== 'seller' && session.profile.role !== 'admin')) {
     redirect('/login');
   }
 
   return (
     <div className={styles.layout}>
-      <SellerSidebar email={user.email} />
+      <SellerSidebar email={session.user.email} />
       <div className={styles.main}>
         {children}
       </div>

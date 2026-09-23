@@ -1,0 +1,186 @@
+/* ==========================================================================
+   Saksham Inclusive Accessibility Stylesheet (WCAG 2.2 AAA Standards)
+   Tailored for visual, motor, auditory, and cognitive disabilities
+   ========================================================================== */
+
+/* 1. Large Touch Target Mode (Motor Tremors / Dexterity Accessibility)
+   Enforces min 54px hit targets, increased spacing, and clear tactile outlines */
+html[data-large-touch-targets="true"] button,
+html[data-large-touch-targets="true"] a,
+html[data-large-touch-targets="true"] [role="button"],
+html[data-large-touch-targets="true"] input[type="button"],
+html[data-large-touch-targets="true"] input[type="submit"],
+html[data-large-touch-targets="true"] input[type="reset"] {
+  min-height: 56px !important;
+  min-width: 56px !important;
+  padding: 14px 24px !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  border-width: 2px !important;
+  border-radius: 12px !important;
+  touch-action: manipulation !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  margin: 6px 4px !important;
+  outline-offset: 4px !important;
+}
+
+html[data-large-touch-targets="true"] input[type="text"],
+html[data-large-touch-targets="true"] input[type="email"],
+html[data-large-touch-targets="true"] input[type="password"],
+html[data-large-touch-targets="true"] input[type="number"],
+html[data-large-touch-targets="true"] input[type="tel"],
+html[data-large-touch-targets="true"] select,
+html[data-large-touch-targets="true"] textarea {
+  min-height: 56px !important;
+  font-size: 1.15rem !important;
+  padding: 14px 18px !important;
+  border-width: 2px !important;
+  border-radius: 10px !important;
+  margin-top: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+html[data-large-touch-targets="true"] label {
+  min-height: 48px !important;
+  padding: 10px 14px !important;
+  font-size: 1.1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  border-radius: 8px !important;
+}
+
+html[data-large-touch-targets="true"] input[type="checkbox"],
+html[data-large-touch-targets="true"] input[type="radio"] {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  margin-right: 14px !important;
+  cursor: pointer !important;
+  accent-color: #0284c7 !important;
+  flex-shrink: 0 !important;
+}
+
+html[data-large-touch-targets="true"] * {
+  letter-spacing: 0.02em !important;
+}
+
+/* 2. Simplified Cognitive Mode (Focus & Distraction-Free View) */
+html[data-simplified-ui="true"] body,
+html[data-simplified-ui="true"] main {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 1.15rem !important;
+  line-height: 1.8 !important;
+}
+
+/* Hide complex visual banners, carousels, and gift features in simplified mode */
+html[data-simplified-ui="true"] [class*="giftToggleContainer"],
+html[data-simplified-ui="true"] [class*="giftFieldsContainer"],
+html[data-simplified-ui="true"] [class*="brandBadge"],
+html[data-simplified-ui="true"] [class*="badge"] {
+  display: none !important;
+}
+
+/* Force simplified single-card layout for products */
+html[data-simplified-ui="true"] [class*="productGrid"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+
+html[data-simplified-ui="true"] [class*="productCard"] {
+  border: 3px solid #0f172a !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  padding: 1.5rem !important;
+  background-color: #ffffff !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+}
+
+html[data-simplified-ui="true"] [class*="cardImageContainer"] {
+  width: 140px !important;
+  height: 140px !important;
+  flex-shrink: 0 !important;
+}
+
+html[data-simplified-ui="true"] [class*="checkoutSection"],
+html[data-simplified-ui="true"] [class*="summaryCard"] {
+  border: 3px solid #0f172a !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  padding: 1.75rem !important;
+  background-color: #ffffff !important;
+}
+
+html[data-simplified-ui="true"] button {
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  border: 2px solid #0f172a !important;
+}
+
+/* 3. High Contrast Mode (Low Vision & Contrast Enhancement) */
+html[data-high-contrast="true"] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html[data-high-contrast="true"] body,
+html[data-high-contrast="true"] main {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html[data-high-contrast="true"] [class*="navbar"],
+html[data-high-contrast="true"] [class*="headerContainer"],
+html[data-high-contrast="true"] [class*="checkoutSection"],
+html[data-high-contrast="true"] [class*="summaryCard"],
+html[data-high-contrast="true"] [class*="productCard"] {
+  background-color: #121212 !important;
+  border: 2px solid #facc15 !important;
+  color: #ffffff !important;
+}
+
+html[data-high-contrast="true"] h1,
+html[data-high-contrast="true"] h2,
+html[data-high-contrast="true"] h3,
+html[data-high-contrast="true"] h4,
+html[data-high-contrast="true"] p,
+html[data-high-contrast="true"] span,
+html[data-high-contrast="true"] strong,
+html[data-high-contrast="true"] label {
+  color: #ffffff !important;
+}
+
+html[data-high-contrast="true"] a {
+  color: #fde047 !important;
+  text-decoration: underline !important;
+  font-weight: 700 !important;
+}
+
+html[data-high-contrast="true"] button,
+html[data-high-contrast="true"] [role="button"] {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+  border: 2px solid #ffffff !important;
+  font-weight: 800 !important;
+}
+
+html[data-high-contrast="true"] input,
+html[data-high-contrast="true"] select,
+html[data-high-contrast="true"] textarea {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+  border: 2px solid #facc15 !important;
+}

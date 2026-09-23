@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { formatINR } from '@/lib/formatters';
 import * as styles from '../customer.css';
 
 export default async function OrdersPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getAuthenticatedUser(supabase);
 
-  if (!user) {
+  if (!session) {
     redirect('/login');
   }
 
@@ -36,7 +36,7 @@ export default async function OrdersPage() {
         )
       )
     `)
-    .eq('customer_id', user.id)
+    .eq('customer_id', session.user.id)
     .order('created_at', { ascending: false });
 
   const orderList = orders || [];
@@ -103,7 +103,7 @@ export default async function OrdersPage() {
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '0.8rem', color: '#64748b' }}>TOTAL</div>
                     <div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#0f172a' }}>
-                      ${Number(order.total_amount).toFixed(2)}
+                      {formatINR(order.total_amount)}
                     </div>
                     <span
                       style={{
@@ -172,7 +172,7 @@ export default async function OrdersPage() {
                           </span>
                         </div>
                         <div style={{ fontWeight: 600 }}>
-                          ${(Number(item.unit_price) * item.quantity).toFixed(2)}
+                          {formatINR(Number(item.unit_price) * item.quantity)}
                         </div>
                       </div>
                     ))}
