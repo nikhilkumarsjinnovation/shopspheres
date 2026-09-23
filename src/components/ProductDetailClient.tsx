@@ -278,7 +278,7 @@ export default function ProductDetailClient({
           ) : null}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', background: '#ffffff', border: '1px solid #c5cedc', borderRadius: 16, boxShadow: '0 4px 16px rgba(7,16,31,0.08)', transform: 'translateY(12px)', border: '1px solid #c5cedc', borderRadius: 16, boxShadow: '0 4px 16px rgba(7,16,31,0.08)', transform: 'translateY(12px)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', background: '#ffffff', border: '1px solid #c5cedc', borderRadius: 16, boxShadow: '0 4px 16px rgba(7,16,31,0.08)', transform: 'translateY(12px)' }}>
           <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid #07101f', display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#07101f', border: '1px solid #07101f', padding: '4px 8px' }}>
