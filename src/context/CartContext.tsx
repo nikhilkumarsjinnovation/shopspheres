@@ -102,6 +102,16 @@ export function CartProvider({ children, userId: propUserId }: CartProviderProps
 
   const addToCart = (product: CartProductInput) => {
     setCart((prev) => addItem(prev, product));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('shopsphere:track', {
+        detail: {
+          eventType: 'add_to_cart',
+          entityType: 'product',
+          entityId: product.id,
+          metadata: { category: product.category ?? null, price: Number(product.price) },
+        },
+      }));
+    }
   };
 
   const removeFromCart = (productId: string) => {

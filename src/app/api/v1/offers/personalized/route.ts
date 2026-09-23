@@ -3,6 +3,7 @@ import { requireApiVersion } from '@/lib/api-version';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { parseFeedWeights } from '@/lib/feed-weights';
+import { getUserFeatures } from '@/services/behavior-service';
 
 export interface BehavioralOffer {
   id: string;
@@ -29,6 +30,8 @@ export async function GET(request: NextRequest) {
     let topCategory = 'Electronics';
     let recentIntents: string[] = [];
 
+    let priceElasticity = 0.5;
+    let giftingPropensity = 0;
     if (session) {
       const { data: profile, error: profileError } = await supabase
         .from('ai_user_profiles')
@@ -49,6 +52,16 @@ export async function GET(request: NextRequest) {
           topCategory = topEntry[0];
         }
         recentIntents = weights.recent_chat_intents;
+      }
+
+      const stored = await getUserFeatures(supabase, session.user.id);
+      if (stored) {
+        priceElasticity = stored.price_elasticity;
+        giftingPropensity = stored.gifting_propensity;
+        const topAffinity = Object.entries(stored.category_affinity).sort((a, b) => b[1] - a[1])[0];
+        if (topAffinity) {
+          topCategory = topAffinity[0];
+        }
       }
     }
 
@@ -118,11 +131,25 @@ export async function GET(request: NextRequest) {
       description: 'Exclusive 10% discount on your cart up to ₹250 for orders above ₹499.',
       badge: 'Welcome Special',
       discountType: 'percentage',
-      discountValue: 10,
-      maxDiscount: 250,
+      discountValue: Math.round(10 + priceElasticity * 10),
+      maxDiscount: Math.round(250 + priceElasticity * 150),
       minOrderAmount: 499,
       expiresInHours: 72,
     });
+
+    if (giftingPropensity >= 0.2) {
+      offers.push({
+        id: 'off_gift300',
+        code: 'GIFT300',
+        title: '🎁 Gift a Friend: ₹300 OFF',
+        description: 'Extra savings when you send a gift, based on your gifting activity.',
+        badge: 'Gift Match',
+        discountType: 'fixed',
+        discountValue: 300,
+        minOrderAmount: 1499,
+        expiresInHours: 48,
+      });
+    }
 
     offers.push({
       id: 'off_upisave50',
