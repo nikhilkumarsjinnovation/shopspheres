@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Database } from '@/types/database.types';
 import * as styles from '../../admin.css';
+import ResetBrandingButton from '@/components/admin/ResetBrandingButton';
 
 type UserRow = Database['public']['Tables']['users']['Row'];
 
@@ -106,6 +107,7 @@ export default async function UsersAuditPage() {
                 </td>
                 <td className={styles.td} style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
                   {new Date(u.created_at).toLocaleDateString()}
+                  {u.role === 'seller' ? <ResetBrandingButton sellerId={u.id} /> : null}
                 </td>
               </tr>
             ))}

@@ -35,6 +35,15 @@ export default function SellerSidebar({ email }: SellerSidebarProps) {
           </svg>
           Dashboard
         </Link>
+        <Link href="/seller/branding" className={`${styles.navItem} ${pathname === '/seller/branding' ? styles.navItemActive : ''}`}>
+          Branding
+        </Link>
+        <Link href="/seller/shop" className={`${styles.navItem} ${pathname === '/seller/shop' ? styles.navItemActive : ''}`}>
+          Shop details
+        </Link>
+        <Link href="/seller/orders" className={`${styles.navItem} ${pathname.startsWith('/seller/orders') ? styles.navItemActive : ''}`}>
+          Orders
+        </Link>
 
         <Link
           href="/seller/add-product"

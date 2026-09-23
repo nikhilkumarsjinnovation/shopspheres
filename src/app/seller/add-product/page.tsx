@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import * as Separator from '@radix-ui/react-separator';
 import { createClient } from '@/lib/supabase/client';
@@ -18,6 +18,7 @@ interface AttributeItem {
 
 export default function AddProductPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   // Multi-step Wizard Navigation: 1 = Path Selection, 2 = AI Mini-Form, 3 = Verification & Rich Form
@@ -35,6 +36,11 @@ export default function AddProductPage() {
 
   // Taxonomy & Tags
   const [category, setCategory] = useState('General');
+
+  useEffect(() => {
+    const preset = searchParams.get('category');
+    if (preset) setCategory(preset);
+  }, [searchParams]);
   const [subCategory, setSubCategory] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [aiConfidence, setAiConfidence] = useState<number | null>(null);
@@ -214,11 +220,14 @@ export default function AddProductPage() {
         .map((t) => t.trim().toLowerCase())
         .filter(Boolean);
 
+      const { data: shop } = await supabase.from('shops').select('id').eq('seller_id', user.id).maybeSingle();
+
       // 2. Insert into Supabase products table with approval_status = 'pending'
       const { data: insertedProduct, error: insertError } = await supabase
         .from('products')
         .insert({
           seller_id: user.id,
+          shop_id: shop?.id ?? null,
           title: title.trim(),
           description: description.trim(),
           price: parsedPrice,
