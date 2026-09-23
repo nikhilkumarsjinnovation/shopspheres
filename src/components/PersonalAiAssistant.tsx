@@ -4,6 +4,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import PersonaSelector from '@/components/ai/PersonaSelector';
+import VoiceInterface from '@/components/ai/VoiceInterface';
+import VisualSearch from '@/components/ai/VisualSearch';
+import * as assistantStyles from '@/components/ai/assistant.css';
+import type { PersonaConfig } from '@/lib/personas';
 
 export interface RecommendedProduct {
   id: string;
@@ -29,7 +34,7 @@ interface PersonalAiAssistantProps {
 
 export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [persona, setPersona] = useState<'everyday' | 'tech' | 'fashion' | 'gourmet' | 'beauty'>('everyday');
+  const [persona, setPersona] = useState<PersonaConfig['id']>('everyday');
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [feedNotification, setFeedNotification] = useState<string | null>(null);
@@ -45,6 +50,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sessionIdRef = useRef(`sess_${Math.random().toString(36).slice(2)}`);
 
   useEffect(() => {
     if (isOpen) {
@@ -86,6 +92,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
         body: JSON.stringify({
           message: text,
           persona,
+          sessionId: sessionIdRef.current,
         }),
       });
 
@@ -146,25 +153,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open Personal AI Shopping Guide"
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '12px 20px',
-          borderRadius: '9999px',
-          backgroundColor: '#0f172a',
-          color: '#ffffff',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
-          border: '1px solid #334155',
-          cursor: 'pointer',
-          fontWeight: 600,
-          fontSize: '14px',
-          transition: 'transform 0.2s, background-color 0.2s',
-        }}
+        className={assistantStyles.trigger}
       >
         <span style={{ fontSize: '18px' }}>✨</span>
         <span>{isOpen ? 'Close AI Guide' : 'Personal AI Guide'}</span>
@@ -175,32 +164,11 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
         <div
           role="dialog"
           aria-label="Personal AI Shopping Companion"
-          style={{
-            position: 'fixed',
-            bottom: '84px',
-            right: '24px',
-            zIndex: 50,
-            width: 'min(92vw, 420px)',
-            height: 'min(80vh, 620px)',
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
+          className={assistantStyles.panel}
         >
           {/* Header */}
           <div
-            style={{
-              padding: '14px 18px',
-              backgroundColor: '#0f172a',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
+            className={assistantStyles.header}
           >
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -241,43 +209,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
           </div>
 
           {/* Persona Selector Tabs */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '6px',
-              padding: '8px 12px',
-              backgroundColor: '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
-              overflowX: 'auto',
-            }}
-          >
-            {[
-              { id: 'everyday', label: 'Everyday' },
-              { id: 'tech', label: 'Tech Guru' },
-              { id: 'fashion', label: 'Stylist' },
-              { id: 'gourmet', label: 'Gourmet' },
-              { id: 'beauty', label: 'Beauty' },
-            ].map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setPersona(p.id as any)}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: '9999px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  border: persona === p.id ? '1px solid #0f172a' : '1px solid #cbd5e1',
-                  backgroundColor: persona === p.id ? '#0f172a' : '#ffffff',
-                  color: persona === p.id ? '#ffffff' : '#475569',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+          <PersonaSelector value={persona} onChange={setPersona} />
 
           {/* Notification banner when feed is mutated */}
           {feedNotification && (
@@ -306,15 +238,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
 
           {/* Message List */}
           <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px',
-              backgroundColor: '#fdfdfe',
-            }}
+            className={assistantStyles.messages}
           >
             {messages.map((m) => (
               <div
@@ -471,6 +395,9 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
               </button>
             ))}
           </div>
+
+          {false && <VisualSearch />}
+          <VoiceInterface onTranscript={(text) => { void handleSendMessage(text); }} />
 
           {/* Input Form */}
           <form

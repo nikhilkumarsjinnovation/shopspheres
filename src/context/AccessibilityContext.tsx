@@ -196,7 +196,9 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     >
       {children}
 
-      {/* Saksham Floating Accessibility Trigger Button (Bottom Left) */}
+      {/* Saksham Floating Accessibility Trigger Button (Bottom Left) — hidden until the feature is ready */}
+      {false && (
+      <>
       <button
         type="button"
         onClick={() => setIsOpenModal(!isOpenModal)}
@@ -526,6 +528,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
             </div>
           </div>
         </div>
+      )}
+      </>
       )}
     </AccessibilityContext.Provider>
   );

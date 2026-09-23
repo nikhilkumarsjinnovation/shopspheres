@@ -358,7 +358,8 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Saksham Accessibility Preferences (Optional) */}
+          {/* Saksham Accessibility Preferences (Optional) — hidden until the feature is ready */}
+          {false && (
           <div
             style={{
               padding: '14px',
@@ -452,6 +453,7 @@ export default function SignupPage() {
               </div>
             )}
           </div>
+          )}
 
           <button
             type="submit"

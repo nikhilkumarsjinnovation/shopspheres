@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
 import { chatLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
-import { chat, getRecommendations, intentsToJson, mutateFeed, parseFeedWeights } from '@/services/ai-service';
+import { chat, getRecommendations, intentsToJson, mutateFeed, parseFeedWeights, summarizeConversation } from '@/services/ai-service';
 import { invalidatePersonalizedFeed } from '@/lib/cache';
 import type { AiUserProfile, UserAccessibilityProfile } from '@/types/database.types';
 
@@ -132,24 +132,38 @@ export async function POST(request: NextRequest) {
       rating: product.average_rating,
     }));
 
+    let memories = '';
+    let priorTurns: Array<{ role: string; content: string; created_at: string }> = [];
     if (userId) {
-      const { error: turnsError } = await supabase
+      const { data: memoryRows, error: memoryError } = await supabase
+        .from('ai_agent_memory')
+        .select('content')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (memoryError) {
+        throw new Error(memoryError.message);
+      }
+      memories = (memoryRows ?? []).map((row) => row.content).join('\n');
+
+      const { data: turns, error: turnsError } = await supabase
         .from('ai_conversations')
-        .select('role, content')
+        .select('role, content, created_at')
         .eq('user_id', userId)
         .eq('session_id', sessionId)
-        .order('created_at', { ascending: false })
-        .limit(6);
-
+        .order('created_at', { ascending: true })
+        .limit(20);
       if (turnsError) {
         throw new Error(turnsError.message);
       }
+      priorTurns = turns ?? [];
     }
 
     const validatedOutput = await chat({
       message,
       persona,
       catalog: catalogContext,
+      memories,
       accessibilityNote: accessibilityProfile?.cognitive_simplified_ui
         ? 'NOTE: User has simplified mode enabled. Keep your reply direct, clear, using bullet points and simple language.'
         : undefined,
@@ -189,6 +203,23 @@ export async function POST(request: NextRequest) {
       if (conversationError) {
         throw new Error(conversationError.message);
       }
+
+      const nextTurns = [
+        ...priorTurns,
+        { role: 'user', content: message, created_at: new Date().toISOString() },
+        { role: 'assistant', content: validatedOutput.reply, created_at: new Date().toISOString() },
+      ];
+      const oldest = priorTurns[0]?.created_at;
+      const olderThanDay = oldest ? Date.now() - new Date(oldest).getTime() > 24 * 60 * 60 * 1000 : false;
+      if (nextTurns.length >= 10 || olderThanDay) {
+        await summarizeConversation({
+          turns: nextTurns,
+          userId,
+          sessionId,
+          supabase,
+          apiKey,
+        });
+      }
     }
 
     return NextResponse.json({
@@ -196,6 +227,7 @@ export async function POST(request: NextRequest) {
       recommendedProducts: recommendedProductDetails,
       feedUpdated: feedMutated,
       intents: validatedOutput.extractedIntents,
+      sessionId,
     });
   } catch (err: unknown) {
     console.error('[Personal AI Assistant] Error:', err);
