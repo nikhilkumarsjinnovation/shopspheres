@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireApiVersion } from '@/lib/api-version';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
 import { chatLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { chat, getRecommendations, intentsToJson, mutateFeed, parseFeedWeights } from '@/services/ai-service';
+import { invalidatePersonalizedFeed } from '@/lib/cache';
 import type { AiUserProfile, UserAccessibilityProfile } from '@/types/database.types';
 
 const ChatRequestSchema = z.object({
@@ -26,6 +28,8 @@ type CatalogItem = {
 
 export async function POST(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const limited = await enforceRateLimit(chatLimiter, await rateLimitKey(request));
     if (limited) {
       return limited;
@@ -160,6 +164,7 @@ export async function POST(request: NextRequest) {
         parseFeedWeights(userProfile.feed_weights),
         validatedOutput.extractedIntents,
       );
+      await invalidatePersonalizedFeed(userId);
     }
 
     const recommendedProductDetails = getRecommendations(catalogProducts ?? [], validatedOutput.recommendedProductIds);

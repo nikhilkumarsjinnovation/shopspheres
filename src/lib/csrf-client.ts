@@ -1,5 +1,6 @@
 const CSRF_COOKIE = 'csrf_token';
 const CSRF_HEADER = 'x-csrf-token';
+const API_V1_MEDIA = 'application/vnd.shopsphere.v1+json';
 
 function readCookie(name: string): string | null {
   if (typeof document === 'undefined') {
@@ -15,12 +16,18 @@ async function ensureToken(): Promise<string | null> {
   if (existing) {
     return existing;
   }
-  await fetch('/api/csrf', { credentials: 'same-origin' });
+  await fetch('/api/v1/csrf', {
+    credentials: 'same-origin',
+    headers: { Accept: API_V1_MEDIA },
+  });
   return readCookie(CSRF_COOKIE);
 }
 
 export async function fetchWithCsrf(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
+  if (!headers.has('Accept')) {
+    headers.set('Accept', API_V1_MEDIA);
+  }
   const method = (init.method ?? 'GET').toUpperCase();
   if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
     const token = await ensureToken();

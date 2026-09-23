@@ -53,7 +53,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     }
 
     // Attempt to fetch from API
-    fetch('/api/accessibility')
+    fetchWithCsrf('/api/v1/accessibility')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.profile) {
@@ -122,7 +122,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     } catch {}
 
     try {
-      await fetchWithCsrf('/api/accessibility', {
+      await fetchWithCsrf('/api/v1/accessibility', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

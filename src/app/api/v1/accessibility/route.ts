@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireApiVersion } from '@/lib/api-version';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
 import type { UserAccessibilityProfileInsert } from '@/types/database.types';
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const supabase = await createClient();
     const session = await getAuthenticatedUser(supabase);
 
@@ -45,6 +48,8 @@ function readMagnification(value: unknown): number {
 
 export async function POST(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const csrfError = csrfMiddleware(request);
     if (csrfError) {
       return csrfError;

@@ -86,7 +86,7 @@ export default function AddProductPage() {
     setErrorMessage(null);
 
     try {
-      const res = await fetchWithCsrf('/api/ai/categorize', {
+      const res = await fetchWithCsrf('/api/v1/ai/categorize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

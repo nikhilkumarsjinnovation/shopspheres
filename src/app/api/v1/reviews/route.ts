@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireApiVersion } from '@/lib/api-version';
 import { createClient } from '@/lib/supabase/server';
 import { csrfMiddleware } from '@/lib/csrf';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const csrfError = csrfMiddleware(request);
     if (csrfError) {
       return csrfError;
@@ -107,6 +110,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const csrfError = csrfMiddleware(request);
     if (csrfError) {
       return csrfError;
