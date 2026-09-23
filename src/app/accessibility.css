@@ -97,7 +97,7 @@ html[data-simplified-ui="true"] [class*="productGrid"] {
 }
 
 html[data-simplified-ui="true"] [class*="productCard"] {
-  border: 3px solid #0f172a !important;
+  border: 3px solid #07101f !important;
   border-radius: 12px !important;
   box-shadow: none !important;
   padding: 1.5rem !important;
@@ -106,6 +106,11 @@ html[data-simplified-ui="true"] [class*="productCard"] {
   flex-direction: row !important;
   align-items: center !important;
   gap: 1.5rem !important;
+  transform: none !important;
+}
+
+html[data-simplified-ui="true"] [class*="productGrid"] > * {
+  transform: none !important;
 }
 
 html[data-simplified-ui="true"] [class*="cardImageContainer"] {

@@ -182,10 +182,10 @@ export default function ExploreFeedClient({
         <div
           style={{
             padding: '12px 20px',
-            backgroundColor: '#ecfdf5',
-            border: '1px solid #10b981',
-            borderRadius: '8px',
-            color: '#065f46',
+            backgroundColor: '#f2f2f2',
+            border: '1px solid #111111',
+            borderRadius: 0,
+            color: '#111111',
             fontWeight: 600,
             fontSize: '13px',
             display: 'flex',
@@ -195,109 +195,101 @@ export default function ExploreFeedClient({
             animation: 'fadeIn 0.3s ease-in-out',
           }}
         >
-          <span>✨</span>
+          
           <span>Feed customized in real-time based on your Personal AI consultation!</span>
         </div>
       )}
 
       {/* Main Search & Amazon-Grade Facet Controls */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          padding: '1.5rem',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
-        }}
-      >
-        {/* Search Bar */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <span
-              style={{
-                position: 'absolute',
-                left: '14px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8',
-                fontSize: '16px',
-              }}
-            >
-              🔍
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by product name, category, brand, or feature..."
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                padding: '12px 16px 12px 42px',
-                fontSize: '14px',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-              }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                }}
-              >
-                ✕
-              </button>
-            )}
-          </div>
+      <div className={styles.exploreControls}>
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            top: 18,
+            left: 0,
+            width: 4,
+            height: 52,
+            background: '#d6ff3a',
+            borderRadius: 2,
+            transform: 'skewY(-8deg)',
+          }}
+        />
 
-          <button
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('shopsphere:open-ai'));
-              }
-            }}
-            type="button"
+        {/* Search Bar — spans left, AI sits offset right */}
+        <div style={{ position: 'relative', gridColumn: '1 / 2' }}>
+          <span
             style={{
-              padding: '12px 18px',
-              borderRadius: '8px',
-              backgroundColor: '#0f172a',
-              color: '#ffffff',
-              border: 'none',
-              fontWeight: 600,
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
+              position: 'absolute',
+              left: 14,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#5a6578',
+              fontSize: 16,
             }}
           >
-            <span>✨</span>
-            <span>Ask Personal AI</span>
-          </button>
+            🔍
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by product name, category, brand, or feature..."
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: '14px 16px 14px 42px',
+              fontSize: 14,
+              border: '1.5px solid #9aabbf',
+              borderRadius: 10,
+              outline: 'none',
+              background: '#e8edf4',
+              color: '#07101f',
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              type="button"
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'transparent',
+                border: 'none',
+                color: '#5a6578',
+                cursor: 'pointer',
+                fontSize: 14,
+              }}
+            >
+              ✕
+            </button>
+          )}
         </div>
 
-        {/* Category Pills */}
+        <button
+          className={styles.exploreAiBtn}
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('shopsphere:open-ai'));
+            }
+          }}
+          type="button"
+        >
+          <span>Ask Personal AI</span>
+        </button>
+
+        {/* Category Pills — full width row under */}
         <div
           style={{
             display: 'flex',
-            gap: '8px',
+            gap: 8,
             overflowX: 'auto',
-            paddingBottom: '4px',
+            paddingBottom: 4,
+            gridColumn: '1 / -1',
+            paddingLeft: 8,
+            borderLeft: '3px solid #d6ff3a',
           }}
         >
           {['All', ...availableCategories].map((cat) => {
@@ -308,16 +300,16 @@ export default function ExploreFeedClient({
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '9999px',
-                  fontSize: '13px',
-                  fontWeight: 600,
+                  padding: '7px 14px',
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  border: isSelected ? '1px solid #0f172a' : '1px solid #e2e8f0',
-                  backgroundColor: isSelected ? '#0f172a' : '#f8fafc',
-                  color: isSelected ? '#ffffff' : '#475569',
+                  border: isSelected ? '1.5px solid #2457ff' : '1.5px solid #c5cedc',
+                  backgroundColor: isSelected ? '#2457ff' : '#ffffff',
+                  color: isSelected ? '#ffffff' : '#5a6578',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease',
+                  transition: 'transform 140ms ease, background-color 140ms ease',
                 }}
               >
                 {cat}
@@ -333,55 +325,56 @@ export default function ExploreFeedClient({
             flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px',
-            paddingTop: '12px',
-            borderTop: '1px solid #f1f5f9',
+            gap: 12,
+            paddingTop: 12,
+            borderTop: '1px solid #e8edf4',
+            gridColumn: '1 / -1',
           }}
         >
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px' }}>
-            {/* Price Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Price (₹):</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#5a6578', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Price</span>
               <input
                 type="number"
                 placeholder="Min ₹"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 style={{
-                  width: '74px',
-                  padding: '5px 8px',
-                  fontSize: '12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  width: 74,
+                  padding: '7px 8px',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  border: '1.5px solid #9aabbf',
+                  background: '#ffffff',
                 }}
               />
-              <span style={{ fontSize: '12px', color: '#94a3b8' }}>-</span>
+              <span style={{ fontSize: 12, color: '#7a8699' }}>–</span>
               <input
                 type="number"
                 placeholder="Max ₹"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 style={{
-                  width: '74px',
-                  padding: '5px 8px',
-                  fontSize: '12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  width: 74,
+                  padding: '7px 8px',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  border: '1.5px solid #9aabbf',
+                  background: '#ffffff',
                 }}
               />
             </div>
 
-            {/* Rating Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Rating:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#5a6578', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Rating</span>
               <select
                 value={minRating}
                 onChange={(e) => setMinRating(Number(e.target.value))}
                 style={{
-                  padding: '5px 10px',
-                  fontSize: '12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  padding: '7px 10px',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  border: '1.5px solid #9aabbf',
                   backgroundColor: '#ffffff',
                 }}
               >
@@ -391,30 +384,28 @@ export default function ExploreFeedClient({
               </select>
             </div>
 
-            {/* In-Stock Toggle */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, color: '#334155' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#07101f' }}>
               <input
                 type="checkbox"
                 checked={inStockOnly}
                 onChange={(e) => setInStockOnly(e.target.checked)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', accentColor: '#2457ff' }}
               />
               In Stock Only
             </label>
           </div>
 
-          {/* Sort By & Clear Filters */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Sort:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#5a6578', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Sort</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 style={{
-                  padding: '5px 10px',
-                  fontSize: '12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  padding: '7px 10px',
+                  fontSize: 12,
+                  borderRadius: 8,
+                  border: '1.5px solid #9aabbf',
                   backgroundColor: '#ffffff',
                 }}
               >
@@ -431,13 +422,14 @@ export default function ExploreFeedClient({
                 type="button"
                 onClick={handleClearFilters}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#2563eb',
-                  fontSize: '12px',
-                  fontWeight: 600,
+                  background: '#dce6ff',
+                  border: '1.5px solid #2457ff',
+                  borderRadius: 8,
+                  color: '#2457ff',
+                  fontSize: 12,
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  textDecoration: 'underline',
+                  padding: '6px 10px',
                 }}
               >
                 Reset Filters
@@ -452,10 +444,10 @@ export default function ExploreFeedClient({
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: '0 0 4px 0' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111111', margin: '0 0 4px 0' }}>
                 Search Results
               </h2>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#737373' }}>
                 Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'} matching your criteria
               </p>
             </div>
@@ -464,7 +456,7 @@ export default function ExploreFeedClient({
           {filteredProducts.length === 0 ? (
             <div className={styles.emptyState}>
               <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔍</div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#111111', margin: '0 0 0.5rem 0' }}>
                 No products match your filters
               </h3>
               <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.9rem' }}>
@@ -496,25 +488,36 @@ export default function ExploreFeedClient({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '12px 18px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#07101f',
+                borderRadius: 12,
+                border: '1px solid #243048',
+                gap: 12,
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px' }}>✨</span>
-                <span style={{ fontSize: '13px', color: '#334155', fontWeight: 500 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    background: '#d6ff3a',
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ fontSize: 13, color: '#8a96ab', fontWeight: 500 }}>
                   {feedSummary}
                 </span>
               </div>
               <span
                 style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: '#2563eb',
-                  backgroundColor: '#eff6ff',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: '#07101f',
+                  backgroundColor: '#d6ff3a',
+                  padding: '4px 10px',
+                  borderRadius: 999,
                 }}
               >
                 Dynamic AI Active
@@ -523,8 +526,8 @@ export default function ExploreFeedClient({
           )}
 
           {feedLoading ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✨</div>
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#8a8a8a' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}></div>
               <p>Analyzing catalog and tailoring your personalized marketplace feed...</p>
             </div>
           ) : carousels.length === 0 ? (
@@ -540,7 +543,7 @@ export default function ExploreFeedClient({
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                      <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#111111', margin: 0 }}>
                         {carousel.title}
                       </h2>
                       {carousel.badge && (
@@ -549,16 +552,16 @@ export default function ExploreFeedClient({
                             fontSize: '11px',
                             fontWeight: 700,
                             color: '#047857',
-                            backgroundColor: '#d1fae5',
+                            backgroundColor: '#e6e6e6',
                             padding: '2px 8px',
-                            borderRadius: '9999px',
+                            borderRadius: 0,
                           }}
                         >
                           {carousel.badge}
                         </span>
                       )}
                     </div>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#737373' }}>
                       {carousel.subtitle}
                     </p>
                   </div>

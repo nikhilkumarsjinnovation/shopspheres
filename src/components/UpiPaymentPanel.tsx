@@ -33,38 +33,104 @@ export default function UpiPaymentPanel({ amountLabel }: { amountLabel: string }
   const cells = pattern(`${app ?? 'upi'}-${amountLabel}-${nonce}`);
 
   return (
-    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <p style={{ margin: 0, fontSize: '12px', color: '#475569' }}>Choose a UPI app. This is a practice step. No app is opened.</p>
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {APPS.map((name) => (
+    <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 11,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          fontWeight: 700,
+          color: '#5a6578',
+          borderLeft: '3px solid #d6ff3a',
+          paddingLeft: 8,
+        }}
+      >
+        Choose a UPI app · practice only
+      </p>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+          gap: 8,
+        }}
+      >
+        {APPS.map((name) => {
+          const selected = app === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => {
+                setApp(name);
+                setRevealed(false);
+              }}
+              style={{
+                padding: '12px 8px',
+                borderRadius: 10,
+                border: selected ? '1.5px solid #2457ff' : '1.5px solid #c5cedc',
+                background: selected ? '#2457ff' : '#ffffff',
+                color: selected ? '#ffffff' : '#5a6578',
+                cursor: 'pointer',
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                boxShadow: selected ? '0 4px 12px rgba(36, 87, 255, 0.25)' : 'none',
+              }}
+            >
+              {name}
+            </button>
+          );
+        })}
+      </div>
+
+      {app ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <p style={{ margin: 0, fontSize: 13, color: '#07101f', fontWeight: 600 }}>
+            Paying {amountLabel} with {app}.
+          </p>
           <button
-            key={name}
             type="button"
-            onClick={() => { setApp(name); setRevealed(false); }}
+            onClick={() => {
+              setRevealed(true);
+              setSecondsLeft(600);
+              setNonce((value) => value + 1);
+            }}
             style={{
-              padding: '6px 10px',
-              borderRadius: '999px',
-              border: app === name ? '2px solid #059669' : '1px solid #cbd5e1',
-              background: app === name ? '#ecfdf5' : '#fff',
+              alignSelf: 'flex-start',
+              padding: '10px 16px',
+              borderRadius: 8,
+              border: '1.5px solid #2457ff',
+              background: '#2457ff',
+              color: '#ffffff',
+              fontSize: 12,
+              fontWeight: 700,
               cursor: 'pointer',
             }}
           >
-            {name}
-          </button>
-        ))}
-      </div>
-      {app ? (
-        <div>
-          <p style={{ margin: '0 0 8px', fontSize: '13px' }}>Paying {amountLabel} with {app}.</p>
-          <button type="button" onClick={() => { setRevealed(true); setSecondsLeft(600); setNonce((value) => value + 1); }}>
-            Show QR code
+            Show QR
           </button>
         </div>
       ) : null}
+
       {revealed && app ? (
-        <div>
+        <div
+          style={{
+            border: '1px solid #c5cedc',
+            borderRadius: 14,
+            padding: 16,
+            display: 'inline-flex',
+            flexDirection: 'column',
+            gap: 10,
+            width: 'fit-content',
+            background: '#ffffff',
+            boxShadow: '0 4px 16px rgba(7, 16, 31, 0.06)',
+          }}
+        >
           <svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label={`UPI QR for ${amountLabel}`}>
-            <rect width="132" height="132" fill="#fff" />
+            <rect width="132" height="132" rx="8" fill="#e8edf4" />
             {cells.map((filled, index) => (
               <rect
                 key={index}
@@ -72,16 +138,42 @@ export default function UpiPaymentPanel({ amountLabel }: { amountLabel: string }
                 y={Math.floor(index / 11) * 12}
                 width="10"
                 height="10"
-                fill={filled ? '#0f172a' : '#fff'}
+                rx="1"
+                fill={filled ? '#07101f' : '#e8edf4'}
               />
             ))}
           </svg>
-          <p style={{ margin: '8px 0', fontSize: '13px' }}>QR expires in {minutes}:{seconds}</p>
+          <p
+            style={{
+              margin: 0,
+              fontSize: 11,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+              color: '#5a6578',
+            }}
+          >
+            Expires {minutes}:{seconds}
+          </p>
           <button
             type="button"
-            onClick={() => { setSecondsLeft(600); setNonce((value) => value + 1); }}
+            onClick={() => {
+              setSecondsLeft(600);
+              setNonce((value) => value + 1);
+            }}
+            style={{
+              alignSelf: 'flex-start',
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1.5px solid #9aabbf',
+              background: '#e8edf4',
+              color: '#07101f',
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
           >
-            Regenerate QR code
+            Regenerate
           </button>
         </div>
       ) : null}

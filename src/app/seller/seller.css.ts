@@ -22,7 +22,7 @@ export const wizardProgressContainer = style({
   backgroundColor: '#ffffff',
   padding: '1rem 1.5rem',
   borderRadius: '10px',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
   boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
 });
 
@@ -36,27 +36,27 @@ export const wizardStepCircle = style({
   width: '32px',
   height: '32px',
   borderRadius: '50%',
-  backgroundColor: '#f1f5f9',
-  color: '#64748b',
+  backgroundColor: '#e8edf4',
+  color: '#5a6578',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontWeight: 700,
   fontSize: '0.85rem',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
 });
 
 export const wizardStepCircleActive = style({
-  backgroundColor: '#2563eb',
+  backgroundColor: '#2457ff',
   color: '#ffffff',
-  borderColor: '#2563eb',
+  borderColor: '#2457ff',
   boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.2)',
 });
 
 export const wizardStepCircleCompleted = style({
-  backgroundColor: '#059669',
+  backgroundColor: '#0f7a4c',
   color: '#ffffff',
-  borderColor: '#059669',
+  borderColor: '#0f7a4c',
 });
 
 export const wizardStepText = style({
@@ -67,18 +67,18 @@ export const wizardStepText = style({
 export const wizardStepTitle = style({
   fontSize: '0.875rem',
   fontWeight: 600,
-  color: '#1e293b',
+  color: '#07101f',
 });
 
 export const wizardStepSubtitle = style({
   fontSize: '0.75rem',
-  color: '#64748b',
+  color: '#5a6578',
 });
 
 export const wizardDivider = style({
   flex: 1,
   height: '2px',
-  backgroundColor: '#e2e8f0',
+  backgroundColor: '#c5cedc',
   margin: '0 1rem',
 });
 
@@ -91,7 +91,7 @@ export const pathSelectionGrid = style({
 
 export const pathCard = style({
   backgroundColor: '#ffffff',
-  border: '2px solid #e2e8f0',
+  border: '2px solid #c5cedc',
   borderRadius: '12px',
   padding: '2rem 1.75rem',
   display: 'flex',
@@ -133,9 +133,9 @@ export const pathBadgeAI = style({
 });
 
 export const pathBadgeManual = style({
-  backgroundColor: '#f1f5f9',
+  backgroundColor: '#e8edf4',
   color: '#475569',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
 });
 
 export const pathCardTitle = style({
@@ -150,7 +150,7 @@ export const pathCardTitle = style({
 
 export const pathCardDesc = style({
   fontSize: '0.9rem',
-  color: '#64748b',
+  color: '#5a6578',
   lineHeight: 1.5,
   margin: '0 0 1.5rem 0',
 });
@@ -196,7 +196,7 @@ export const pathButtonManual = style({
   backgroundColor: '#0f172a',
   color: '#ffffff',
   ':hover': {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#07101f',
   },
 });
 
@@ -204,7 +204,7 @@ export const pathButtonManual = style({
 export const skeletonCard = style({
   backgroundColor: '#ffffff',
   borderRadius: '12px',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
   padding: '2.5rem 2rem',
   textAlign: 'center',
 });
@@ -219,7 +219,7 @@ export const skeletonPulseText = style({
 
 export const skeletonSubtext = style({
   fontSize: '0.85rem',
-  color: '#64748b',
+  color: '#5a6578',
   marginBottom: '2rem',
 });
 
@@ -233,7 +233,7 @@ export const skeletonGrid = style({
 
 export const skeletonBar = style({
   height: '24px',
-  backgroundColor: '#f1f5f9',
+  backgroundColor: '#e8edf4',
   borderRadius: '6px',
   animation: `${pulseKeyframe} 1.2s ease-in-out infinite`,
 });
@@ -241,7 +241,7 @@ export const skeletonBar = style({
 /* Form Card and Elements */
 export const formCard = style({
   backgroundColor: '#ffffff',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
   borderRadius: '12px',
   padding: '2rem',
   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
@@ -289,7 +289,7 @@ export const input = style({
   width: '100%',
   padding: '0.65rem 0.875rem',
   fontSize: '0.95rem',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
   borderRadius: '6px',
   outline: 'none',
   boxSizing: 'border-box',
@@ -305,7 +305,7 @@ export const select = style({
   width: '100%',
   padding: '0.65rem 0.875rem',
   fontSize: '0.95rem',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
   borderRadius: '6px',
   outline: 'none',
   boxSizing: 'border-box',
@@ -322,7 +322,7 @@ export const textarea = style({
   width: '100%',
   padding: '0.65rem 0.875rem',
   fontSize: '0.95rem',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
   borderRadius: '6px',
   outline: 'none',
   boxSizing: 'border-box',
@@ -345,7 +345,7 @@ export const formRow = style({
 /* Dynamic Attributes Grid (Amazon-level 10+ Specs) */
 export const attributesContainer = style({
   backgroundColor: '#f8fafc',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
   borderRadius: '8px',
   padding: '1.25rem',
   display: 'flex',
@@ -385,7 +385,7 @@ export const addAttrBtn = style({
   gap: '0.5rem',
   padding: '0.5rem 0.85rem',
   backgroundColor: '#ffffff',
-  color: '#2563eb',
+  color: '#2457ff',
   border: '1px dashed #93c5fd',
   borderRadius: '6px',
   fontSize: '0.85rem',
@@ -459,8 +459,8 @@ export const tagChip = style({
   alignItems: 'center',
   gap: '0.35rem',
   padding: '0.25rem 0.6rem',
-  backgroundColor: '#f1f5f9',
-  border: '1px solid #e2e8f0',
+  backgroundColor: '#e8edf4',
+  border: '1px solid #c5cedc',
   borderRadius: '4px',
   fontSize: '0.8rem',
   color: '#475569',
@@ -469,7 +469,7 @@ export const tagChip = style({
 /* Radix Separator */
 export const separator = style({
   height: '1px',
-  backgroundColor: '#e2e8f0',
+  backgroundColor: '#c5cedc',
   margin: '0.25rem 0',
   width: '100%',
 });
@@ -486,7 +486,7 @@ export const tabsList = style({
   flexWrap: 'nowrap',
   overflowX: 'auto',
   gap: '0.5rem',
-  borderBottom: '1px solid #e2e8f0',
+  borderBottom: '1px solid #c5cedc',
   paddingBottom: '2px',
 });
 
@@ -496,7 +496,7 @@ export const tabTrigger = style({
   gap: '0.5rem',
   padding: '0.75rem 1rem',
   backgroundColor: 'transparent',
-  color: '#64748b',
+  color: '#5a6578',
   border: 'none',
   borderBottom: '2px solid transparent',
   fontSize: '0.9rem',
@@ -510,8 +510,8 @@ export const tabTrigger = style({
   },
   selectors: {
     '&[data-state="active"]': {
-      color: '#2563eb',
-      borderBottomColor: '#2563eb',
+      color: '#2457ff',
+      borderBottomColor: '#2457ff',
     },
   },
 });
@@ -521,12 +521,12 @@ export const tabCountBadge = style({
   fontWeight: 700,
   padding: '0.1rem 0.45rem',
   borderRadius: '9999px',
-  backgroundColor: '#f1f5f9',
+  backgroundColor: '#e8edf4',
   color: '#475569',
   selectors: {
     '[data-state="active"] > &': {
       backgroundColor: '#eff6ff',
-      color: '#2563eb',
+      color: '#2457ff',
     },
   },
 });
@@ -568,11 +568,11 @@ export const statusBadgeRejected = style({
 export const conditionBadge = style({
   fontSize: '0.75rem',
   fontWeight: 600,
-  backgroundColor: '#f1f5f9',
+  backgroundColor: '#e8edf4',
   color: '#334155',
   padding: '0.15rem 0.45rem',
   borderRadius: '4px',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
 });
 
 /* Metrics Cards Grid */
@@ -585,7 +585,7 @@ export const metricsGrid = style({
 
 export const metricCard = style({
   backgroundColor: '#ffffff',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
   borderRadius: '8px',
   padding: '1.25rem',
   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
@@ -593,7 +593,7 @@ export const metricCard = style({
 
 export const metricLabel = style({
   fontSize: '0.85rem',
-  color: '#64748b',
+  color: '#5a6578',
   margin: '0 0 0.5rem 0',
 });
 
@@ -607,7 +607,7 @@ export const metricValue = style({
 /* Table Styles */
 export const tableContainer = style({
   backgroundColor: '#ffffff',
-  border: '1px solid #e2e8f0',
+  border: '1px solid #c5cedc',
   borderRadius: '8px',
   overflow: 'hidden',
   boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
@@ -615,7 +615,7 @@ export const tableContainer = style({
 
 export const tableHeader = style({
   padding: '1rem 1.5rem',
-  borderBottom: '1px solid #e2e8f0',
+  borderBottom: '1px solid #c5cedc',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -640,7 +640,7 @@ export const th = style({
   padding: '0.75rem 1rem',
   fontWeight: 600,
   color: '#475569',
-  borderBottom: '1px solid #e2e8f0',
+  borderBottom: '1px solid #c5cedc',
   fontSize: '0.8rem',
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -648,7 +648,7 @@ export const th = style({
 
 export const td = style({
   padding: '1rem',
-  borderBottom: '1px solid #f1f5f9',
+  borderBottom: '1px solid #e8edf4',
   verticalAlign: 'middle',
 });
 
@@ -661,7 +661,7 @@ export const tr = style({
 export const emptyState = style({
   padding: '4rem 2rem',
   textAlign: 'center',
-  color: '#64748b',
+  color: '#5a6578',
 });
 
 /* Primary Buttons */
@@ -681,7 +681,7 @@ export const buttonPrimary = style({
   textDecoration: 'none',
   transition: 'background-color 0.2s',
   ':hover': {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#07101f',
   },
   ':disabled': {
     opacity: 0.5,
@@ -694,9 +694,9 @@ export const buttonSecondary = style({
   alignItems: 'center',
   justifyContent: 'center',
   padding: '0.65rem 1rem',
-  backgroundColor: '#f1f5f9',
+  backgroundColor: '#e8edf4',
   color: '#334155',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
   borderRadius: '6px',
   fontSize: '0.875rem',
   fontWeight: 500,
@@ -704,7 +704,7 @@ export const buttonSecondary = style({
   textDecoration: 'none',
   transition: 'all 0.2s',
   ':hover': {
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#c5cedc',
   },
 });
 
@@ -740,5 +740,5 @@ export const imagePreview = style({
   height: '80px',
   objectFit: 'cover',
   borderRadius: '6px',
-  border: '1px solid #cbd5e1',
+  border: '1px solid #9aabbf',
 });
