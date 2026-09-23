@@ -23,7 +23,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, updateQuantity, cart } = useCart();
   const [added, setAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -37,6 +37,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const stock = product.stock ?? 10;
   const isOutOfStock = stock <= 0;
+
+  const inCart = cart.find((item) => item.id === product.id);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -101,11 +103,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className={styles.cardBody}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
             <span className={styles.cardCategory}>{product.category}</span>
-            {stock > 0 && stock <= 5 && (
+            {inCart ? (
+              <span style={{ fontSize: '10px', color: '#0f172a', fontWeight: 700 }}>
+                In cart · {inCart.quantity}
+              </span>
+            ) : stock > 0 && stock <= 5 ? (
               <span style={{ fontSize: '10px', color: '#b91c1c', fontWeight: 600 }}>
                 Only {stock} left!
               </span>
-            )}
+            ) : null}
           </div>
 
           <h3 className={styles.cardTitle}>{product.title}</h3>
@@ -153,8 +159,15 @@ export default function ProductCard({ product }: ProductCardProps) {
               disabled={isOutOfStock}
               className={styles.buttonAddToCart}
             >
-              {isOutOfStock ? 'Sold Out' : added ? 'Added ✓' : 'Add to Cart'}
+              {isOutOfStock ? 'Sold Out' : inCart ? 'Add one more' : added ? 'Added ✓' : 'Add to Cart'}
             </button>
+            {inCart ? (
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); updateQuantity(product.id, inCart.quantity - 1); }}>-</button>
+                <span>{inCart.quantity}</span>
+                <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); updateQuantity(product.id, inCart.quantity + 1); }}>+</button>
+              </div>
+            ) : null}
           </div>
         </div>
       </Link>

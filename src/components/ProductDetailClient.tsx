@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
@@ -62,6 +62,9 @@ export default function ProductDetailClient({
   initialReviews = [],
 }: ProductDetailProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refToken = searchParams.get('ref');
+  const [sharerName, setSharerName] = useState<string | null>(null);
   const { addToCart } = useCart();
 
   // Image Gallery State
@@ -87,6 +90,21 @@ export default function ProductDetailClient({
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMessage, setReviewMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!refToken) return;
+    let active = true;
+    fetchWithCsrf(`/api/v1/shared-products/${refToken}`)
+      .then(async (response) => {
+        const payload: unknown = await response.json();
+        if (!active || !payload || typeof payload !== 'object' || !('sharerName' in payload)) return;
+        if (typeof payload.sharerName === 'string') setSharerName(payload.sharerName);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [refToken]);
 
   // Active price calculation (checking variant override)
   const activeVariant = variants.find((v) => v.id === selectedVariantId);
@@ -348,6 +366,7 @@ export default function ProductDetailClient({
               )}
             </div>
 
+            {sharerName ? <p>Sent by {sharerName}</p> : null}
             <h1 style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0f172a', margin: '0 0 10px 0', lineHeight: 1.25 }}>
               {product.title}
             </h1>

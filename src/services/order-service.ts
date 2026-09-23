@@ -29,6 +29,7 @@ export interface CreateOrderInput {
   isGift?: boolean;
   giftRecipientEmail?: string | null;
   giftRevealDate?: string | null;
+  confirmNow?: boolean;
 }
 
 export interface OrderTotals {
@@ -187,7 +188,7 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
   });
 
   const stockReserved = await reserveStock(validatedItems);
-  const paymentConfirmed = await confirmPayment(newOrder.id, userId);
+  const paymentConfirmed = input.confirmNow === false ? false : await confirmPayment(newOrder.id, userId);
 
   await queueNotification({
     channel: 'email',
