@@ -84,7 +84,8 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
           <span>Ask Personal AI</span>
         </button>
 
-        {/* Saksham Accessibility Quick Access */}
+        {/* Saksham Accessibility Quick Access — hidden until the feature is ready */}
+        {false && (
         <button
           type="button"
           onClick={() => setIsOpenModal(true)}
@@ -117,6 +118,7 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
             />
           )}
         </button>
+        )}
 
         <Link
           href="/checkout"

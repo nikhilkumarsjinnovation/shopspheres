@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/v1/ai/proactive",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

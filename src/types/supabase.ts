@@ -484,6 +484,7 @@ export type Database = {
           condition: string
           created_at: string
           description: string
+          embedding: string | null
           id: string
           image_urls: string[]
           price: number
@@ -510,6 +511,7 @@ export type Database = {
           condition?: string
           created_at?: string
           description: string
+          embedding?: string | null
           id?: string
           image_urls?: string[]
           price: number
@@ -536,6 +538,7 @@ export type Database = {
           condition?: string
           created_at?: string
           description?: string
+          embedding?: string | null
           id?: string
           image_urls?: string[]
           price?: number
@@ -1384,6 +1387,17 @@ export type Database = {
       is_gift_participant: {
         Args: { target_gift_id: string }
         Returns: boolean
+      }
+      match_products: {
+        Args: { query_embedding: string; match_count: number }
+        Returns: {
+          id: string
+          title: string
+          price: number
+          category: string
+          image_urls: string[]
+          similarity: number
+        }[]
       }
     }
     Enums: {

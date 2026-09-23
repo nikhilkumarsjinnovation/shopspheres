@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import AudioDescriptionPlayer from '@/components/accessibility/AudioDescriptionPlayer';
 import * as styles from '@/app/(customer)/customer.css';
 
 export interface ProductDetailProps {
@@ -350,6 +351,7 @@ export default function ProductDetailClient({
             <h1 style={{ fontSize: '1.65rem', fontWeight: 700, color: '#0f172a', margin: '0 0 10px 0', lineHeight: 1.25 }}>
               {product.title}
             </h1>
+            {false && <AudioDescriptionPlayer productId={product.id} />}
 
             {/* Ratings Bar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
