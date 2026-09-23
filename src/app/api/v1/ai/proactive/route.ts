@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireApiVersion } from '@/lib/api-version';
 import { checkProactiveNotifications } from '@/services/notification-service';
 import { recomputeRecentFeatures } from '@/services/behavior-service';
+import { completeReadyGroupGifts, revealDueGifts } from '@/services/gift-service';
 
 async function run(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -14,7 +15,9 @@ async function run(request: NextRequest) {
   }
   const result = await checkProactiveNotifications();
   const featuresComputed = await recomputeRecentFeatures().catch(() => 0);
-  return NextResponse.json({ ...result, featuresComputed });
+  const giftsRevealed = await revealDueGifts().catch(() => 0);
+  const groupGiftsCompleted = await completeReadyGroupGifts().catch(() => 0);
+  return NextResponse.json({ ...result, featuresComputed, giftsRevealed, groupGiftsCompleted });
 }
 
 export async function GET(request: NextRequest) {

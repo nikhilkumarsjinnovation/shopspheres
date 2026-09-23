@@ -7,6 +7,8 @@ import { useCart } from '@/context/CartContext';
 import { createClient } from '@/lib/supabase/client';
 import { formatINR, INDIAN_STATES } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import UpiPaymentPanel from '@/components/UpiPaymentPanel';
+import PracticePaymentPanel from '@/components/PracticePaymentPanel';
 import * as styles from '../customer.css';
 
 interface SavedAddress {
@@ -26,12 +28,13 @@ interface SavedAddress {
 export default function CheckoutPage() {
   const router = useRouter();
   const supabase = createClient();
-  const { cart, totalAmount, clearCart } = useCart();
+  const { cart, totalAmount, clearCart, updateQuantity, removeFromCart } = useCart();
 
   // Saved Addresses State
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [saveToAddressBook, setSaveToAddressBook] = useState(true);
 
   // New Address Form State
@@ -46,8 +49,8 @@ export default function CheckoutPage() {
   const [addressLabel, setAddressLabel] = useState<'Home' | 'Work' | 'Other'>('Home');
 
   // Payment Method State
-  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod' | 'card' | 'netbanking'>('upi');
-  const [upiId, setUpiId] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod' | 'card' | 'netbanking' | 'stripe'>('upi');
+  const [paymentReady, setPaymentReady] = useState(true);
 
   // Gift for Friend Feature State
   const [isGift, setIsGift] = useState(false);
@@ -231,9 +234,10 @@ export default function CheckoutPage() {
 
     try {
       const res = await fetchWithCsrf('/api/v1/addresses', {
-        method: 'POST',
+        method: editingAddressId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: editingAddressId,
           recipient_name: recipientName.trim(),
           recipient_phone: recipientPhone.trim(),
           address_line1: addressLine1.trim(),
@@ -253,6 +257,7 @@ export default function CheckoutPage() {
 
       await fetchAddresses();
       setIsAddingNewAddress(false);
+      setEditingAddressId(null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Could not save address.';
       setErrorMessage(msg);
@@ -268,6 +273,12 @@ export default function CheckoutPage() {
 
     if (cart.length === 0) {
       setErrorMessage('Your cart is empty. Please add items before checking out.');
+      setLoading(false);
+      return;
+    }
+
+    if ((paymentMethod === 'card' || paymentMethod === 'netbanking') && !paymentReady) {
+      setErrorMessage('Finish the practice card or net banking steps, including the OTP, before placing the order.');
       setLoading(false);
       return;
     }
@@ -365,6 +376,7 @@ export default function CheckoutPage() {
           items: cart,
           shippingAddress: activeShippingAddress,
           paymentMethod,
+          confirmNow: paymentMethod !== 'stripe',
           appliedOffer: appliedOffer
             ? {
                 code: appliedOffer.code,
@@ -382,6 +394,11 @@ export default function CheckoutPage() {
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to place order.');
+      }
+
+      if (typeof data.checkoutUrl === 'string') {
+        window.location.assign(data.checkoutUrl);
+        return;
       }
 
       // Step 2: Clear Cart and Show Success Confirmation
@@ -575,6 +592,37 @@ export default function CheckoutPage() {
                         <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b' }}>
                           Phone number: <strong>+91 {addr.recipient_phone}</strong>
                         </p>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              setEditingAddressId(addr.id);
+                              setRecipientName(addr.recipient_name);
+                              setRecipientPhone(addr.recipient_phone);
+                              setAddressLine1(addr.address_line1);
+                              setAddressLine2(addr.address_line2 ?? '');
+                              setCity(addr.city);
+                              setState(addr.state);
+                              setPostalCode(addr.postal_code);
+                              setAddressLabel((addr.label === 'Work' || addr.label === 'Other' ? addr.label : 'Home'));
+                              setIsAddingNewAddress(true);
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              void fetchWithCsrf(`/api/v1/addresses?id=${addr.id}`, { method: 'DELETE' }).then(() => {
+                                setSavedAddresses((current) => current.filter((item) => item.id !== addr.id));
+                              });
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </label>
                   );
@@ -819,7 +867,7 @@ export default function CheckoutPage() {
                   name="paymentMethod"
                   value="upi"
                   checked={paymentMethod === 'upi'}
-                  onChange={() => setPaymentMethod('upi')}
+                  onChange={() => { setPaymentMethod('upi'); setPaymentReady(true); }}
                   style={{ marginTop: '3px' }}
                 />
                 <div style={{ flex: 1 }}>
@@ -833,25 +881,40 @@ export default function CheckoutPage() {
                     Instant verification via any UPI App or VPA.
                   </p>
                   {paymentMethod === 'upi' && (
-                    <div style={{ marginTop: '8px' }}>
-                      <input
-                        type="text"
-                        placeholder="Enter UPI ID (e.g. mobile@okaxis / username@okhdfcbank)"
-                        value={upiId}
-                        onChange={(e) => setUpiId(e.target.value)}
-                        style={{
-                          width: '100%',
-                          maxWidth: '360px',
-                          padding: '8px 12px',
-                          borderRadius: '6px',
-                          border: '1px solid #a7f3d0',
-                          fontSize: '13px',
-                        }}
-                      />
-                    </div>
+                    <UpiPaymentPanel amountLabel={formatINR(finalTotalINR)} />
                   )}
                 </div>
               </label>
+
+              {false && (
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                  padding: '14px',
+                  borderRadius: '8px',
+                  border: paymentMethod === 'stripe' ? '2px solid #635bff' : '1px solid #cbd5e1',
+                  backgroundColor: paymentMethod === 'stripe' ? '#eef2ff' : '#ffffff',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="stripe"
+                  checked={paymentMethod === 'stripe'}
+                  onChange={() => { setPaymentMethod('stripe'); setPaymentReady(true); }}
+                  style={{ marginTop: '3px' }}
+                />
+                <div>
+                  <strong style={{ fontSize: '14px', color: '#0f172a' }}>Card via Stripe (test)</strong>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b' }}>
+                    Opens Stripe test checkout. Use card 4242 4242 4242 4242. No real charge.
+                  </p>
+                </div>
+              </label>
+              )}
 
               {/* Cash on Delivery */}
               <label
@@ -871,7 +934,7 @@ export default function CheckoutPage() {
                   name="paymentMethod"
                   value="cod"
                   checked={paymentMethod === 'cod'}
-                  onChange={() => setPaymentMethod('cod')}
+                  onChange={() => { setPaymentMethod('cod'); setPaymentReady(true); }}
                   style={{ marginTop: '3px' }}
                 />
                 <div>
@@ -900,14 +963,17 @@ export default function CheckoutPage() {
                   name="paymentMethod"
                   value="card"
                   checked={paymentMethod === 'card'}
-                  onChange={() => setPaymentMethod('card')}
+                  onChange={() => { setPaymentMethod('card'); setPaymentReady(false); }}
                   style={{ marginTop: '3px' }}
                 />
-                <div>
+                <div style={{ flex: 1 }}>
                   <strong style={{ fontSize: '14px', color: '#0f172a' }}>Credit or Debit Card (RuPay, Visa, MasterCard)</strong>
                   <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b' }}>
-                    Encrypted with 256-bit bank grade security & OTP verification.
+                    Enter practice card details, then the OTP shown on this page.
                   </p>
+                  {paymentMethod === 'card' ? (
+                    <PracticePaymentPanel mode="card" amountLabel={formatINR(finalTotalINR)} onReady={setPaymentReady} />
+                  ) : null}
                 </div>
               </label>
 
@@ -929,14 +995,17 @@ export default function CheckoutPage() {
                   name="paymentMethod"
                   value="netbanking"
                   checked={paymentMethod === 'netbanking'}
-                  onChange={() => setPaymentMethod('netbanking')}
+                  onChange={() => { setPaymentMethod('netbanking'); setPaymentReady(false); }}
                   style={{ marginTop: '3px' }}
                 />
-                <div>
+                <div style={{ flex: 1 }}>
                   <strong style={{ fontSize: '14px', color: '#0f172a' }}>Net Banking</strong>
                   <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748b' }}>
-                    Supports SBI, HDFC, ICICI, Axis, Kotak, Punjab National Bank & 50+ Indian banks.
+                    Choose a bank, enter a practice user id, then the OTP shown on this page.
                   </p>
+                  {paymentMethod === 'netbanking' ? (
+                    <PracticePaymentPanel mode="netbanking" amountLabel={formatINR(finalTotalINR)} onReady={setPaymentReady} />
+                  ) : null}
                 </div>
               </label>
             </div>
@@ -997,7 +1066,10 @@ export default function CheckoutPage() {
         {/* ORDER SUMMARY (INR) */}
         <div>
           <div className={styles.summaryCard}>
-            <h2 className={styles.sectionTitle}>Order Summary</h2>
+            <h2 className={styles.sectionTitle}>Review items before payment</h2>
+            <p style={{ fontSize: '12px', color: '#64748b', marginTop: 0 }}>
+              Change quantity or remove a product. The amount below updates before you pay.
+            </p>
 
             <div className={styles.cartItemList}>
               {cart.map((item) => (
@@ -1006,8 +1078,11 @@ export default function CheckoutPage() {
                     <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '13px' }}>
                       {item.title}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>
-                      Qty: {item.quantity} × {formatINR(item.price)}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+                      <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
+                      <span>{item.quantity}</span>
+                      <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                      <button type="button" onClick={() => removeFromCart(item.id)}>Remove</button>
                     </div>
                   </div>
                   <strong style={{ fontSize: '13px', color: '#0f172a' }}>
@@ -1198,7 +1273,7 @@ export default function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={loading || cart.length === 0}
+              disabled={loading || cart.length === 0 || ((paymentMethod === 'card' || paymentMethod === 'netbanking') && !paymentReady)}
               className={styles.buttonCheckout}
               style={{
                 backgroundColor: '#ffd814',

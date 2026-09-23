@@ -112,6 +112,37 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
+    const csrfError = csrfMiddleware(request);
+    if (csrfError) return csrfError;
+    const supabase = await createClient();
+    const session = await getAuthenticatedUser(supabase);
+    if (!session) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    const body: unknown = await request.json();
+    const record = body && typeof body === 'object' ? body : {};
+    const id = 'id' in record && typeof record.id === 'string' ? record.id : '';
+    if (!id) return NextResponse.json({ error: 'Address id is required.' }, { status: 400 });
+    const { data, error } = await supabase.from('user_addresses').update({
+      recipient_name: 'recipient_name' in record && typeof record.recipient_name === 'string' ? record.recipient_name : undefined,
+      recipient_phone: 'recipient_phone' in record && typeof record.recipient_phone === 'string' ? record.recipient_phone : undefined,
+      address_line1: 'address_line1' in record && typeof record.address_line1 === 'string' ? record.address_line1 : undefined,
+      address_line2: 'address_line2' in record && (typeof record.address_line2 === 'string' || record.address_line2 === null) ? record.address_line2 : undefined,
+      city: 'city' in record && typeof record.city === 'string' ? record.city : undefined,
+      state: 'state' in record && typeof record.state === 'string' ? record.state : undefined,
+      postal_code: 'postal_code' in record && typeof record.postal_code === 'string' ? record.postal_code : undefined,
+      label: 'label' in record && typeof record.label === 'string' ? record.label : undefined,
+    }).eq('id', id).eq('user_id', session.user.id).select('*').single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, address: data });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update address';
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const versionError = requireApiVersion(request);

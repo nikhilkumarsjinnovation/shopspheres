@@ -1399,6 +1399,18 @@ export type Database = {
           similarity: number
         }[]
       }
+      lookup_user_id_by_email: {
+        Args: { target_email: string }
+        Returns: string
+      }
+      record_share_open: {
+        Args: { target_token: string }
+        Returns: {
+          product_id: string
+          sharer_name: string
+          status: string
+        }[]
+      }
     }
     Enums: {
       approval_status: "pending" | "approved" | "rejected"

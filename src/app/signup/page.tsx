@@ -96,6 +96,21 @@ export default function SignupPage() {
     }
 
     try {
+      const lookup = await fetch('/api/v1/auth/account-lookup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.shopsphere.v1+json',
+        },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+      const existing: unknown = await lookup.json();
+      if (existing && typeof existing === 'object' && 'exists' in existing && existing.exists === true && 'message' in existing && typeof existing.message === 'string') {
+        setErrorMessage(existing.message);
+        setLoading(false);
+        return;
+      }
+
       const origin = window.location.origin;
 
       // 1. Sign up with Supabase Auth including role and email verification redirect
@@ -193,6 +208,22 @@ export default function SignupPage() {
     setErrorMessage(null);
 
     try {
+      if (email.trim()) {
+        const lookup = await fetch('/api/v1/auth/account-lookup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/vnd.shopsphere.v1+json',
+          },
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        });
+        const existing: unknown = await lookup.json();
+        if (existing && typeof existing === 'object' && 'exists' in existing && existing.exists === true && 'message' in existing && typeof existing.message === 'string') {
+          setErrorMessage(existing.message);
+          setLoading(false);
+          return;
+        }
+      }
       const origin = window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

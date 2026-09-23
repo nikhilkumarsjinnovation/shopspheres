@@ -49,12 +49,30 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
           >
             Explore
           </Link>
+          <Link
+            href="/shops"
+            className={`${styles.navLink} ${pathname.startsWith('/shops') ? styles.navLinkActive : ''}`}
+          >
+            Shops
+          </Link>
 
           <Link
             href="/orders"
             className={`${styles.navLink} ${isOrdersActive ? styles.navLinkActive : ''}`}
           >
             My Orders
+          </Link>
+          <Link
+            href="/gifts"
+            className={`${styles.navLink} ${pathname.startsWith('/gifts') ? styles.navLinkActive : ''}`}
+          >
+            Gifts
+          </Link>
+          <Link
+            href="/friends"
+            className={`${styles.navLink} ${pathname.startsWith('/friends') ? styles.navLinkActive : ''}`}
+          >
+            Friends
           </Link>
         </nav>
       </div>
