@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/v1/ai/proactive",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
