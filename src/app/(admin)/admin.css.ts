@@ -1,456 +1,501 @@
-import { style } from '@vanilla-extract/css';
+import { style, globalStyle } from '@vanilla-extract/css';
+import { vars } from '@/styles/tokens.css';
 
 export const layoutContainer = style({
-  display: 'flex',
+  display: 'grid',
+  gridTemplateColumns: '240px 1fr',
+  gap: vars.space[5],
   minHeight: '100vh',
-  backgroundColor: '#090d16',
-  color: '#f8fafc',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
+  padding: `${vars.space[5]} ${vars.space[5]} ${vars.space[5]} ${vars.space[4]}`,
+  backgroundColor: vars.color.adminCanvas,
+  backgroundImage: `
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(36, 87, 255, 0.22), transparent),
+    radial-gradient(ellipse 35% 30% at 0% 100%, rgba(214, 255, 58, 0.1), transparent)
+  `,
+  color: vars.color.adminText,
+  fontFamily: vars.font.sans,
+  boxSizing: 'border-box',
+  '@media': {
+    'screen and (max-width: 900px)': {
+      gridTemplateColumns: '1fr',
+      padding: vars.space[3],
+      gap: vars.space[3],
+    },
+  },
 });
 
-/* Left Sidebar - Distinct Dark Theme */
 export const sidebar = style({
-  width: '280px',
-  minWidth: '280px',
-  backgroundColor: '#0b0f19',
-  borderRight: '1px solid #1e293b',
+  backgroundColor: vars.color.adminPanel,
+  border: `1px solid ${vars.color.adminLine}`,
+  borderRadius: vars.radius.lg,
   display: 'flex',
   flexDirection: 'column',
+  padding: `${vars.space[5]} ${vars.space[4]}`,
   position: 'sticky',
-  top: 0,
-  height: '100vh',
-  padding: '1.75rem 1.25rem',
-  boxSizing: 'border-box',
-  zIndex: 30,
+  top: vars.space[5],
+  height: `calc(100vh - ${vars.space[10]})`,
+  boxShadow: vars.shadow.md,
+  transform: 'rotate(0.35deg)',
+  '@media': {
+    'screen and (max-width: 900px)': {
+      position: 'relative',
+      height: 'auto',
+      top: 0,
+      transform: 'none',
+    },
+  },
 });
 
 export const brandSection = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.35rem',
+  gap: vars.space[1],
+  marginBottom: vars.space[5],
+  paddingBottom: vars.space[4],
+  position: 'relative',
+  selectors: {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      bottom: 0,
+      width: '45%',
+      height: 3,
+      backgroundColor: vars.color.adminSignal,
+      transform: 'skewX(-14deg)',
+      borderRadius: 2,
+    },
+  },
 });
 
 export const brandRow = style({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'baseline',
   justifyContent: 'space-between',
+  gap: vars.space[2],
 });
 
 export const brandTitle = style({
-  fontSize: '1.25rem',
+  fontFamily: vars.font.display,
+  fontSize: '1.3rem',
   fontWeight: 800,
-  letterSpacing: '-0.025em',
-  color: '#ffffff',
+  letterSpacing: '-0.04em',
+  color: vars.color.adminText,
   textDecoration: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
 });
 
 export const adminBadge = style({
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  letterSpacing: '0.08em',
+  fontSize: '0.58rem',
+  fontWeight: 800,
+  letterSpacing: '0.12em',
   textTransform: 'uppercase',
-  color: '#f43f5e',
-  backgroundColor: 'rgba(244, 63, 94, 0.12)',
-  border: '1px solid rgba(244, 63, 94, 0.3)',
-  padding: '0.2rem 0.5rem',
-  borderRadius: '9999px',
+  color: vars.color.signalInk,
+  backgroundColor: vars.color.adminSignal,
+  padding: '0.25rem 0.45rem',
+  borderRadius: vars.radius.pill,
 });
 
 export const brandSubtitle = style({
-  fontSize: '0.75rem',
-  color: '#64748b',
+  fontSize: '0.7rem',
+  letterSpacing: '0.04em',
+  color: vars.color.adminMuted,
   margin: 0,
 });
 
-/* Radix Separator Primitive Styling */
 export const separator = style({
-  height: '1px',
-  backgroundColor: '#1e293b',
-  margin: '1.25rem 0',
-  width: '100%',
+  display: 'none',
 });
 
 export const navSection = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.35rem',
+  gap: vars.space[1],
   flex: 1,
 });
 
 export const navSectionLabel = style({
-  fontSize: '0.7rem',
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: '#475569',
-  marginBottom: '0.5rem',
-  paddingLeft: '0.75rem',
+  display: 'none',
 });
 
 export const navItem = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '0.75rem',
-  padding: '0.75rem 0.85rem',
-  borderRadius: '8px',
-  color: '#94a3b8',
+  gap: vars.space[3],
+  padding: `${vars.space[3]} ${vars.space[3]}`,
+  color: vars.color.adminMuted,
   textDecoration: 'none',
-  fontSize: '0.9rem',
-  fontWeight: 500,
-  transition: 'all 0.15s ease',
+  fontSize: '0.78rem',
+  fontWeight: 600,
+  borderRadius: vars.radius.sm,
+  transition: `color ${vars.motion.fast}, background-color ${vars.motion.fast}, transform ${vars.motion.fast}`,
   ':hover': {
-    backgroundColor: '#131b2e',
-    color: '#ffffff',
+    color: vars.color.adminText,
+    backgroundColor: 'rgba(36, 87, 255, 0.15)',
+    transform: 'translateX(4px)',
   },
 });
 
 export const navItemActive = style({
-  backgroundColor: '#1e293b',
-  color: '#38bdf8',
-  fontWeight: 600,
-  ':hover': {
-    backgroundColor: '#1e293b',
-    color: '#38bdf8',
-  },
+  color: vars.color.adminText,
+  backgroundColor: vars.color.adminAccent,
 });
 
 export const sidebarFooter = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '1rem',
-  paddingTop: '0.5rem',
+  gap: vars.space[3],
+  marginTop: vars.space[5],
+  paddingTop: vars.space[4],
+  borderTop: `1px solid ${vars.color.adminLine}`,
 });
 
 export const adminProfileCard = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '0.75rem',
-  padding: '0.75rem',
-  borderRadius: '8px',
-  backgroundColor: '#131b2e',
-  border: '1px solid #1e293b',
+  gap: vars.space[3],
 });
 
 export const adminAvatar = style({
-  width: '36px',
-  height: '36px',
-  borderRadius: '50%',
-  backgroundColor: '#f43f5e',
-  color: '#ffffff',
+  width: 36,
+  height: 36,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.adminAccent,
+  color: vars.color.surface,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontWeight: 700,
-  fontSize: '0.85rem',
-  flexShrink: 0,
+  fontWeight: 800,
+  fontSize: vars.size.xs,
 });
 
 export const adminDetails = style({
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
   minWidth: 0,
 });
 
 export const adminEmail = style({
-  fontSize: '0.8rem',
-  fontWeight: 600,
-  color: '#f1f5f9',
-  whiteSpace: 'nowrap',
+  fontSize: vars.size.xs,
+  color: vars.color.adminText,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 export const adminRole = style({
-  fontSize: '0.7rem',
-  color: '#94a3b8',
+  fontSize: '0.65rem',
+  letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  letterSpacing: '0.04em',
+  color: vars.color.adminMuted,
 });
 
-/* Main Content Area */
 export const mainContent = style({
-  flex: 1,
-  padding: '2.5rem 3rem',
-  overflowY: 'auto',
-  backgroundColor: '#090d16',
+  padding: `${vars.space[2]} ${vars.space[2]} ${vars.space[8]}`,
   minWidth: 0,
 });
 
 export const header = style({
-  marginBottom: '2.5rem',
+  marginBottom: vars.space[8],
+  padding: `${vars.space[5]} ${vars.space[5]}`,
+  backgroundColor: vars.color.adminPanel,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.adminLine}`,
+  position: 'relative',
+  display: 'grid',
+  gridTemplateColumns: '1.4fr 0.8fr',
+  gap: vars.space[4],
+  alignItems: 'end',
+  selectors: {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: vars.space[5],
+      bottom: -3,
+      width: '32%',
+      height: 4,
+      backgroundColor: vars.color.adminSignal,
+      transform: 'skewX(-12deg)',
+      borderRadius: 2,
+    },
+  },
+  '@media': {
+    'screen and (max-width: 720px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
 });
 
 export const headerTitle = style({
-  fontSize: '1.875rem',
-  fontWeight: 700,
-  letterSpacing: '-0.025em',
-  color: '#ffffff',
-  margin: '0 0 0.5rem 0',
+  margin: 0,
+  fontFamily: vars.font.display,
+  fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)',
+  fontWeight: 800,
+  letterSpacing: '-0.04em',
+  color: vars.color.adminText,
+  lineHeight: 0.95,
 });
 
 export const headerSubtitle = style({
-  fontSize: '0.95rem',
-  color: '#94a3b8',
   margin: 0,
+  fontSize: vars.size.sm,
+  color: vars.color.adminMuted,
+  maxWidth: '28rem',
+  textAlign: 'right',
+  '@media': {
+    'screen and (max-width: 720px)': {
+      textAlign: 'left',
+      paddingLeft: vars.space[5],
+    },
+  },
 });
 
-/* Metrics Cards Grid */
 export const metricsGrid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-  gap: '1.5rem',
-  marginBottom: '2.5rem',
+  gridTemplateColumns: '1.35fr 0.9fr 1.05fr 0.8fr',
+  gap: vars.space[4],
+  marginBottom: vars.space[8],
+  '@media': {
+    'screen and (max-width: 900px)': {
+      gridTemplateColumns: '1fr 1fr',
+    },
+    'screen and (max-width: 560px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
 });
 
 export const metricCard = style({
-  backgroundColor: '#0f172a',
-  border: '1px solid #1e293b',
-  borderRadius: '12px',
-  padding: '1.5rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
-  transition: 'border-color 0.2s ease, transform 0.2s ease',
-  ':hover': {
-    borderColor: '#334155',
-    transform: 'translateY(-2px)',
-  },
+  backgroundColor: vars.color.adminPanel,
+  border: `1px solid ${vars.color.adminLine}`,
+  borderRadius: vars.radius.md,
+  padding: vars.space[4],
+  boxShadow: vars.shadow.sm,
 });
 
 export const metricTopRow = style({
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center',
+  marginBottom: vars.space[2],
 });
 
 export const metricLabel = style({
-  fontSize: '0.75rem',
-  fontWeight: 600,
+  fontSize: '0.62rem',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: '#94a3b8',
+  color: vars.color.adminMuted,
+  borderLeft: `3px solid ${vars.color.adminSignal}`,
+  paddingLeft: vars.space[2],
 });
 
 export const metricIconContainer = style({
-  width: '36px',
-  height: '36px',
-  borderRadius: '8px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#1e293b',
+  display: 'none',
 });
 
 export const metricValue = style({
-  fontSize: '2.25rem',
-  fontWeight: 700,
+  fontFamily: vars.font.display,
+  fontSize: '1.75rem',
+  fontWeight: 800,
   letterSpacing: '-0.03em',
-  color: '#ffffff',
-  margin: '0.25rem 0 0 0',
+  color: vars.color.adminText,
 });
 
 export const metricSubtext = style({
-  fontSize: '0.8rem',
-  color: '#10b981',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.35rem',
+  marginTop: vars.space[2],
+  fontSize: '0.65rem',
+  letterSpacing: '0.04em',
+  color: vars.color.adminMuted,
 });
 
-/* Recent Orders Table */
 export const sectionTitle = style({
-  fontSize: '1.25rem',
-  fontWeight: 600,
-  color: '#ffffff',
-  margin: '0 0 1rem 0',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  gap: vars.space[3],
+  margin: `${vars.space[8]} 0 ${vars.space[3]}`,
+  fontFamily: vars.font.display,
+  fontSize: vars.size.lg,
+  fontWeight: 700,
+  letterSpacing: '-0.02em',
+  color: vars.color.adminText,
+  paddingLeft: vars.space[3],
+  borderLeft: `4px solid ${vars.color.adminSignal}`,
 });
 
 export const tableWrapper = style({
-  backgroundColor: '#0f172a',
-  border: '1px solid #1e293b',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)',
+  border: `1px solid ${vars.color.adminLine}`,
+  borderRadius: vars.radius.lg,
+  overflow: 'auto',
+  backgroundColor: vars.color.adminPanel,
+  boxShadow: vars.shadow.sm,
 });
 
 export const table = style({
   width: '100%',
   borderCollapse: 'collapse',
-  textAlign: 'left',
-  fontSize: '0.875rem',
+  fontSize: vars.size.sm,
 });
 
 export const th = style({
-  backgroundColor: '#131b2e',
-  color: '#94a3b8',
-  fontWeight: 600,
+  textAlign: 'left',
+  padding: `${vars.space[3]} ${vars.space[4]}`,
+  color: vars.color.adminMuted,
+  fontWeight: 700,
+  fontSize: '0.62rem',
+  letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  fontSize: '0.75rem',
-  letterSpacing: '0.05em',
-  padding: '1rem 1.25rem',
-  borderBottom: '1px solid #1e293b',
+  borderBottom: `1px solid ${vars.color.adminLine}`,
+  backgroundColor: 'rgba(36, 87, 255, 0.08)',
 });
 
 export const td = style({
-  padding: '1rem 1.25rem',
-  borderBottom: '1px solid #1e293b',
-  color: '#e2e8f0',
+  padding: `${vars.space[3]} ${vars.space[4]}`,
+  borderBottom: `1px solid ${vars.color.adminLine}`,
+  color: vars.color.adminText,
+  verticalAlign: 'top',
 });
 
-export const tr = style({
-  transition: 'background-color 0.15s ease',
-  ':hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-  },
-});
+export const tr = style({});
 
 export const uuidCell = style({
-  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-  fontSize: '0.8rem',
-  color: '#38bdf8',
+  fontFamily: vars.font.mono,
+  fontSize: vars.size.xs,
+  color: vars.color.adminMuted,
 });
 
 export const statusBadge = style({
-  display: 'inline-block',
-  padding: '0.25rem 0.65rem',
-  borderRadius: '9999px',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  textTransform: 'capitalize',
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '0.2rem 0.5rem',
+  fontSize: '0.6rem',
+  fontWeight: 800,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  borderRadius: vars.radius.pill,
+  border: `1px solid ${vars.color.adminLine}`,
 });
 
 export const statusPending = style({
-  backgroundColor: 'rgba(234, 179, 8, 0.15)',
-  color: '#facc15',
-  border: '1px solid rgba(234, 179, 8, 0.3)',
+  backgroundColor: 'transparent',
+  color: vars.color.adminSignal,
+  borderColor: vars.color.adminSignal,
 });
-
 export const statusProcessing = style({
-  backgroundColor: 'rgba(59, 130, 246, 0.15)',
-  color: '#60a5fa',
-  border: '1px solid rgba(59, 130, 246, 0.3)',
+  backgroundColor: vars.color.adminAccent,
+  color: vars.color.surface,
+  borderColor: vars.color.adminAccent,
 });
-
 export const statusShipped = style({
-  backgroundColor: 'rgba(168, 85, 247, 0.15)',
-  color: '#c084fc',
-  border: '1px solid rgba(168, 85, 247, 0.3)',
+  backgroundColor: 'transparent',
+  color: vars.color.adminText,
+  borderStyle: 'dashed',
 });
-
 export const statusDelivered = style({
-  backgroundColor: 'rgba(34, 197, 94, 0.15)',
-  color: '#4ade80',
-  border: '1px solid rgba(34, 197, 94, 0.3)',
+  backgroundColor: vars.color.adminSignal,
+  color: vars.color.signalInk,
+  borderColor: vars.color.adminSignal,
 });
-
 export const statusCancelled = style({
-  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-  color: '#f87171',
-  border: '1px solid rgba(239, 68, 68, 0.3)',
+  backgroundColor: 'transparent',
+  color: vars.color.adminMuted,
 });
 
 export const emptyState = style({
-  padding: '3rem',
-  textAlign: 'center',
-  color: '#64748b',
+  padding: `${vars.space[8]} ${vars.space[5]}`,
+  color: vars.color.adminMuted,
+  border: `1px solid ${vars.color.adminLine}`,
+  borderRadius: vars.radius.lg,
+  borderLeft: `4px solid ${vars.color.adminSignal}`,
+  backgroundColor: vars.color.adminPanel,
 });
 
-/* Admin Approval Queue Styles */
 export const approvalSection = style({
-  marginBottom: '3rem',
+  marginTop: vars.space[6],
 });
 
 export const actionButtonGroup = style({
   display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
+  gap: vars.space[2],
+  flexWrap: 'wrap',
 });
 
 export const approveBtn = style({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '0.35rem',
-  padding: '0.4rem 0.75rem',
-  backgroundColor: '#059669',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  fontSize: '0.8rem',
-  fontWeight: 600,
+  gap: 6,
+  height: 34,
+  padding: `0 ${vars.space[3]}`,
+  border: `1.5px solid ${vars.color.adminAccent}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.adminAccent,
+  color: vars.color.surface,
+  fontWeight: 700,
+  fontSize: '0.7rem',
   cursor: 'pointer',
-  transition: 'background-color 0.15s ease',
-  ':hover': {
-    backgroundColor: '#047857',
-  },
-  ':disabled': {
-    opacity: 0.5,
-    cursor: 'not-allowed',
+  transition: `transform ${vars.motion.fast}`,
+  selectors: {
+    '&:hover': { transform: 'translateY(-1px)' },
   },
 });
 
 export const rejectBtn = style({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '0.35rem',
-  padding: '0.4rem 0.75rem',
-  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-  color: '#f87171',
-  border: '1px solid rgba(239, 68, 68, 0.3)',
-  borderRadius: '6px',
-  fontSize: '0.8rem',
-  fontWeight: 600,
+  gap: 6,
+  height: 34,
+  padding: `0 ${vars.space[3]}`,
+  border: `1.5px solid ${vars.color.adminLine}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: 'transparent',
+  color: vars.color.adminText,
+  fontWeight: 700,
+  fontSize: '0.7rem',
   cursor: 'pointer',
-  transition: 'all 0.15s ease',
-  ':hover': {
-    backgroundColor: '#ef4444',
-    color: '#ffffff',
-  },
-  ':disabled': {
-    opacity: 0.5,
-    cursor: 'not-allowed',
-  },
 });
 
 export const specCountChip = style({
   display: 'inline-flex',
-  alignItems: 'center',
-  gap: '0.25rem',
-  padding: '0.2rem 0.5rem',
-  backgroundColor: '#1e293b',
-  color: '#38bdf8',
-  borderRadius: '4px',
-  fontSize: '0.75rem',
-  fontWeight: 500,
+  fontSize: vars.size.xs,
+  color: vars.color.adminMuted,
 });
 
 export const queueBadge = style({
-  fontSize: '0.75rem',
-  fontWeight: 700,
-  padding: '0.2rem 0.6rem',
-  borderRadius: '9999px',
-  backgroundColor: 'rgba(245, 158, 11, 0.15)',
-  color: '#fbbf24',
-  border: '1px solid rgba(245, 158, 11, 0.3)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  height: 24,
+  padding: `0 ${vars.space[2]}`,
+  borderRadius: vars.radius.pill,
+  backgroundColor: vars.color.adminSignal,
+  color: vars.color.signalInk,
+  fontSize: '0.62rem',
+  fontWeight: 800,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
 });
 
 export const queueSuccessToast = style({
-  backgroundColor: 'rgba(16, 185, 129, 0.15)',
-  border: '1px solid rgba(16, 185, 129, 0.3)',
-  color: '#34d399',
-  padding: '0.75rem 1rem',
-  borderRadius: '8px',
-  fontSize: '0.875rem',
-  marginBottom: '1rem',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
+  border: `1px solid ${vars.color.success}`,
+  borderLeftWidth: 4,
+  borderRadius: vars.radius.sm,
+  color: vars.color.successSoft,
+  backgroundColor: 'rgba(15, 122, 76, 0.2)',
+  padding: vars.space[3],
+  marginBottom: vars.space[4],
+  fontSize: vars.size.sm,
 });
 
+globalStyle(`${metricCard}:nth-child(2)`, {
+  '@media': {
+    'screen and (min-width: 901px)': { transform: 'translateY(14px)' },
+  },
+});
+globalStyle(`${metricCard}:nth-child(3)`, {
+  '@media': {
+    'screen and (min-width: 901px)': { transform: 'translateY(-8px)' },
+  },
+});
+globalStyle(`${metricCard}:nth-child(4)`, {
+  '@media': {
+    'screen and (min-width: 901px)': { transform: 'translateY(8px)' },
+  },
+});

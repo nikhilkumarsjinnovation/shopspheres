@@ -1,178 +1,249 @@
-import { style } from '@vanilla-extract/css';
+import { style, globalStyle } from '@vanilla-extract/css';
+import { vars } from '@/styles/tokens.css';
 
 export const layout = style({
   minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  backgroundColor: '#f8fafc',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif',
-  color: '#0f172a',
+  display: 'grid',
+  gridTemplateRows: 'auto 1fr',
+  backgroundColor: vars.color.canvas,
+  color: vars.color.ink,
+  fontFamily: vars.font.sans,
+  backgroundImage: `
+    radial-gradient(ellipse 80% 50% at 100% -10%, rgba(36, 87, 255, 0.12), transparent),
+    radial-gradient(ellipse 40% 30% at 0% 100%, rgba(214, 255, 58, 0.18), transparent)
+  `,
 });
 
-/* Top Navigation Bar */
 export const navbar = style({
   position: 'sticky',
   top: 0,
   zIndex: 40,
-  backgroundColor: '#ffffff',
-  borderBottom: '1px solid #e2e8f0',
-  padding: '0 2rem',
-  height: '64px',
-  display: 'flex',
+  display: 'grid',
+  gridTemplateColumns: 'minmax(160px, 1.2fr) minmax(0, 2fr) auto',
   alignItems: 'center',
-  justifyContent: 'space-between',
-  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+  gap: vars.space[4],
+  padding: `${vars.space[3]} ${vars.space[5]} ${vars.space[3]} ${vars.space[8]}`,
+  backgroundColor: 'rgba(255, 255, 255, 0.88)',
+  backdropFilter: 'blur(12px)',
+  borderBottom: `1px solid ${vars.color.line}`,
+  boxShadow: vars.shadow.sm,
+  '@media': {
+    'screen and (max-width: 900px)': {
+      gridTemplateColumns: '1fr auto',
+      padding: `${vars.space[3]} ${vars.space[4]}`,
+    },
+  },
 });
 
 export const navLeft = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '2.5rem',
+  gap: vars.space[3],
+  minWidth: 0,
+  transform: 'translateX(-4px)',
 });
 
 export const brandTitle = style({
-  fontSize: '1.25rem',
-  fontWeight: 700,
-  color: '#0f172a',
+  fontFamily: vars.font.display,
+  fontSize: '1.55rem',
+  fontWeight: 800,
+  letterSpacing: '-0.05em',
+  color: vars.color.ink,
   textDecoration: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.5rem',
+  position: 'relative',
+  selectors: {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: -6,
+      bottom: -2,
+      width: '70%',
+      height: 3,
+      backgroundColor: vars.color.signal,
+      transform: 'skewX(-18deg)',
+      borderRadius: 2,
+    },
+  },
 });
 
 export const brandBadge = style({
-  fontSize: '0.7rem',
-  fontWeight: 600,
-  color: '#2563eb',
-  backgroundColor: '#eff6ff',
-  padding: '0.15rem 0.5rem',
-  borderRadius: '4px',
-  textTransform: 'uppercase',
-  letterSpacing: '0.04em',
+  display: 'none',
 });
 
 export const navLinks = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '1.5rem',
+  justifyContent: 'flex-start',
+  gap: vars.space[4],
+  paddingLeft: vars.space[4],
+  borderLeft: `3px solid ${vars.color.signal}`,
+  '@media': {
+    'screen and (max-width: 900px)': {
+      display: 'none',
+    },
+  },
 });
 
 export const navLink = style({
-  color: '#64748b',
+  color: vars.color.inkMuted,
   textDecoration: 'none',
-  fontSize: '0.925rem',
-  fontWeight: 500,
-  transition: 'color 0.15s ease',
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  letterSpacing: '0.02em',
+  padding: `${vars.space[1]} 0`,
+  borderBottom: '2px solid transparent',
+  transition: `color ${vars.motion.fast}, border-color ${vars.motion.fast}, transform ${vars.motion.fast}`,
   ':hover': {
-    color: '#0f172a',
+    color: vars.color.accent,
+    transform: 'translateY(-1px)',
   },
 });
 
 export const navLinkActive = style({
-  color: '#0f172a',
-  fontWeight: 600,
-  borderBottom: '2px solid #2563eb',
-  paddingBottom: '2px',
+  color: vars.color.accent,
+  borderBottomColor: vars.color.accent,
 });
 
 export const navRight = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '1.25rem',
+  justifyContent: 'flex-end',
+  gap: vars.space[2],
+  paddingRight: vars.space[2],
 });
 
 export const cartLink = style({
   position: 'relative',
-  display: 'flex',
+  display: 'inline-flex',
   alignItems: 'center',
-  gap: '0.5rem',
-  padding: '0.5rem 0.85rem',
-  borderRadius: '6px',
-  border: '1px solid #cbd5e1',
-  backgroundColor: '#ffffff',
-  color: '#0f172a',
+  gap: vars.space[2],
+  height: 42,
+  padding: `0 ${vars.space[4]}`,
+  border: `1.5px solid ${vars.color.accent}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.accent,
+  color: vars.color.surface,
   textDecoration: 'none',
-  fontSize: '0.875rem',
-  fontWeight: 500,
-  transition: 'all 0.15s ease',
+  fontSize: '0.78rem',
+  fontWeight: 700,
+  letterSpacing: '0.04em',
+  transition: `transform ${vars.motion.fast}, box-shadow ${vars.motion.fast}`,
   ':hover': {
-    backgroundColor: '#f1f5f9',
-    borderColor: '#94a3b8',
+    transform: 'translateY(-2px)',
+    boxShadow: vars.shadow.sm,
   },
 });
 
 export const cartBadge = style({
   position: 'absolute',
-  top: '-7px',
-  right: '-7px',
-  backgroundColor: '#2563eb',
-  color: '#ffffff',
-  fontSize: '0.75rem',
-  fontWeight: 700,
-  borderRadius: '9999px',
-  minWidth: '18px',
-  height: '18px',
+  top: -8,
+  right: -8,
+  backgroundColor: vars.color.signal,
+  color: vars.color.signalInk,
+  fontSize: '0.65rem',
+  fontWeight: 800,
+  minWidth: 20,
+  height: 20,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '0 4px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+  borderRadius: vars.radius.pill,
+  border: `2px solid ${vars.color.surface}`,
 });
 
 export const mainContent = style({
-  flex: 1,
-  maxWidth: '1200px',
   width: '100%',
+  maxWidth: '1320px',
   margin: '0 auto',
-  padding: '2rem',
-  boxSizing: 'border-box',
+  padding: `${vars.space[8]} ${vars.space[5]} ${vars.space[12]} ${vars.space[8]}`,
+  '@media': {
+    'screen and (max-width: 640px)': {
+      padding: `${vars.space[5]} ${vars.space[4]} ${vars.space[8]}`,
+    },
+  },
 });
 
-/* Headers */
 export const headerContainer = style({
-  marginBottom: '2rem',
+  marginBottom: vars.space[8],
+  paddingBottom: vars.space[5],
+  position: 'relative',
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1.35fr) minmax(0, 0.85fr)',
+  gap: vars.space[5],
+  alignItems: 'end',
+  selectors: {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      bottom: 0,
+      width: '38%',
+      height: 4,
+      backgroundColor: vars.color.signal,
+      transform: 'skewX(-14deg)',
+      borderRadius: 2,
+    },
+  },
+  '@media': {
+    'screen and (max-width: 720px)': {
+      gridTemplateColumns: '1fr',
+      gap: vars.space[2],
+    },
+  },
 });
 
 export const heading = style({
-  fontSize: '1.75rem',
-  fontWeight: 700,
-  color: '#0f172a',
-  margin: '0 0 0.5rem 0',
+  fontFamily: vars.font.display,
+  fontSize: 'clamp(2.2rem, 5.5vw, 3.6rem)',
+  fontWeight: 800,
+  letterSpacing: '-0.045em',
+  color: vars.color.ink,
+  margin: 0,
+  lineHeight: 0.92,
 });
 
 export const subheading = style({
-  fontSize: '0.95rem',
-  color: '#64748b',
+  fontSize: vars.size.sm,
+  color: vars.color.inkMuted,
   margin: 0,
+  maxWidth: '26rem',
+  marginLeft: 'auto',
+  textAlign: 'right',
+  paddingBottom: vars.space[1],
+  '@media': {
+    'screen and (max-width: 720px)': {
+      marginLeft: vars.space[6],
+      textAlign: 'left',
+    },
+  },
 });
 
-/* Product Grid (Explore Page) */
 export const productGrid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-  gap: '1.5rem',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+  gap: vars.space[5],
+  alignItems: 'start',
 });
 
 export const productCard = style({
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  overflow: 'hidden',
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.line}`,
+  borderRadius: vars.radius.md,
   display: 'flex',
   flexDirection: 'column',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+  overflow: 'hidden',
+  boxShadow: vars.shadow.sm,
+  transition: `transform ${vars.motion.base}, box-shadow ${vars.motion.base}`,
   ':hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.08)',
+    transform: 'translateY(-6px) rotate(-0.4deg)',
+    boxShadow: vars.shadow.md,
   },
 });
 
 export const cardImageContainer = style({
   width: '100%',
-  height: '180px',
-  backgroundColor: '#f1f5f9',
+  aspectRatio: '4 / 5',
+  backgroundColor: vars.color.canvas,
   overflow: 'hidden',
   position: 'relative',
 });
@@ -181,94 +252,139 @@ export const cardImage = style({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
+  transition: `transform ${vars.motion.base}`,
+  selectors: {
+    [`${productCard}:hover &`]: {
+      transform: 'scale(1.04)',
+    },
+  },
 });
 
 export const cardPlaceholderImage = style({
   width: '100%',
   height: '100%',
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  color: '#94a3b8',
-  fontSize: '0.85rem',
-  backgroundColor: '#f1f5f9',
+  gap: vars.space[2],
+  color: vars.color.inkSubtle,
+  fontSize: vars.size.xs,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  backgroundColor: vars.color.canvas,
 });
 
 export const cardBody = style({
-  padding: '1.25rem',
+  padding: `${vars.space[3]} ${vars.space[4]} ${vars.space[4]}`,
   display: 'flex',
   flexDirection: 'column',
+  gap: vars.space[2],
   flex: 1,
 });
 
 export const cardCategory = style({
-  fontSize: '0.75rem',
+  fontSize: '0.68rem',
   textTransform: 'uppercase',
-  fontWeight: 600,
-  color: '#2563eb',
-  marginBottom: '0.35rem',
-  letterSpacing: '0.03em',
+  fontWeight: 700,
+  color: vars.color.accent,
+  letterSpacing: '0.08em',
+  alignSelf: 'flex-start',
+  paddingLeft: vars.space[1],
+  borderLeft: `3px solid ${vars.color.signal}`,
 });
 
 export const cardTitle = style({
-  fontSize: '1.1rem',
-  fontWeight: 600,
-  color: '#0f172a',
-  margin: '0 0 0.5rem 0',
-  lineHeight: 1.3,
-});
-
-export const cardDescription = style({
-  fontSize: '0.85rem',
-  color: '#64748b',
-  margin: '0 0 1rem 0',
-  flex: 1,
-  lineHeight: 1.4,
+  fontFamily: vars.font.display,
+  fontSize: '1.05rem',
+  fontWeight: 700,
+  color: vars.color.ink,
+  margin: 0,
+  lineHeight: 1.2,
+  letterSpacing: '-0.02em',
   display: '-webkit-box',
   WebkitLineClamp: 2,
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
 });
 
+export const cardDescription = style({
+  display: 'none',
+});
+
 export const cardFooter = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  gap: vars.space[3],
   marginTop: 'auto',
-  paddingTop: '0.75rem',
-  borderTop: '1px solid #f1f5f9',
+  paddingTop: vars.space[2],
 });
 
 export const cardPrice = style({
-  fontSize: '1.25rem',
+  fontSize: vars.size.md,
   fontWeight: 700,
-  color: '#0f172a',
+  letterSpacing: '-0.02em',
+  color: vars.color.ink,
+  fontVariantNumeric: 'tabular-nums',
 });
 
 export const buttonAddToCart = style({
-  backgroundColor: '#0f172a',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  padding: '0.5rem 0.85rem',
-  fontSize: '0.85rem',
-  fontWeight: 600,
+  backgroundColor: vars.color.accent,
+  color: vars.color.surface,
+  border: `1.5px solid ${vars.color.accent}`,
+  borderRadius: vars.radius.sm,
+  height: 36,
+  padding: `0 ${vars.space[3]}`,
+  fontSize: '0.72rem',
+  fontWeight: 700,
+  letterSpacing: '0.04em',
   cursor: 'pointer',
-  transition: 'background-color 0.15s ease',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: vars.space[2],
+  transition: `transform ${vars.motion.fast}, background-color ${vars.motion.fast}`,
   ':hover': {
-    backgroundColor: '#1e293b',
+    backgroundColor: vars.color.accentHover,
+    transform: 'translateY(-1px)',
   },
   ':disabled': {
-    opacity: 0.6,
+    opacity: 0.4,
     cursor: 'not-allowed',
   },
 });
 
-/* Checkout Page Styles */
+export const qtyControl = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 0,
+  border: `1.5px solid ${vars.color.lineStrong}`,
+  borderRadius: vars.radius.sm,
+  height: 36,
+  backgroundColor: vars.color.surface,
+  overflow: 'hidden',
+});
+
+export const qtyButton = style({
+  width: 32,
+  height: '100%',
+  border: 'none',
+  background: 'transparent',
+  color: vars.color.ink,
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  ':hover': {
+    backgroundColor: vars.color.accentSoft,
+  },
+});
+
 export const checkoutLayout = style({
   display: 'grid',
-  gridTemplateColumns: '1fr 380px',
-  gap: '2rem',
+  gridTemplateColumns: 'minmax(0, 1.35fr) minmax(280px, 0.75fr)',
+  gap: vars.space[6],
+  alignItems: 'start',
   '@media': {
     'screen and (max-width: 860px)': {
       gridTemplateColumns: '1fr',
@@ -277,185 +393,429 @@ export const checkoutLayout = style({
 });
 
 export const checkoutSection = style({
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  padding: '1.75rem',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-  marginBottom: '1.5rem',
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.line}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space[5],
+  marginBottom: vars.space[5],
+  boxShadow: vars.shadow.sm,
+  position: 'relative',
+  selectors: {
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 16,
+      left: -3,
+      width: 4,
+      height: 48,
+      backgroundColor: vars.color.signal,
+      borderRadius: 2,
+      transform: 'skewY(-8deg)',
+    },
+  },
 });
 
 export const sectionTitle = style({
-  fontSize: '1.15rem',
+  fontFamily: vars.font.display,
+  fontSize: vars.size.lg,
   fontWeight: 700,
-  color: '#0f172a',
-  margin: '0 0 1.25rem 0',
-  paddingBottom: '0.75rem',
-  borderBottom: '1px solid #f1f5f9',
+  letterSpacing: '-0.02em',
+  color: vars.color.ink,
+  margin: `0 0 ${vars.space[4]} 0`,
+  paddingBottom: vars.space[3],
+  borderBottom: `1px solid ${vars.color.line}`,
 });
 
 export const formRow = style({
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: '1rem',
-  marginBottom: '1rem',
+  gridTemplateColumns: '1.1fr 0.9fr',
+  gap: vars.space[4],
+  marginBottom: vars.space[4],
+  '@media': {
+    'screen and (max-width: 640px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
 });
 
 export const formGroup = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.35rem',
-  marginBottom: '1rem',
+  gap: vars.space[2],
+  marginBottom: vars.space[4],
 });
 
 export const label = style({
-  fontSize: '0.85rem',
-  fontWeight: 600,
-  color: '#334155',
+  fontSize: '0.72rem',
+  fontWeight: 700,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: vars.color.inkMuted,
 });
 
 export const input = style({
-  padding: '0.625rem 0.85rem',
-  fontSize: '0.925rem',
-  border: '1px solid #cbd5e1',
-  borderRadius: '6px',
+  padding: `${vars.space[3]} ${vars.space[3]}`,
+  fontSize: vars.size.md,
+  border: `1.5px solid ${vars.color.lineStrong}`,
+  borderRadius: vars.radius.sm,
   outline: 'none',
   boxSizing: 'border-box',
   fontFamily: 'inherit',
-  transition: 'border-color 0.2s',
+  backgroundColor: vars.color.surface,
+  transition: `border-color ${vars.motion.fast}, box-shadow ${vars.motion.fast}`,
   ':focus': {
-    borderColor: '#2563eb',
+    borderColor: vars.color.accent,
+    boxShadow: `0 0 0 3px ${vars.color.accentSoft}`,
   },
 });
 
-/* Gift Box Toggle Styles */
 export const giftToggleContainer = style({
-  backgroundColor: '#f8fafc',
-  border: '1px solid #cbd5e1',
-  borderRadius: '8px',
-  padding: '1.25rem',
-  marginBottom: '1rem',
+  backgroundColor: vars.color.accentSoft,
+  border: `1px solid ${vars.color.line}`,
+  borderRadius: vars.radius.md,
+  padding: vars.space[4],
+  marginBottom: vars.space[4],
+  transform: 'rotate(-0.3deg)',
 });
 
 export const giftCheckboxLabel = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '0.65rem',
+  gap: vars.space[3],
   cursor: 'pointer',
-  fontSize: '0.95rem',
-  fontWeight: 600,
-  color: '#0f172a',
+  fontSize: vars.size.sm,
+  fontWeight: 700,
+  color: vars.color.ink,
   userSelect: 'none',
 });
 
 export const giftFieldsContainer = style({
-  marginTop: '1rem',
-  paddingTop: '1rem',
-  borderTop: '1px dashed #cbd5e1',
+  marginTop: vars.space[4],
+  paddingTop: vars.space[4],
+  borderTop: `1px dashed ${vars.color.lineStrong}`,
 });
 
 export const giftNotice = style({
-  fontSize: '0.8rem',
-  color: '#64748b',
-  backgroundColor: '#f1f5f9',
-  padding: '0.6rem 0.85rem',
-  borderRadius: '6px',
-  marginTop: '0.5rem',
+  fontSize: vars.size.sm,
+  color: vars.color.inkSubtle,
+  marginTop: vars.space[2],
 });
 
-/* Order Summary Box */
 export const summaryCard = style({
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  padding: '1.75rem',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+  backgroundColor: vars.color.surface,
+  color: vars.color.ink,
+  padding: vars.space[5],
   position: 'sticky',
-  top: '80px',
+  top: 88,
+  borderRadius: vars.radius.lg,
+  boxShadow: vars.shadow.md,
+  border: `1px solid ${vars.color.line}`,
+  transform: 'translateY(12px)',
+  selectors: {
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 20,
+      left: -3,
+      width: 4,
+      height: 56,
+      backgroundColor: vars.color.signal,
+      borderRadius: 2,
+      transform: 'skewY(-8deg)',
+    },
+  },
+  '@media': {
+    'screen and (max-width: 860px)': {
+      transform: 'none',
+      position: 'relative',
+      top: 0,
+    },
+  },
 });
 
 export const summaryItem = style({
   display: 'flex',
   justifyContent: 'space-between',
-  fontSize: '0.9rem',
-  color: '#475569',
-  marginBottom: '0.75rem',
+  fontSize: vars.size.sm,
+  color: vars.color.inkMuted,
+  marginBottom: vars.space[3],
 });
 
 export const summaryTotal = style({
   display: 'flex',
   justifyContent: 'space-between',
-  fontSize: '1.2rem',
-  fontWeight: 700,
-  color: '#0f172a',
-  paddingTop: '0.75rem',
-  borderTop: '2px solid #e2e8f0',
-  marginTop: '1rem',
-  marginBottom: '1.5rem',
+  fontFamily: vars.font.display,
+  fontSize: vars.size.lg,
+  fontWeight: 800,
+  color: vars.color.ink,
+  paddingTop: vars.space[3],
+  borderTop: `1px solid ${vars.color.line}`,
+  marginTop: vars.space[4],
+  marginBottom: vars.space[5],
 });
 
 export const cartItemList = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.75rem',
-  marginBottom: '1.25rem',
+  gap: vars.space[3],
+  marginBottom: vars.space[4],
 });
 
 export const cartRow = style({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   justifyContent: 'space-between',
-  fontSize: '0.875rem',
-  paddingBottom: '0.75rem',
-  borderBottom: '1px solid #f1f5f9',
+  gap: vars.space[3],
+  fontSize: vars.size.sm,
+  padding: vars.space[3],
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.line}`,
+  backgroundColor: vars.color.canvas,
+  color: vars.color.ink,
 });
 
 export const buttonCheckout = style({
   width: '100%',
-  backgroundColor: '#059669',
-  color: '#ffffff',
-  border: 'none',
-  borderRadius: '6px',
-  padding: '0.85rem',
-  fontSize: '1rem',
-  fontWeight: 600,
+  backgroundColor: vars.color.accent,
+  color: vars.color.surface,
+  border: `1.5px solid ${vars.color.accent}`,
+  borderRadius: vars.radius.sm,
+  padding: vars.space[3],
+  fontSize: '0.9rem',
+  fontWeight: 800,
+  letterSpacing: '0.02em',
   cursor: 'pointer',
-  transition: 'background-color 0.2s',
+  transition: `transform ${vars.motion.fast}, box-shadow ${vars.motion.fast}`,
+  boxShadow: '0 4px 14px rgba(36, 87, 255, 0.28)',
   ':hover': {
-    backgroundColor: '#047857',
+    transform: 'translateY(-2px)',
+    backgroundColor: vars.color.accentHover,
   },
   ':disabled': {
-    opacity: 0.6,
+    opacity: 0.4,
     cursor: 'not-allowed',
+    boxShadow: 'none',
   },
 });
 
-/* Alert & Notice Messages */
 export const alertSuccess = style({
-  backgroundColor: '#ecfdf5',
-  border: '1px solid #a7f3d0',
-  color: '#065f46',
-  padding: '1rem',
-  borderRadius: '6px',
-  marginBottom: '1.5rem',
-  fontSize: '0.9rem',
+  backgroundColor: vars.color.successSoft,
+  border: `1px solid ${vars.color.success}`,
+  borderLeftWidth: 4,
+  borderRadius: vars.radius.sm,
+  color: vars.color.success,
+  padding: vars.space[4],
+  marginBottom: vars.space[5],
+  fontSize: vars.size.sm,
 });
 
 export const alertError = style({
-  backgroundColor: '#fef2f2',
-  border: '1px solid #fecaca',
-  color: '#991b1b',
-  padding: '1rem',
-  borderRadius: '6px',
-  marginBottom: '1.5rem',
-  fontSize: '0.9rem',
+  backgroundColor: vars.color.dangerSoft,
+  border: `1px solid ${vars.color.danger}`,
+  borderLeftWidth: 4,
+  borderRadius: vars.radius.sm,
+  color: vars.color.danger,
+  padding: vars.space[4],
+  marginBottom: vars.space[5],
+  fontSize: vars.size.sm,
 });
 
 export const emptyState = style({
-  textAlign: 'center',
-  padding: '4rem 2rem',
-  backgroundColor: '#ffffff',
-  borderRadius: '8px',
-  border: '1px solid #e2e8f0',
-  color: '#64748b',
+  textAlign: 'left',
+  padding: `${vars.space[8]} ${vars.space[5]}`,
+  backgroundColor: vars.color.surface,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.line}`,
+  borderLeft: `4px solid ${vars.color.signal}`,
+  color: vars.color.inkMuted,
+  boxShadow: vars.shadow.sm,
+});
+
+export const iconButton = style({
+  width: 42,
+  height: 42,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: `1.5px solid ${vars.color.lineStrong}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.surface,
+  color: vars.color.ink,
+  cursor: 'pointer',
+  position: 'relative',
+  transition: `background-color ${vars.motion.fast}, border-color ${vars.motion.fast}`,
+  ':hover': {
+    backgroundColor: vars.color.accentSoft,
+    borderColor: vars.color.accent,
+  },
+});
+
+export const deliverHint = style({
+  display: 'none',
+});
+
+export const surfaceCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.line}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space[5],
+  boxShadow: vars.shadow.sm,
+});
+
+export const stack = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space[4],
+});
+
+export const sectionBlock = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space[3],
+  marginBottom: vars.space[8],
+});
+
+export const sectionLabel = style({
+  margin: 0,
+  fontFamily: vars.font.display,
+  fontSize: vars.size.lg,
+  fontWeight: 700,
+  letterSpacing: '-0.02em',
+  color: vars.color.ink,
+  paddingLeft: vars.space[3],
+  borderLeft: `4px solid ${vars.color.signal}`,
+});
+
+export const listCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.line}`,
+  borderRadius: vars.radius.md,
+  padding: vars.space[4],
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space[2],
+  boxShadow: vars.shadow.sm,
+});
+
+export const listMeta = style({
+  fontSize: vars.size.sm,
+  color: vars.color.inkSubtle,
+  margin: 0,
+});
+
+export const inlineActions = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: vars.space[2],
+  alignItems: 'center',
+});
+
+export const buttonSecondary = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: vars.space[2],
+  height: 36,
+  padding: `0 ${vars.space[3]}`,
+  border: `1.5px solid ${vars.color.lineStrong}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.surface,
+  color: vars.color.ink,
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  cursor: 'pointer',
+  textDecoration: 'none',
+  transition: `border-color ${vars.motion.fast}, background-color ${vars.motion.fast}`,
+  ':hover': {
+    borderColor: vars.color.accent,
+    backgroundColor: vars.color.accentSoft,
+  },
+});
+
+export const quietLink = style({
+  color: vars.color.accent,
+  fontWeight: 700,
+  textDecoration: 'underline',
+  textUnderlineOffset: 3,
+  fontSize: vars.size.sm,
+  ':hover': {
+    color: vars.color.accentHover,
+  },
+});
+
+export const shopGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  gap: vars.space[5],
+});
+
+export const exploreControls = style({
+  backgroundColor: vars.color.surface,
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.line}`,
+  padding: `${vars.space[5]} ${vars.space[5]}`,
+  boxShadow: vars.shadow.sm,
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1.35fr) minmax(160px, 0.45fr)',
+  gap: vars.space[4],
+  alignItems: 'stretch',
+  position: 'relative',
+  '@media': {
+    'screen and (max-width: 720px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+});
+
+export const exploreAiBtn = style({
+  padding: `${vars.space[3]} ${vars.space[4]}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.accent,
+  color: vars.color.surface,
+  border: `1.5px solid ${vars.color.accent}`,
+  fontWeight: 700,
+  fontSize: vars.size.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: vars.space[2],
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  boxShadow: '0 4px 14px rgba(36, 87, 255, 0.28)',
+  '@media': {
+    'screen and (min-width: 721px)': {
+      transform: 'translateY(4px)',
+    },
+  },
+});
+
+globalStyle(`${productGrid} > *:nth-child(3n+2)`, {
+  '@media': {
+    'screen and (min-width: 901px)': {
+      transform: 'translateY(18px)',
+    },
+  },
+});
+
+globalStyle(`${productGrid} > *:nth-child(3n)`, {
+  '@media': {
+    'screen and (min-width: 901px)': {
+      transform: 'translateY(-10px)',
+    },
+  },
+});
+
+globalStyle(`${listCard}:nth-child(even)`, {
+  '@media': {
+    'screen and (min-width: 641px)': {
+      transform: 'translateX(12px)',
+    },
+  },
+});
+
+globalStyle(`${shopGrid} > *:nth-child(odd)`, {
+  '@media': {
+    'screen and (min-width: 901px)': {
+      transform: 'translateY(10px)',
+    },
+  },
 });

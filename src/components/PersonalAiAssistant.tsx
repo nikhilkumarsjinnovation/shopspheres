@@ -59,7 +59,6 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
     }
   }, [messages, isOpen]);
 
-  // Listen to open-ai event from any button (e.g. from ExploreFeedClient)
   useEffect(() => {
     const handleOpenAi = () => {
       setIsOpen(true);
@@ -121,7 +120,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
       setMessages((prev) => [...prev, assistantMsg]);
 
       if (data.feedUpdated) {
-        setFeedNotification('✨ Your explore feed was just personalized to match this conversation!');
+        setFeedNotification('Your explore feed was personalized to match this conversation.');
         onFeedUpdated?.();
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('shopsphere:feed-updated', { detail: data }));
@@ -147,7 +146,6 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
 
   return (
     <>
-      {/* Floating Trigger Button */}
       <button
         id="personal-ai-trigger"
         type="button"
@@ -155,127 +153,150 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
         aria-label="Open Personal AI Shopping Guide"
         className={assistantStyles.trigger}
       >
-        <span style={{ fontSize: '18px' }}>✨</span>
-        <span>{isOpen ? 'Close AI Guide' : 'Personal AI Guide'}</span>
+        <span>{isOpen ? 'Close guide' : 'AI guide'}</span>
       </button>
 
-      {/* Slide-over Drawer / Chat Window */}
       {isOpen && (
         <div
           role="dialog"
           aria-label="Personal AI Shopping Companion"
           className={assistantStyles.panel}
         >
-          {/* Header */}
-          <div
-            className={assistantStyles.header}
-          >
+          <div className={assistantStyles.header}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px' }}>✨</span>
-                <span style={{ fontWeight: 700, fontSize: '15px' }}>ShopSphere AI</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span
                   style={{
-                    fontSize: '10px',
-                    fontWeight: 700,
+                    fontFamily: 'var(--font-display), sans-serif',
+                    fontWeight: 800,
+                    fontSize: 16,
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  ShopSphere Guide
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: '0.08em',
                     textTransform: 'uppercase',
-                    backgroundColor: '#10b981',
-                    color: '#064e3b',
-                    padding: '2px 6px',
-                    borderRadius: '9999px',
+                    backgroundColor: '#d6ff3a',
+                    color: '#07101f',
+                    padding: '3px 8px',
+                    borderRadius: 999,
                   }}
                 >
                   Live
                 </span>
               </div>
-              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>
+              <p style={{ margin: '6px 0 0', fontSize: 12, color: '#8a96ab', maxWidth: '28rem' }}>
                 Understands your style, answers questions & customizes your feed in ₹.
               </p>
             </div>
 
             <button
+              type="button"
               onClick={() => setIsOpen(false)}
+              aria-label="Close guide"
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#94a3b8',
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid #243048',
+                color: '#eef2f8',
                 cursor: 'pointer',
-                fontSize: '18px',
-                padding: '4px',
+                fontSize: 16,
               }}
             >
               ✕
             </button>
           </div>
 
-          {/* Persona Selector Tabs */}
           <PersonaSelector value={persona} onChange={setPersona} />
 
-          {/* Notification banner when feed is mutated */}
           {feedNotification && (
             <div
               style={{
-                backgroundColor: '#ecfdf5',
-                color: '#065f46',
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '8px 14px',
-                borderBottom: '1px solid #a7f3d0',
+                backgroundColor: '#dce6ff',
+                color: '#2457ff',
+                fontSize: 12,
+                fontWeight: 700,
+                padding: '10px 14px',
+                borderBottom: '1px solid #c5cedc',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                gap: 8,
               }}
             >
               <span>{feedNotification}</span>
               <button
+                type="button"
                 onClick={() => setFeedNotification(null)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#065f46' }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#2457ff',
+                  fontWeight: 800,
+                }}
               >
                 ✕
               </button>
             </div>
           )}
 
-          {/* Message List */}
-          <div
-            className={assistantStyles.messages}
-          >
-            {messages.map((m) => (
+          <div className={assistantStyles.messages}>
+            {messages.map((m, index) => (
               <div
                 key={m.id}
                 style={{
                   alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '86%',
+                  maxWidth: '88%',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '6px',
+                  gap: 6,
+                  transform:
+                    m.role === 'assistant' && index % 2 === 0
+                      ? 'translateX(-2px)'
+                      : m.role === 'user'
+                        ? 'translateX(2px)'
+                        : undefined,
                 }}
               >
                 <div
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: m.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
-                    backgroundColor: m.role === 'user' ? '#0f172a' : '#f1f5f9',
-                    color: m.role === 'user' ? '#ffffff' : '#0f172a',
-                    fontSize: '13px',
-                    lineHeight: '1.5',
-                  }}
+                  className={
+                    m.role === 'user'
+                      ? assistantStyles.bubbleUser
+                      : assistantStyles.bubbleAssistant
+                  }
                 >
                   {m.content}
                 </div>
 
-                {/* Render Recommended Products if returned */}
                 {m.recommendedProducts && m.recommendedProducts.length > 0 && (
                   <div
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '8px',
-                      marginTop: '4px',
+                      gap: 8,
+                      marginTop: 4,
                     }}
                   >
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>
-                      Recommended for You:
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
+                        color: '#5a6578',
+                        borderLeft: '3px solid #d6ff3a',
+                        paddingLeft: 8,
+                      }}
+                    >
+                      Recommended for you
                     </span>
                     {m.recommendedProducts.map((prod) => (
                       <Link
@@ -287,35 +308,36 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                           color: 'inherit',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '10px',
-                          padding: '8px 10px',
+                          gap: 10,
+                          padding: '10px 12px',
                           backgroundColor: '#ffffff',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                          borderRadius: 12,
+                          border: '1px solid #c5cedc',
+                          boxShadow: '0 4px 12px rgba(7,16,31,0.06)',
                         }}
                       >
                         <div
                           style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '6px',
-                            backgroundColor: '#f1f5f9',
-                            display: 'grid',
-                            placeItems: 'center',
-                            fontSize: '18px',
+                            width: 44,
+                            height: 44,
+                            borderRadius: 10,
+                            backgroundColor: '#e8edf4',
+                            backgroundImage:
+                              prod.image_urls?.[0]
+                                ? `url(${prod.image_urls[0]})`
+                                : undefined,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
                             flexShrink: 0,
                           }}
-                        >
-                          📦
-                        </div>
+                        />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p
                             style={{
                               margin: 0,
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              color: '#0f172a',
+                              fontSize: 12,
+                              fontWeight: 700,
+                              color: '#07101f',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -323,11 +345,11 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                           >
                             {prod.title}
                           </p>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                            <span style={{ fontSize: 12, fontWeight: 800, color: '#2457ff' }}>
                               {formatINR(prod.price)}
                             </span>
-                            <span style={{ fontSize: '10px', color: '#64748b' }}>
+                            <span style={{ fontSize: 11, color: '#5a6578' }}>
                               ★ {Number(prod.average_rating || 5).toFixed(1)}
                             </span>
                           </div>
@@ -341,55 +363,28 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
 
             {loading && (
               <div
-                style={{
-                  alignSelf: 'flex-start',
-                  padding: '8px 14px',
-                  borderRadius: '12px',
-                  backgroundColor: '#f1f5f9',
-                  color: '#64748b',
-                  fontSize: '12px',
-                  fontStyle: 'italic',
-                }}
+                className={assistantStyles.bubbleAssistant}
+                style={{ alignSelf: 'flex-start', fontStyle: 'italic', color: '#5a6578' }}
               >
-                AI is searching Indian marketplace catalog and tailoring recommendations...
+                Searching the catalog and tuning recommendations…
               </div>
             )}
 
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick suggestions pills */}
-          <div
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#f8fafc',
-              borderTop: '1px solid #f1f5f9',
-              display: 'flex',
-              gap: '6px',
-              overflowX: 'auto',
-            }}
-          >
+          <div className={assistantStyles.suggestionRow}>
             {[
               'Smartphones under ₹15,000',
               'Wireless earbuds under ₹2,000',
               'Trending festive kurta & fashion',
               'Kitchen cookware essentials',
-            ].map((pill, idx) => (
+            ].map((pill) => (
               <button
-                key={idx}
+                key={pill}
                 type="button"
                 onClick={() => handleSendMessage(pill)}
-                style={{
-                  whiteSpace: 'nowrap',
-                  fontSize: '11px',
-                  padding: '4px 9px',
-                  borderRadius: '4px',
-                  backgroundColor: '#e2e8f0',
-                  color: '#334155',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 500,
-                }}
+                className={assistantStyles.suggestionPill}
               >
                 {pill}
               </button>
@@ -397,21 +392,16 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
           </div>
 
           {false && <VisualSearch />}
-          <VoiceInterface onTranscript={(text) => { void handleSendMessage(text); }} />
+          {false && (
+            <VoiceInterface onTranscript={(text) => { void handleSendMessage(text); }} />
+          )}
 
-          {/* Input Form */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSendMessage();
+              void handleSendMessage();
             }}
-            style={{
-              padding: '12px',
-              backgroundColor: '#ffffff',
-              borderTop: '1px solid #e2e8f0',
-              display: 'flex',
-              gap: '8px',
-            }}
+            className={assistantStyles.composer}
           >
             <input
               ref={inputRef}
@@ -420,28 +410,12 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Ask anything or search with budget in ₹..."
               disabled={loading}
-              style={{
-                flex: 1,
-                padding: '10px 14px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '13px',
-                outline: 'none',
-              }}
+              className={assistantStyles.composerInput}
             />
             <button
               type="submit"
               disabled={loading || !inputMessage.trim()}
-              style={{
-                padding: '10px 16px',
-                borderRadius: '8px',
-                backgroundColor: loading || !inputMessage.trim() ? '#94a3b8' : '#0f172a',
-                color: '#ffffff',
-                border: 'none',
-                fontWeight: 600,
-                fontSize: '13px',
-                cursor: loading || !inputMessage.trim() ? 'not-allowed' : 'pointer',
-              }}
+              className={assistantStyles.sendBtn}
             >
               Send
             </button>
