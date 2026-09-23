@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireApiVersion } from '@/lib/api-version';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { parseFeedWeights } from '@/lib/feed-weights';
@@ -17,8 +18,10 @@ export interface BehavioralOffer {
   expiresInHours: number;
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const supabase = await createClient();
     const session = await getAuthenticatedUser(supabase);
 

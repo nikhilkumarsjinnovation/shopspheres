@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ProductCard from '@/components/ProductCard';
 import BehavioralOffersBanner from '@/components/BehavioralOffersBanner';
-import type { FeedCarousel } from '@/app/api/feed/personalized/route';
+import type { FeedCarousel } from '@/app/api/v1/feed/personalized/route';
+import { fetchWithCsrf } from '@/lib/csrf-client';
 import * as styles from '@/app/(customer)/customer.css';
 
 export interface BaseProduct {
@@ -54,7 +55,7 @@ export default function ExploreFeedClient({
   const fetchPersonalizedFeed = useCallback(async () => {
     try {
       setFeedLoading(true);
-      const res = await fetch('/api/feed/personalized');
+      const res = await fetchWithCsrf('/api/v1/feed/personalized');
       if (res.ok) {
         const data = await res.json();
         setCarousels(data.carousels || []);

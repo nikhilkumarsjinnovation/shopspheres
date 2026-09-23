@@ -80,7 +80,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
     setLoading(true);
 
     try {
-      const res = await fetchWithCsrf('/api/ai/chat', {
+      const res = await fetchWithCsrf('/api/v1/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

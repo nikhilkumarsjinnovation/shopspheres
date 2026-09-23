@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import type { BehavioralOffer } from '@/app/api/offers/personalized/route';
+import type { BehavioralOffer } from '@/app/api/v1/offers/personalized/route';
+import { fetchWithCsrf } from '@/lib/csrf-client';
 
 interface BehavioralOffersBannerProps {
   onApplyOffer?: (offer: BehavioralOffer) => void;
@@ -17,7 +18,7 @@ export default function BehavioralOffersBanner({
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/offers/personalized')
+    fetchWithCsrf('/api/v1/offers/personalized')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.offers) {

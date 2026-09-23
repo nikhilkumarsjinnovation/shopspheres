@@ -133,7 +133,7 @@ export default function ProductDetailClient({
     if (votedReviews.has(reviewId)) return;
 
     try {
-      const res = await fetchWithCsrf('/api/reviews', {
+      const res = await fetchWithCsrf('/api/v1/reviews', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ review_id: reviewId }),
@@ -160,7 +160,7 @@ export default function ProductDetailClient({
     setReviewMessage(null);
 
     try {
-      const res = await fetchWithCsrf('/api/reviews', {
+      const res = await fetchWithCsrf('/api/v1/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

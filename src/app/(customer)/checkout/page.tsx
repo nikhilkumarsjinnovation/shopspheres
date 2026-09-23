@@ -73,7 +73,7 @@ export default function CheckoutPage() {
   // Fetch saved addresses from user_addresses API
   const fetchAddresses = useCallback(async () => {
     try {
-      const res = await fetch('/api/addresses');
+      const res = await fetchWithCsrf('/api/v1/addresses');
       if (res.ok) {
         const data = await res.json();
         const list: SavedAddress[] = data.addresses || [];
@@ -94,7 +94,7 @@ export default function CheckoutPage() {
 
   // Fetch personalized behavioral offers
   useEffect(() => {
-    fetch('/api/offers/personalized')
+    fetchWithCsrf('/api/v1/offers/personalized')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.offers) {
@@ -230,7 +230,7 @@ export default function CheckoutPage() {
     setErrorMessage(null);
 
     try {
-      const res = await fetchWithCsrf('/api/addresses', {
+      const res = await fetchWithCsrf('/api/v1/addresses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -336,7 +336,7 @@ export default function CheckoutPage() {
         // If user wants to save this address to their address book
         if (saveToAddressBook) {
           try {
-            await fetchWithCsrf('/api/addresses', {
+            await fetchWithCsrf('/api/v1/addresses', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -358,7 +358,7 @@ export default function CheckoutPage() {
       }
 
       // Step 1: Place Order via Server-Side Orders API (solves UUID and seller_id constraints)
-      const res = await fetchWithCsrf('/api/orders', {
+      const res = await fetchWithCsrf('/api/v1/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

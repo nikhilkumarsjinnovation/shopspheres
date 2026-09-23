@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireApiVersion } from '@/lib/api-version';
 import { CategoryResponseSchema, type CategoryResponse } from '@/lib/validations/ai';
 import { categorizeLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { csrfMiddleware } from '@/lib/csrf';
@@ -8,6 +9,8 @@ const MAX_RETRIES = 3;
 
 export async function POST(request: NextRequest) {
   try {
+    const versionError = requireApiVersion(request);
+    if (versionError) return versionError;
     const csrfError = csrfMiddleware(request);
     if (csrfError) {
       return csrfError;

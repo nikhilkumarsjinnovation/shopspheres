@@ -848,6 +848,522 @@ export type Database = {
         }
         Relationships: []
       }
+      user_behavior_events: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friend_relationships: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          initiated_by: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          initiated_by: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          initiated_by?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      gift_wrapping_options: {
+        Row: {
+          animation_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          preview_image_url: string | null
+          price: number
+        }
+        Insert: {
+          animation_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          preview_image_url?: string | null
+          price?: number
+        }
+        Update: {
+          animation_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          preview_image_url?: string | null
+          price?: number
+        }
+        Relationships: []
+      }
+      gifts: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          id: string
+          message: string | null
+          order_id: string | null
+          recipient_email: string | null
+          recipient_id: string | null
+          recipient_phone: string | null
+          reveal_date: string | null
+          reveal_trigger: string
+          revealed_at: string | null
+          sender_id: string
+          status: string
+          updated_at: string
+          wrapping_option_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          message?: string | null
+          order_id?: string | null
+          recipient_email?: string | null
+          recipient_id?: string | null
+          recipient_phone?: string | null
+          reveal_date?: string | null
+          reveal_trigger?: string
+          revealed_at?: string | null
+          sender_id: string
+          status?: string
+          updated_at?: string
+          wrapping_option_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          message?: string | null
+          order_id?: string | null
+          recipient_email?: string | null
+          recipient_id?: string | null
+          recipient_phone?: string | null
+          reveal_date?: string | null
+          reveal_trigger?: string
+          revealed_at?: string | null
+          sender_id?: string
+          status?: string
+          updated_at?: string
+          wrapping_option_id?: string | null
+        }
+        Relationships: []
+      }
+      gift_notifications: {
+        Row: {
+          channel: string
+          gift_id: string
+          id: string
+          payload: Json | null
+          read_at: string | null
+          sent_at: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          channel?: string
+          gift_id: string
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          sent_at?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          gift_id?: string
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          sent_at?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      group_gifts: {
+        Row: {
+          created_at: string
+          currency: string
+          current_amount: number
+          deadline: string
+          description: string | null
+          id: string
+          order_id: string | null
+          organizer_id: string
+          product_id: string | null
+          status: string
+          target_amount: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          current_amount?: number
+          deadline: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          organizer_id: string
+          product_id?: string | null
+          status?: string
+          target_amount: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          current_amount?: number
+          deadline?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          organizer_id?: string
+          product_id?: string | null
+          status?: string
+          target_amount?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      group_gift_contributions: {
+        Row: {
+          amount: number
+          contributor_id: string
+          created_at: string
+          group_gift_id: string
+          id: string
+          message: string | null
+          payment_id: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          contributor_id: string
+          created_at?: string
+          group_gift_id: string
+          id?: string
+          message?: string | null
+          payment_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          contributor_id?: string
+          created_at?: string
+          group_gift_id?: string
+          id?: string
+          message?: string | null
+          payment_id?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      shared_products: {
+        Row: {
+          clicked_at: string | null
+          converted_at: string | null
+          created_at: string
+          deep_link_token: string
+          id: string
+          product_id: string
+          recipient_email: string | null
+          recipient_id: string | null
+          recipient_phone: string | null
+          share_channel: string
+          share_message: string | null
+          sharer_id: string
+          status: string
+          viewed_at: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          deep_link_token: string
+          id?: string
+          product_id: string
+          recipient_email?: string | null
+          recipient_id?: string | null
+          recipient_phone?: string | null
+          share_channel: string
+          share_message?: string | null
+          sharer_id: string
+          status?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          deep_link_token?: string
+          id?: string
+          product_id?: string
+          recipient_email?: string | null
+          recipient_id?: string | null
+          recipient_phone?: string | null
+          share_channel?: string
+          share_message?: string | null
+          sharer_id?: string
+          status?: string
+          viewed_at?: string | null
+        }
+        Relationships: []
+      }
+      ai_agent_memory: {
+        Row: {
+          content: string
+          created_at: string
+          embedding: string | null
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          embedding?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_agent_sessions: {
+        Row: {
+          context_summary: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          persona: string
+          status: string
+          tool_calls: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context_summary?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          persona?: string
+          status?: string
+          tool_calls?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context_summary?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          persona?: string
+          status?: string
+          tool_calls?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      audio_descriptions: {
+        Row: {
+          audio_url: string
+          created_at: string
+          duration_seconds: number | null
+          generated_by: string
+          id: string
+          is_active: boolean
+          language: string
+          product_id: string
+          script: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          duration_seconds?: number | null
+          generated_by?: string
+          id?: string
+          is_active?: boolean
+          language?: string
+          product_id: string
+          script: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          duration_seconds?: number | null
+          generated_by?: string
+          id?: string
+          is_active?: boolean
+          language?: string
+          product_id?: string
+          script?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      accessibility_usage_metrics: {
+        Row: {
+          action: string
+          created_at: string
+          feature: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          feature: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          feature?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_features: {
+        Row: {
+          computed_at: string
+          features: Json
+          model_version: string | null
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          features?: Json
+          model_version?: string | null
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          features?: Json
+          model_version?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ml_models: {
+        Row: {
+          activated_at: string | null
+          artifact_uri: string
+          created_at: string
+          framework: string | null
+          id: string
+          is_active: boolean
+          metrics: Json | null
+          name: string
+          training_data_snapshot: string | null
+          version: string
+        }
+        Insert: {
+          activated_at?: string | null
+          artifact_uri: string
+          created_at?: string
+          framework?: string | null
+          id?: string
+          is_active?: boolean
+          metrics?: Json | null
+          name: string
+          training_data_snapshot?: string | null
+          version: string
+        }
+        Update: {
+          activated_at?: string | null
+          artifact_uri?: string
+          created_at?: string
+          framework?: string | null
+          id?: string
+          is_active?: boolean
+          metrics?: Json | null
+          name?: string
+          training_data_snapshot?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -859,6 +1375,14 @@ export type Database = {
       }
       is_seller: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      are_friends: {
+        Args: { left_id: string; right_id: string }
+        Returns: boolean
+      }
+      is_gift_participant: {
+        Args: { target_gift_id: string }
         Returns: boolean
       }
     }
