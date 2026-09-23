@@ -29,6 +29,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# local planning docs (keep on disk, do not track)
+BUILD_PLAN.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
