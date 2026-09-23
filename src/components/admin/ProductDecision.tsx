@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import type { ApprovalStatus } from '@/types/database.types';
+import * as styles from '@/app/(admin)/admin.css';
 
 export default function ProductDecision({
   productId,
@@ -40,20 +41,21 @@ export default function ProductDecision({
   }
 
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+    <div className={styles.actionButtonGroup}>
       {status !== 'approved' ? (
-        <button type="button" disabled={busy} onClick={() => void send('approved')}>Approve</button>
+        <button type="button" className={styles.approveBtn} disabled={busy} onClick={() => void send('approved')}>Approve</button>
       ) : (
-        <button type="button" disabled={busy} onClick={() => void send('pending')}>Pull back to pending</button>
+        <button type="button" className={styles.approveBtn} disabled={busy} onClick={() => void send('pending')}>Pull to pending</button>
       )}
       <input
         value={reason}
         onChange={(event) => setReason(event.target.value)}
         placeholder="Rejection reason"
         disabled={busy}
+        style={{ height: 32, minWidth: 160, borderRadius: 0, border: '1px solid #404040', background: '#161616', color: '#e6e6e6', padding: '0 0.6rem' }}
       />
-      <button type="button" disabled={busy} onClick={() => void send('rejected')}>Reject</button>
-      {message ? <span>{message}</span> : null}
+      <button type="button" className={styles.rejectBtn} disabled={busy} onClick={() => void send('rejected')}>Reject</button>
+      {message ? <span style={{ fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8a8a' }}>{message}</span> : null}
     </div>
   );
 }

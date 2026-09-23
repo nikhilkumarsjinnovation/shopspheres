@@ -26,7 +26,7 @@ export default function OrderTrack({ status }: { status: string }) {
           style={{
             fontSize: '12px',
             fontWeight: index <= current ? 700 : 500,
-            color: index <= current ? '#065f46' : '#94a3b8',
+            color: index <= current ? '#111111' : '#8a8a8a',
           }}
         >
           {index <= current ? '●' : '○'} {step.label}

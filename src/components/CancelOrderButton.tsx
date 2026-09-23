@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import * as styles from '@/app/(customer)/customer.css';
 
 export default function CancelOrderButton({ orderId, status }: { orderId: string; status: string }) {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function CancelOrderButton({ orderId, status }: { orderId: string
     <div>
       <button
         type="button"
+        className={styles.buttonSecondary}
         disabled={pending}
         onClick={() => {
           setPending(true);
@@ -36,7 +38,7 @@ export default function CancelOrderButton({ orderId, status }: { orderId: string
       >
         {pending ? 'Cancelling…' : 'Cancel order'}
       </button>
-      {error ? <p role="alert">{error}</p> : null}
+      {error ? <p role="alert" className={styles.listMeta} style={{ color: '#111111' }}>{error}</p> : null}
     </div>
   );
 }

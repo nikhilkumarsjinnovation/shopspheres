@@ -37,7 +37,7 @@ export default function PracticePaymentPanel({
 
   return (
     <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <p style={{ margin: 0, fontSize: '12px', color: '#475569' }}>
+      <p style={{ margin: 0, fontSize: '12px', color: '#525252' }}>
         Practice payment for {amountLabel}. Nothing is charged.
       </p>
       {mode === 'card' ? (

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import FriendSelector from '@/components/gifting/FriendSelector';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import * as styles from '@/app/(customer)/customer.css';
 
 interface GiftProduct {
   id: string;
@@ -52,36 +53,36 @@ export default function GiftFlow({ products }: { products: GiftProduct[] }) {
   };
 
   return (
-    <form onSubmit={(event) => { void submit(event); }}>
-      <label>
-        Product to gift
-        <select value={productId} onChange={(event) => setProductId(event.target.value)} required>
+    <form className={styles.stack} onSubmit={(event) => { void submit(event); }}>
+      <div className={styles.formGroup}>
+        <label className={styles.label} htmlFor="gift-product">Product to gift</label>
+        <select id="gift-product" className={styles.input} value={productId} onChange={(event) => setProductId(event.target.value)} required>
           <option value="">Select a product</option>
           {products.map((product) => (
             <option key={product.id} value={product.id}>{product.title} · ₹{product.price}</option>
           ))}
         </select>
-      </label>
-      {chosen ? <p>You are gifting {chosen.title}.</p> : null}
+      </div>
+      {chosen ? <p className={styles.listMeta}>You are gifting {chosen.title}.</p> : null}
       <FriendSelector onSelect={setRecipientEmail} />
-      <p>Recipient: {recipientEmail || 'not chosen'}</p>
-      <label>
-        Message
-        <textarea value={message} onChange={(event) => setMessage(event.target.value)} />
-      </label>
-      <label>
-        Reveal
-        <select value={revealTrigger} onChange={(event) => setRevealTrigger(event.target.value as 'manual' | 'date' | 'delivery')}>
+      <p className={styles.listMeta}>Recipient: {recipientEmail || 'not chosen'}</p>
+      <div className={styles.formGroup}>
+        <label className={styles.label} htmlFor="gift-message">Message</label>
+        <textarea id="gift-message" className={styles.input} value={message} onChange={(event) => setMessage(event.target.value)} />
+      </div>
+      <div className={styles.formGroup}>
+        <label className={styles.label} htmlFor="gift-reveal">Reveal</label>
+        <select id="gift-reveal" className={styles.input} value={revealTrigger} onChange={(event) => setRevealTrigger(event.target.value as 'manual' | 'date' | 'delivery')}>
           <option value="manual">When I choose</option>
           <option value="date">On a date</option>
           <option value="delivery">When the order is delivered</option>
         </select>
-      </label>
+      </div>
       {revealTrigger === 'date' ? (
-        <input type="datetime-local" value={revealDate} onChange={(event) => setRevealDate(event.target.value)} />
+        <input className={styles.input} type="datetime-local" value={revealDate} onChange={(event) => setRevealDate(event.target.value)} />
       ) : null}
-      {error ? <p role="alert">{error}</p> : null}
-      <button type="submit">Create gift</button>
+      {error ? <div className={styles.alertError} role="alert">{error}</div> : null}
+      <button type="submit" className={styles.buttonAddToCart}>Create gift</button>
     </form>
   );
 }

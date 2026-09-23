@@ -48,31 +48,60 @@ export default async function SellerDashboardPage() {
       <header className={layoutStyles.topBar}>
         <div>
           <h1 className={layoutStyles.pageHeading}>{shop?.name ?? 'Your shop'}</h1>
-          <p style={{ margin: '0.2rem 0 0 0', color: '#64748b', fontSize: '0.85rem' }}>
-            Branding edits left: {editsLeft}. {shop ? <Link href={`/shops/${shop.id}`}>View public shop</Link> : null}
+          <p className={layoutStyles.muted} style={{ marginTop: '0.25rem' }}>
+            {editsLeft} branding edit{editsLeft === 1 ? '' : 's'} left
+            {shop ? <> · <Link href={`/shops/${shop.id}`}>Public shop</Link></> : null}
           </p>
         </div>
-        <Link href="/seller/add-product" className={layoutStyles.buttonPrimary}>Add Product</Link>
+        <Link href="/seller/add-product" className={layoutStyles.buttonPrimary}>Add product</Link>
       </header>
-      {error ? <p>{error.message}</p> : null}
-      <section>
-        <h2>Full shop health</h2>
-        <p>Live {health.live} · Pending {health.pending} · Rejected {health.rejected} · Low stock {health.lowStock}</p>
-        <p>Orders {health.orders} · Revenue {formatINR(health.revenue)}</p>
-      </section>
-      <section>
-        <h2>Mini-shops</h2>
-        <ul>
-          {health.categories.map((row) => (
-            <li key={row.category}>
-              <Link href={`/seller/inventory/${encodeURIComponent(row.category)}`}>{row.category}</Link>
-              <span> · {row.products} products · live {row.live} · pending {row.pending} · rejected {row.rejected}</span>
-              <span> · stock {formatINR(row.stockValue)} · sold {row.unitsSold} · {formatINR(row.revenue)}</span>
-            </li>
-          ))}
-        </ul>
-        {health.categories.length === 0 ? <p>No products yet. Add one to open a category mini-shop.</p> : null}
-      </section>
+      <div className={layoutStyles.pageBody}>
+        {error ? <p className={layoutStyles.muted}>{error.message}</p> : null}
+        <div className={layoutStyles.metricsGrid}>
+          <div className={layoutStyles.metricCard}>
+            <p className={layoutStyles.metricLabel}>Live</p>
+            <p className={layoutStyles.metricValue}>{health.live}</p>
+          </div>
+          <div className={layoutStyles.metricCard}>
+            <p className={layoutStyles.metricLabel}>Pending</p>
+            <p className={layoutStyles.metricValue}>{health.pending}</p>
+          </div>
+          <div className={layoutStyles.metricCard}>
+            <p className={layoutStyles.metricLabel}>Rejected</p>
+            <p className={layoutStyles.metricValue}>{health.rejected}</p>
+          </div>
+          <div className={layoutStyles.metricCard}>
+            <p className={layoutStyles.metricLabel}>Low stock</p>
+            <p className={layoutStyles.metricValue}>{health.lowStock}</p>
+          </div>
+          <div className={layoutStyles.metricCard}>
+            <p className={layoutStyles.metricLabel}>Orders</p>
+            <p className={layoutStyles.metricValue}>{health.orders}</p>
+          </div>
+          <div className={layoutStyles.metricCard}>
+            <p className={layoutStyles.metricLabel}>Revenue</p>
+            <p className={layoutStyles.metricValue}>{formatINR(health.revenue)}</p>
+          </div>
+        </div>
+        <section className={layoutStyles.panel}>
+          <h2 className={layoutStyles.panelTitle}>Category mini-shops</h2>
+          {health.categories.length === 0 ? (
+            <p className={layoutStyles.muted}>No products yet. Add one to open a category mini-shop.</p>
+          ) : (
+            <ul className={layoutStyles.miniShopList}>
+              {health.categories.map((row) => (
+                <li key={row.category} className={layoutStyles.miniShopItem}>
+                  <Link href={`/seller/inventory/${encodeURIComponent(row.category)}`}>{row.category}</Link>
+                  <span className={layoutStyles.muted}>
+                    {row.products} products · live {row.live} · pending {row.pending} · rejected {row.rejected}
+                    · sold {row.unitsSold} · {formatINR(row.revenue)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </>
   );
 }

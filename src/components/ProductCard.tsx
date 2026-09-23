@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { ImageOff, Minus, Plus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
 import * as styles from '@/app/(customer)/customer.css';
+import { badge, badgeTone } from '@/styles/ui.css';
 
 interface ProductCardProps {
   product: {
@@ -37,15 +39,13 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const stock = product.stock ?? 10;
   const isOutOfStock = stock <= 0;
-
   const inCart = cart.find((item) => item.id === product.id);
+  const rating = Number(product.average_rating || 0);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (isOutOfStock) return;
-
     addToCart({
       id: product.id,
       title: product.title,
@@ -54,15 +54,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       image_url: firstImage,
       category: product.category,
     });
-
     setAdded(true);
-    setTimeout(() => {
-      setAdded(false);
-    }, 1200);
+    setTimeout(() => setAdded(false), 900);
   };
 
   return (
-    <div className={styles.productCard}>
+    <article className={styles.productCard}>
       <Link
         href={`/product/${product.id}`}
         style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', flex: 1 }}
@@ -72,105 +69,70 @@ export default function ProductCard({ product }: ProductCardProps) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={firstImage}
-              alt={product.title}
+              alt=""
               className={styles.cardImage}
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className={styles.cardPlaceholderImage}>📦 Product Image</div>
+            <div className={styles.cardPlaceholderImage}>
+              <ImageOff size={20} strokeWidth={1.5} aria-hidden />
+              No image
+            </div>
           )}
-
-          {discountPercent !== null && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '8px',
-                left: '8px',
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '2px 7px',
-                borderRadius: '4px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              }}
-            >
-              -{discountPercent}% OFF
+          {discountPercent !== null ? (
+            <span className={`${badge} ${badgeTone.accent}`} style={{ position: 'absolute', top: 0, left: 0 }}>
+              −{discountPercent}%
             </span>
-          )}
+          ) : null}
+          {inCart ? (
+            <span className={`${badge} ${badgeTone.neutral}`} style={{ position: 'absolute', top: 0, right: 0 }}>
+              {inCart.quantity} in bag
+            </span>
+          ) : null}
         </div>
 
         <div className={styles.cardBody}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-            <span className={styles.cardCategory}>{product.category}</span>
-            {inCart ? (
-              <span style={{ fontSize: '10px', color: '#0f172a', fontWeight: 700 }}>
-                In cart · {inCart.quantity}
-              </span>
-            ) : stock > 0 && stock <= 5 ? (
-              <span style={{ fontSize: '10px', color: '#b91c1c', fontWeight: 600 }}>
-                Only {stock} left!
-              </span>
-            ) : null}
-          </div>
-
+          <span className={styles.cardCategory}>{product.category}</span>
           <h3 className={styles.cardTitle}>{product.title}</h3>
-
-          {/* Star Rating summary */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
-            <div style={{ color: '#f59e0b', fontSize: '13px' }}>
-              {'★'.repeat(Math.round(product.average_rating || 5))}
-              {'☆'.repeat(5 - Math.round(product.average_rating || 5))}
-            </div>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: '#334155' }}>
-              {Number(product.average_rating || 5.0).toFixed(1)}
-            </span>
-            <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-              ({product.review_count || 0})
-            </span>
-          </div>
-
-          <p className={styles.cardDescription}>{product.description}</p>
+          {rating > 0 ? (
+            <p className={styles.listMeta} style={{ letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+              {rating.toFixed(1)} · {product.review_count || 0} reviews
+            </p>
+          ) : null}
+          {!inCart && stock > 0 && stock <= 5 ? (
+            <p className={styles.listMeta} style={{ letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+              Only {stock} left
+            </p>
+          ) : null}
 
           <div className={styles.cardFooter}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                <span className={styles.cardPrice}>{formatINR(product.price)}</span>
-                {product.compare_at_price && product.compare_at_price > product.price && (
-                  <span
-                    style={{
-                      fontSize: '12px',
-                      color: '#94a3b8',
-                      textDecoration: 'line-through',
-                    }}
-                  >
-                    M.R.P: {formatINR(product.compare_at_price)}
-                  </span>
-                )}
-              </div>
-              <span style={{ fontSize: '10px', color: '#059669', fontWeight: 600 }}>
-                Free Delivery over ₹499
-              </span>
+            <div>
+              <span className={styles.cardPrice}>{formatINR(product.price)}</span>
+              {product.compare_at_price && product.compare_at_price > product.price ? (
+                <span style={{ display: 'block', fontSize: '0.7rem', color: '#737373', textDecoration: 'line-through' }}>
+                  {formatINR(product.compare_at_price)}
+                </span>
+              ) : null}
             </div>
 
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={isOutOfStock}
-              className={styles.buttonAddToCart}
-            >
-              {isOutOfStock ? 'Sold Out' : inCart ? 'Add one more' : added ? 'Added ✓' : 'Add to Cart'}
-            </button>
             {inCart ? (
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); updateQuantity(product.id, inCart.quantity - 1); }}>-</button>
-                <span>{inCart.quantity}</span>
-                <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); updateQuantity(product.id, inCart.quantity + 1); }}>+</button>
+              <div className={styles.qtyControl} onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}>
+                <button type="button" className={styles.qtyButton} aria-label="Decrease" onClick={() => updateQuantity(product.id, inCart.quantity - 1)}>
+                  <Minus size={14} />
+                </button>
+                <span style={{ minWidth: 20, textAlign: 'center', fontWeight: 600, fontSize: '0.8rem' }}>{inCart.quantity}</span>
+                <button type="button" className={styles.qtyButton} aria-label="Increase" onClick={() => updateQuantity(product.id, inCart.quantity + 1)}>
+                  <Plus size={14} />
+                </button>
               </div>
-            ) : null}
+            ) : (
+              <button type="button" onClick={handleAdd} disabled={isOutOfStock} className={styles.buttonAddToCart}>
+                {isOutOfStock ? 'Sold out' : added ? 'Added' : 'Add'}
+              </button>
+            )}
           </div>
         </div>
       </Link>
-    </div>
+    </article>
   );
 }

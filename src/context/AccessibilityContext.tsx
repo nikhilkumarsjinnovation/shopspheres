@@ -212,11 +212,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
           alignItems: 'center',
           gap: '8px',
           padding: '12px 18px',
-          borderRadius: '9999px',
-          backgroundColor: '#0284c7',
+          borderRadius: 0,
+          backgroundColor: '#111111',
           color: '#ffffff',
           boxShadow: '0 10px 25px -5px rgba(2, 132, 199, 0.4)',
-          border: '1px solid #38bdf8',
+          border: '1px solid #8a8a8a',
           cursor: 'pointer',
           fontWeight: 600,
           fontSize: '13px',
@@ -224,7 +224,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
         }}
       >
         <span style={{ fontSize: '18px' }} aria-hidden="true">
-          ♿
+          
         </span>
         <span>Saksham Access</span>
         {settings.hasDisability && (
@@ -232,8 +232,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
             style={{
               width: '8px',
               height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#4ade80',
+              borderRadius: 0,
+              backgroundColor: '#f2f2f2',
             }}
           />
         )}
@@ -251,8 +251,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
             zIndex: 50,
             width: 'min(92vw, 380px)',
             backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #cbd5e1',
+            borderRadius: 0,
+            border: '1px solid #cccccc',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             display: 'flex',
             flexDirection: 'column',
@@ -263,7 +263,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
           <div
             style={{
               padding: '16px',
-              backgroundColor: '#0369a1',
+              backgroundColor: '#111111',
               color: '#ffffff',
               display: 'flex',
               justifyContent: 'space-between',
@@ -272,12 +272,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
           >
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '18px' }}>♿</span>
+                <span style={{ fontSize: '18px' }}></span>
                 <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700 }}>
                   Saksham Access Hub
                 </h2>
               </div>
-              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#e0f2fe' }}>
+              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#cccccc' }}>
                 Inclusive accessibility tailored for all abilities
               </p>
             </div>
@@ -300,7 +300,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
           <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Font Magnification */}
             <div>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#111111', display: 'block', marginBottom: '6px' }}>
                 Text Magnification:
               </label>
               <div style={{ display: 'flex', gap: '6px' }}>
@@ -317,12 +317,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                     style={{
                       flex: 1,
                       padding: '8px 4px',
-                      borderRadius: '6px',
+                      borderRadius: 0,
                       fontSize: '12px',
                       fontWeight: 600,
-                      border: settings.visualFontMagnification === item.scale ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      backgroundColor: settings.visualFontMagnification === item.scale ? '#f0f9ff' : '#ffffff',
-                      color: settings.visualFontMagnification === item.scale ? '#0369a1' : '#334155',
+                      border: settings.visualFontMagnification === item.scale ? '2px solid #111111' : '1px solid #cccccc',
+                      backgroundColor: settings.visualFontMagnification === item.scale ? '#f2f2f2' : '#ffffff',
+                      color: settings.visualFontMagnification === item.scale ? '#111111' : '#404040',
                       cursor: 'pointer',
                     }}
                   >
@@ -339,16 +339,16 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '10px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f2f2f2',
+                borderRadius: 0,
+                border: '1px solid #e6e6e6',
               }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'block' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111', display: 'block' }}>
                   High Contrast Mode
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                <span style={{ fontSize: '11px', color: '#737373' }}>
                   Amplifies contrast for low vision & reading ease
                 </span>
               </div>
@@ -357,12 +357,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 onClick={toggleHighContrast}
                 style={{
                   padding: '6px 12px',
-                  borderRadius: '9999px',
+                  borderRadius: 0,
                   border: 'none',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  backgroundColor: settings.visualHighContrast ? '#059669' : '#cbd5e1',
+                  backgroundColor: settings.visualHighContrast ? '#111111' : '#cccccc',
                   color: '#ffffff',
                 }}
               >
@@ -377,16 +377,16 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '10px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f2f2f2',
+                borderRadius: 0,
+                border: '1px solid #e6e6e6',
               }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'block' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111', display: 'block' }}>
                   Large Touch Targets
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                <span style={{ fontSize: '11px', color: '#737373' }}>
                   Enlarges buttons for motor & tremor accessibility
                 </span>
               </div>
@@ -395,12 +395,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 onClick={toggleLargeTouchTargets}
                 style={{
                   padding: '6px 12px',
-                  borderRadius: '9999px',
+                  borderRadius: 0,
                   border: 'none',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  backgroundColor: settings.motorLargeTouchTargets ? '#059669' : '#cbd5e1',
+                  backgroundColor: settings.motorLargeTouchTargets ? '#111111' : '#cccccc',
                   color: '#ffffff',
                 }}
               >
@@ -415,16 +415,16 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '10px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
+                backgroundColor: '#f2f2f2',
+                borderRadius: 0,
+                border: '1px solid #e6e6e6',
               }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'block' }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111', display: 'block' }}>
                   Simplified Interface
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                <span style={{ fontSize: '11px', color: '#737373' }}>
                   Reduces visual distractions for focus ease
                 </span>
               </div>
@@ -433,12 +433,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 onClick={toggleSimplifiedUI}
                 style={{
                   padding: '6px 12px',
-                  borderRadius: '9999px',
+                  borderRadius: 0,
                   border: 'none',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  backgroundColor: settings.cognitiveSimplifiedUI ? '#059669' : '#cbd5e1',
+                  backgroundColor: settings.cognitiveSimplifiedUI ? '#111111' : '#cccccc',
                   color: '#ffffff',
                 }}
               >
@@ -453,16 +453,16 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '10px 12px',
-                backgroundColor: '#f0fdf4',
-                borderRadius: '8px',
-                border: '1px solid #bbf7d0',
+                backgroundColor: '#f2f2f2',
+                borderRadius: 0,
+                border: '1px solid #cccccc',
               }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#14532d', display: 'block' }}>
-                  🔊 Voice Guide (Screen Reader)
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#111111', display: 'block' }}>
+                  Voice Guide (Screen Reader)
                 </span>
-                <span style={{ fontSize: '11px', color: '#166534' }}>
+                <span style={{ fontSize: '11px', color: '#525252' }}>
                   Reads active page and prices in clear natural voice
                 </span>
               </div>
@@ -480,12 +480,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 }}
                 style={{
                   padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #16a34a',
+                  borderRadius: 0,
+                  border: '1px solid #111111',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  backgroundColor: '#16a34a',
+                  backgroundColor: '#111111',
                   color: '#ffffff',
                 }}
               >
@@ -501,7 +501,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#64748b',
+                  color: '#737373',
                   fontSize: '12px',
                   cursor: 'pointer',
                   textDecoration: 'underline',
@@ -514,8 +514,8 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                 onClick={() => setIsOpenModal(false)}
                 style={{
                   padding: '6px 14px',
-                  borderRadius: '6px',
-                  backgroundColor: '#0f172a',
+                  borderRadius: 0,
+                  backgroundColor: '#111111',
                   color: '#ffffff',
                   border: 'none',
                   fontSize: '12px',

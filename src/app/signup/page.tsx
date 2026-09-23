@@ -394,9 +394,9 @@ export default function SignupPage() {
           <div
             style={{
               padding: '14px',
-              borderRadius: '8px',
-              backgroundColor: wantsAccessibility ? '#f0f9ff' : '#f8fafc',
-              border: wantsAccessibility ? '1px solid #38bdf8' : '1px solid #e2e8f0',
+              borderRadius: 0,
+              backgroundColor: wantsAccessibility ? '#f0f9ff' : '#f2f2f2',
+              border: wantsAccessibility ? '1px solid #8a8a8a' : '1px solid #e6e6e6',
               marginBottom: '1rem',
               transition: 'all 0.2s',
             }}
@@ -409,7 +409,7 @@ export default function SignupPage() {
                 cursor: 'pointer',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#0f172a',
+                color: '#111111',
               }}
             >
               <input
@@ -426,14 +426,14 @@ export default function SignupPage() {
                 style={{
                   marginTop: '12px',
                   paddingTop: '12px',
-                  borderTop: '1px solid #cbd5e1',
+                  borderTop: '1px solid #cccccc',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '10px',
                 }}
               >
                 {/* High Contrast */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#404040', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={accessHighContrast}
@@ -443,15 +443,15 @@ export default function SignupPage() {
                 </label>
 
                 {/* Font Scaling */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#404040' }}>
                   <span>Text Size:</span>
                   <select
                     value={accessFontScale}
                     onChange={(e) => setAccessFontScale(Number(e.target.value))}
                     style={{
                       padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
+                      borderRadius: 0,
+                      border: '1px solid #cccccc',
                       fontSize: '12px',
                     }}
                   >
@@ -463,7 +463,7 @@ export default function SignupPage() {
                 </div>
 
                 {/* Large Touch Targets */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#404040', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={accessLargeTouch}
@@ -473,7 +473,7 @@ export default function SignupPage() {
                 </label>
 
                 {/* Simplified UI */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#404040', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={accessSimplifiedUI}

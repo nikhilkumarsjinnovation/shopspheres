@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Gift } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import * as styles from '@/app/(customer)/customer.css';
 
 interface GiftRow {
   id: string;
@@ -48,82 +50,53 @@ export default function GiftsPage() {
     });
   }, [searchParams]);
 
-  const payWithStripe = async (poolId: string, amount: number) => {
-    const response = await fetchWithCsrf(`/api/v1/group-gifts/${poolId}/contribute`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount }),
-    });
-    const payload: unknown = await response.json();
-    if (!response.ok || !payload || typeof payload !== 'object' || !('checkoutUrl' in payload) || typeof payload.checkoutUrl !== 'string') {
-      setError(payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string' ? payload.error : 'Could not start Stripe checkout.');
-      return;
-    }
-    window.location.assign(payload.checkoutUrl);
-  };
-
   return (
-    <main>
-      <h1>Gifts</h1>
-      <p><Link href="/gifts/send">Send a gift</Link></p>
-      {error ? <p role="alert">{error}</p> : null}
-      <h2>Sent</h2>
-      <ul>
-        {sent.map((gift) => (
-          <li key={gift.id}><Link href={`/gifts/${gift.id}`}>{gift.recipient_email ?? gift.id}</Link> · {gift.status}</li>
-        ))}
-      </ul>
-      <h2>Received</h2>
-      <ul>
-        {received.map((gift) => (
-          <li key={gift.id}><Link href={`/gifts/${gift.id}`}>{gift.status}</Link></li>
-        ))}
-      </ul>
-      {false && (
-        <>
-          <h2>Group gift, pay with Stripe test card</h2>
-          <GroupGiftPay onPay={payWithStripe} />
-        </>
-      )}
-    </main>
-  );
-}
+    <div>
+      <div className={styles.headerContainer}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div>
+            <h1 className={styles.heading}>Gifts</h1>
+            <p className={styles.subheading}>Send and open gifts for friends.</p>
+          </div>
+          <Link href="/gifts/send" className={styles.buttonAddToCart} style={{ textDecoration: 'none' }}>
+            <Gift size={15} aria-hidden />
+            Send a gift
+          </Link>
+        </div>
+      </div>
+      {error ? <div className={styles.alertError} role="alert">{error}</div> : null}
 
-function GroupGiftPay({ onPay }: { onPay: (poolId: string, amount: number) => Promise<void> }) {
-  const [pools, setPools] = useState<Array<{ id: string; title: string; status: string }>>([]);
-  const [poolId, setPoolId] = useState('');
-  const [amount, setAmount] = useState(500);
+      <section className={styles.sectionBlock}>
+        <h2 className={styles.sectionLabel}>Sent</h2>
+        {sent.length === 0 ? (
+          <div className={styles.listCard}><p className={styles.listMeta}>No gifts sent yet.</p></div>
+        ) : (
+          <div className={styles.stack}>
+            {sent.map((gift) => (
+              <div key={gift.id} className={styles.listCard}>
+                <Link className={styles.quietLink} href={`/gifts/${gift.id}`}>{gift.recipient_email ?? gift.id}</Link>
+                <p className={styles.listMeta}>{gift.status}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
-  useEffect(() => {
-    fetchWithCsrf('/api/v1/group-gifts')
-      .then(async (response) => {
-        const payload: unknown = await response.json();
-        if (payload && typeof payload === 'object' && 'pools' in payload && Array.isArray(payload.pools)) {
-          const rows = payload.pools.filter((pool): pool is { id: string; title: string; status: string } => {
-            return Boolean(pool) && typeof pool === 'object' && 'id' in pool && 'title' in pool && 'status' in pool;
-          });
-          setPools(rows);
-          const first = rows[0];
-          if (first) setPoolId(first.id);
-        }
-      })
-      .catch(() => undefined);
-  }, []);
-
-  return (
-    <form onSubmit={(event) => { event.preventDefault(); void onPay(poolId, amount); }}>
-      <label>
-        Pool
-        <select value={poolId} onChange={(event) => setPoolId(event.target.value)}>
-          {pools.map((pool) => <option key={pool.id} value={pool.id}>{pool.title} · {pool.status}</option>)}
-        </select>
-      </label>
-      <label>
-        Amount in ₹
-        <input type="number" min={1} value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
-      </label>
-      <button type="submit">Pay with Stripe</button>
-      <p>Use test card 4242 4242 4242 4242. This only works after you create a group gift pool.</p>
-    </form>
+      <section className={styles.sectionBlock}>
+        <h2 className={styles.sectionLabel}>Received</h2>
+        {received.length === 0 ? (
+          <div className={styles.listCard}><p className={styles.listMeta}>No gifts received yet.</p></div>
+        ) : (
+          <div className={styles.stack}>
+            {received.map((gift) => (
+              <div key={gift.id} className={styles.listCard}>
+                <Link className={styles.quietLink} href={`/gifts/${gift.id}`}>Open gift</Link>
+                <p className={styles.listMeta}>{gift.status}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }

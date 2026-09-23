@@ -5,6 +5,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { buildShopHealth, categoryKey } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
+import layoutStyles from '../../seller.module.css';
 
 export default async function MiniShopPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
@@ -32,21 +33,43 @@ export default async function MiniShopPage({ params }: { params: Promise<{ categ
   const list = ((products ?? []) as Product[]).filter((product) => categoryKey(product.category) === name);
 
   return (
-    <main>
-      <p><Link href="/seller/dashboard">All mini-shops</Link></p>
-      <h1>{name}</h1>
-      {row ? (
-        <p>Products {row.products} · live {row.live} · pending {row.pending} · rejected {row.rejected} · low stock {row.lowStock} · sold {row.unitsSold} · {formatINR(row.revenue)}</p>
-      ) : <p>No products in this mini-shop yet.</p>}
-      <p><Link href={`/seller/add-product?category=${encodeURIComponent(name)}`}>Add a product here</Link></p>
-      <ul>
-        {list.map((product) => (
-          <li key={product.id}>
-            <Link href={`/seller/products/${product.id}`}>{product.title}</Link>
-            {' '}· {product.approval_status} · stock {product.stock} · {formatINR(product.price)}
-          </li>
-        ))}
-      </ul>
-    </main>
+    <>
+      <header className={layoutStyles.topBar}>
+        <div>
+          <p className={layoutStyles.muted} style={{ marginBottom: '0.25rem' }}>
+            <Link href="/seller/dashboard">All mini-shops</Link>
+          </p>
+          <h1 className={layoutStyles.pageHeading}>{name}</h1>
+        </div>
+        <Link href={`/seller/add-product?category=${encodeURIComponent(name)}`} className={layoutStyles.buttonPrimary}>
+          Add product
+        </Link>
+      </header>
+      <div className={layoutStyles.pageBody}>
+        {row ? (
+          <div className={layoutStyles.metricsGrid}>
+            <div className={layoutStyles.metricCard}><p className={layoutStyles.metricLabel}>Products</p><p className={layoutStyles.metricValue}>{row.products}</p></div>
+            <div className={layoutStyles.metricCard}><p className={layoutStyles.metricLabel}>Live</p><p className={layoutStyles.metricValue}>{row.live}</p></div>
+            <div className={layoutStyles.metricCard}><p className={layoutStyles.metricLabel}>Pending</p><p className={layoutStyles.metricValue}>{row.pending}</p></div>
+            <div className={layoutStyles.metricCard}><p className={layoutStyles.metricLabel}>Revenue</p><p className={layoutStyles.metricValue}>{formatINR(row.revenue)}</p></div>
+          </div>
+        ) : (
+          <div className={layoutStyles.panel}><p className={layoutStyles.muted}>No products in this mini-shop yet.</p></div>
+        )}
+        <section className={layoutStyles.panel}>
+          <h2 className={layoutStyles.panelTitle}>Products</h2>
+          <ul className={layoutStyles.miniShopList}>
+            {list.map((product) => (
+              <li key={product.id} className={layoutStyles.miniShopItem}>
+                <Link href={`/seller/products/${product.id}`}>{product.title}</Link>
+                <span className={layoutStyles.muted}>
+                  {product.approval_status} · stock {product.stock} · {formatINR(product.price)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </>
   );
 }

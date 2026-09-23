@@ -41,25 +41,9 @@ export default async function ExplorePage() {
   return (
     <div>
       <div className={styles.headerContainer}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <h1 className={styles.heading}>Explore Marketplace</h1>
-          <span
-            style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#047857',
-              backgroundColor: '#d1fae5',
-              padding: '3px 8px',
-              borderRadius: '4px',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-            }}
-          >
-            🇮🇳 India Live Catalog
-          </span>
-        </div>
+        <h1 className={styles.heading}>Explore</h1>
         <p className={styles.subheading}>
-          Discover authentic products with prices in INR (₹) listed directly by verified Indian merchants, with real-time AI personalization.
+          Products from verified shops across India. Prices in INR.
         </p>
       </div>
 
