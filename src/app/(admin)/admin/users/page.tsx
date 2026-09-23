@@ -1,119 +1,69 @@
-import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import type { Database } from '@/types/database.types';
-import * as styles from '../../admin.css';
 import ResetBrandingButton from '@/components/admin/ResetBrandingButton';
+import UserControls from '@/components/admin/UserControls';
+import * as styles from '../../admin.css';
 
-type UserRow = Database['public']['Tables']['users']['Row'];
+function safeQuery(raw: string | undefined): string {
+  return (raw ?? '').replace(/[%_,()]/g, '').trim().slice(0, 80);
+}
 
-export default async function UsersAuditPage() {
+export default async function UsersAuditPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q: rawQuery } = await searchParams;
+  const q = safeQuery(rawQuery);
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin' || !profile.is_active) {
-    redirect('/login?error=unauthorized');
-  }
-
-  const { data: usersData } = await supabase
+  let query = supabase
     .from('users')
     .select('id, email, full_name, role, is_active, created_at')
     .order('created_at', { ascending: false })
-    .limit(20);
-
-  const users = (usersData || []) as UserRow[];
+    .limit(50);
+  if (q) {
+    query = query.or(`email.ilike.%${q}%,full_name.ilike.%${q}%`);
+  }
+  const { data: users, error } = await query;
 
   return (
     <div>
       <div className={styles.header}>
-        <h1 className={styles.headerTitle}>Users Audit & Governance</h1>
-        <p className={styles.headerSubtitle}>
-          Platform user directory, security roles, and active authentication status records.
-        </p>
+        <h1 className={styles.headerTitle}>Users</h1>
+        <p className={styles.headerSubtitle}>Search accounts, change roles, and suspend access. Passwords stay in the auth system.</p>
       </div>
-
-      <div className={styles.sectionTitle}>
-        <span>Registered User Accounts ({users.length})</span>
-      </div>
-
+      <form action="/admin/users" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <input name="q" defaultValue={q} placeholder="Email or name" />
+        <button type="submit">Search</button>
+      </form>
+      {error ? <div className={styles.emptyState}>{error.message}</div> : null}
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th}>User ID</th>
+              <th className={styles.th}>Name</th>
               <th className={styles.th}>Email</th>
-              <th className={styles.th}>Role</th>
               <th className={styles.th}>Status</th>
-              <th className={styles.th}>Registered</th>
+              <th className={styles.th}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr key={u.id} className={styles.tr}>
+            {(users ?? []).map((user) => (
+              <tr key={user.id} className={styles.tr}>
+                <td className={styles.td}>{user.full_name || '—'}</td>
+                <td className={styles.td}>{user.email}</td>
+                <td className={styles.td}>{user.is_active ? 'Active' : 'Suspended'}</td>
                 <td className={styles.td}>
-                  <span className={styles.uuidCell} title={u.id}>
-                    {u.id.slice(0, 8)}...{u.id.slice(-4)}
-                  </span>
-                </td>
-                <td className={styles.td} style={{ color: '#f8fafc', fontWeight: 500 }}>
-                  {u.email}
-                </td>
-                <td className={styles.td}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      backgroundColor:
-                        u.role === 'admin'
-                          ? 'rgba(244, 63, 94, 0.15)'
-                          : u.role === 'seller'
-                          ? 'rgba(59, 130, 246, 0.15)'
-                          : 'rgba(16, 185, 129, 0.15)',
-                      color:
-                        u.role === 'admin'
-                          ? '#f43f5e'
-                          : u.role === 'seller'
-                          ? '#60a5fa'
-                          : '#34d399',
-                    }}
-                  >
-                    {u.role}
-                  </span>
-                </td>
-                <td className={styles.td}>
-                  <span
-                    className={`${styles.statusBadge} ${
-                      u.is_active ? styles.statusDelivered : styles.statusCancelled
-                    }`}
-                  >
-                    {u.is_active ? 'Active' : 'Suspended'}
-                  </span>
-                </td>
-                <td className={styles.td} style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
-                  {new Date(u.created_at).toLocaleDateString()}
-                  {u.role === 'seller' ? <ResetBrandingButton sellerId={u.id} /> : null}
+                  <UserControls userId={user.id} role={user.role} isActive={user.is_active} />
+                  {user.role === 'seller' ? <ResetBrandingButton sellerId={user.id} /> : null}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {(users ?? []).length === 0 ? <div className={styles.emptyState}>No accounts match this search.</div> : null}
+      <p><Link href="/admin/logs">Open the audit log</Link></p>
     </div>
   );
 }
