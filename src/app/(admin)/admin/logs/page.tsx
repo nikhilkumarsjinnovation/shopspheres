@@ -1,108 +1,44 @@
-import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import * as styles from '../../admin.css';
 
 export default async function SystemLogsPage() {
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin' || !profile.is_active) {
-    redirect('/login?error=unauthorized');
-  }
-
-  const sampleLogs = [
-    {
-      level: 'INFO',
-      event: 'RLS_EVAL_SUCCESS',
-      message: 'Admin authorization bypassed for platform aggregation metrics.',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      level: 'INFO',
-      event: 'AUTH_SESSION_REFRESH',
-      message: 'Supabase SSR cookie exchange validated.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    },
-    {
-      level: 'DEBUG',
-      event: 'ORDER_PIPELINE_INIT',
-      message: 'Order and order_items transaction verified.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    },
-  ];
+  const { data: logs, error } = await supabase
+    .from('admin_audit_logs')
+    .select('id, action, admin_id, target_entity, target_id, created_at')
+    .order('created_at', { ascending: false })
+    .limit(100);
 
   return (
     <div>
       <div className={styles.header}>
-        <h1 className={styles.headerTitle}>System & Security Logs</h1>
-        <p className={styles.headerSubtitle}>
-          Real-time stream of platform events, authentication operations, and database transactions.
-        </p>
+        <h1 className={styles.headerTitle}>Audit log</h1>
+        <p className={styles.headerSubtitle}>Every admin change is recorded here. This is not a dump of customer activity.</p>
       </div>
-
-      <div className={styles.sectionTitle}>
-        <span>System Event Stream</span>
-        <span style={{ fontSize: '0.8rem', color: '#10b981' }}>● Live Monitoring</span>
-      </div>
-
+      {error ? <div className={styles.emptyState}>{error.message}</div> : null}
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th className={styles.th}>Level</th>
-              <th className={styles.th}>Event Code</th>
-              <th className={styles.th}>Description</th>
-              <th className={styles.th}>Timestamp</th>
+              <th className={styles.th}>When</th>
+              <th className={styles.th}>Action</th>
+              <th className={styles.th}>Target</th>
+              <th className={styles.th}>Admin</th>
             </tr>
           </thead>
           <tbody>
-            {sampleLogs.map((log, idx) => (
-              <tr key={idx} className={styles.tr}>
-                <td className={styles.td}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      backgroundColor:
-                        log.level === 'INFO'
-                          ? 'rgba(56, 189, 248, 0.15)'
-                          : 'rgba(168, 85, 247, 0.15)',
-                      color: log.level === 'INFO' ? '#38bdf8' : '#c084fc',
-                    }}
-                  >
-                    {log.level}
-                  </span>
-                </td>
-                <td className={styles.td}>
-                  <span className={styles.uuidCell}>{log.event}</span>
-                </td>
-                <td className={styles.td} style={{ color: '#e2e8f0' }}>
-                  {log.message}
-                </td>
-                <td className={styles.td} style={{ color: '#94a3b8', fontSize: '0.8rem' }}>
-                  {new Date(log.timestamp).toLocaleTimeString()}
-                </td>
+            {(logs ?? []).map((log) => (
+              <tr key={log.id} className={styles.tr}>
+                <td className={styles.td}>{new Date(log.created_at).toLocaleString('en-IN')}</td>
+                <td className={styles.td}>{log.action}</td>
+                <td className={styles.td}>{log.target_entity} {log.target_id.slice(0, 8)}</td>
+                <td className={styles.td}>{log.admin_id.slice(0, 8)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {(logs ?? []).length === 0 ? <div className={styles.emptyState}>No admin actions recorded yet.</div> : null}
     </div>
   );
 }

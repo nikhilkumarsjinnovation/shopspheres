@@ -1,23 +1,37 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import type { Product } from '@/types/database.types';
+import { fetchWithCsrf } from '@/lib/csrf-client';
+import type { Json } from '@/types/database.types';
 import ProductThumbnail from '@/components/ProductThumbnail';
 import * as styles from '@/app/(admin)/admin.css';
 
+export type QueueProduct = {
+  id: string;
+  title: string;
+  price: number;
+  stock: number;
+  category: string;
+  sub_category: string | null;
+  condition: string;
+  seller_id: string;
+  image_urls: string[];
+  attributes: Json;
+};
+
 interface AdminApprovalQueueProps {
-  initialPendingProducts: Product[];
+  initialPendingProducts: QueueProduct[];
 }
 
 export default function AdminApprovalQueue({
   initialPendingProducts,
 }: AdminApprovalQueueProps) {
   const router = useRouter();
-  const supabase = createClient();
 
-  const [pendingProducts, setPendingProducts] = useState<Product[]>(initialPendingProducts);
+  const [pendingProducts, setPendingProducts] = useState<QueueProduct[]>(initialPendingProducts);
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -27,18 +41,24 @@ export default function AdminApprovalQueue({
     productTitle: string,
     newStatus: 'approved' | 'rejected'
   ) => {
+    const rejectionReason = (reasons[productId] ?? '').trim();
+    if (newStatus === 'rejected' && !rejectionReason) {
+      setErrorMessage('A rejection reason is required.');
+      return;
+    }
     setLoadingId(productId);
     setErrorMessage(null);
     setToastMessage(null);
 
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({ approval_status: newStatus })
-        .eq('id', productId);
-
-      if (error) {
-        throw new Error(error.message);
+      const response = await fetchWithCsrf(`/api/v1/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approval_status: newStatus, rejection_reason: rejectionReason }),
+      });
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Could not update this product.');
       }
 
       // Optimistically remove from pending queue
@@ -137,7 +157,9 @@ export default function AdminApprovalQueue({
                     </td>
 
                     <td className={styles.td}>
-                      <div style={{ fontWeight: 600, color: '#f8fafc' }}>{product.title}</div>
+                      <div style={{ fontWeight: 600, color: '#f8fafc' }}>
+                        <Link href={`/admin/catalog/${product.id}`}>{product.title}</Link>
+                      </div>
                       {product.sub_category && (
                         <div style={{ fontSize: '0.8rem', color: '#38bdf8', marginTop: '2px' }}>
                           {product.sub_category}
@@ -150,6 +172,9 @@ export default function AdminApprovalQueue({
                           </span>
                         </div>
                       )}
+                      <div style={{ marginTop: '0.35rem' }}>
+                        <Link href={`/admin/catalog/${product.id}`}>View full details</Link>
+                      </div>
                     </td>
 
                     <td className={styles.td} style={{ color: '#cbd5e1' }}>
@@ -201,6 +226,14 @@ export default function AdminApprovalQueue({
                           <span>{isOperating ? 'Saving...' : 'Approve'}</span>
                         </button>
 
+                        <input
+                          value={reasons[product.id] ?? ''}
+                          onChange={(event) =>
+                            setReasons((current) => ({ ...current, [product.id]: event.target.value }))
+                          }
+                          placeholder="Rejection reason"
+                          disabled={isOperating}
+                        />
                         <button
                           type="button"
                           onClick={() =>

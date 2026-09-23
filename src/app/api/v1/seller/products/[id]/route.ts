@@ -34,13 +34,37 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   const text = (key: string) => key in record && typeof record[key as keyof typeof record] === 'string'
     ? String(record[key as keyof typeof record])
     : undefined;
+  const numberOrUndefined = (key: string) =>
+    key in record && typeof record[key as keyof typeof record] === 'number'
+      ? Number(record[key as keyof typeof record])
+      : undefined;
+  const tags = 'tags' in record && Array.isArray(record.tags)
+    ? record.tags.filter((tag): tag is string => typeof tag === 'string').map((tag) => tag.trim().toLowerCase()).filter(Boolean)
+    : undefined;
+  const imageUrls = 'imageUrls' in record && Array.isArray(record.imageUrls)
+    ? record.imageUrls.filter((url): url is string => typeof url === 'string' && url.trim().length > 0).map((url) => url.trim())
+    : undefined;
+  let attributes: Record<string, string> | undefined;
+  if ('attributes' in record && record.attributes && typeof record.attributes === 'object' && !Array.isArray(record.attributes)) {
+    attributes = {};
+    for (const [key, value] of Object.entries(record.attributes)) {
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        attributes[key] = String(value);
+      }
+    }
+  }
+
   const { error } = await supabase.from('products').update({
     title: text('title'),
     description: text('description'),
-    price: 'price' in record && typeof record.price === 'number' ? record.price : undefined,
-    stock: 'stock' in record && typeof record.stock === 'number' ? record.stock : undefined,
+    price: numberOrUndefined('price'),
+    stock: numberOrUndefined('stock'),
+    condition: text('condition'),
     category: text('category'),
     sub_category: text('subCategory'),
+    tags,
+    attributes,
+    image_urls: imageUrls,
     approval_status: product.approval_status === 'rejected' && resubmit ? 'pending' : undefined,
     resubmit_count: product.approval_status === 'rejected' && resubmit ? product.resubmit_count + 1 : undefined,
   }).eq('id', product.id);

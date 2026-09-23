@@ -1405,6 +1405,14 @@ export type Database = {
           similarity: number
         }[]
       }
+      seller_owns_order: {
+        Args: { target_order_id: string }
+        Returns: boolean
+      }
+      admin_platform_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       lookup_user_id_by_email: {
         Args: { target_email: string }
         Returns: string

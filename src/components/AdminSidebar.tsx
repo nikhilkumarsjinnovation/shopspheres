@@ -16,6 +16,9 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
 
   const isHealthActive = pathname === '/admin/dashboard' || pathname === '/dashboard' || pathname === '/admin';
   const isUsersActive = pathname === '/admin/users';
+  const isCatalogActive = pathname.startsWith('/admin/catalog');
+  const isOrdersActive = pathname.startsWith('/admin/orders');
+  const isShopsActive = pathname.startsWith('/admin/shops');
   const isLogsActive = pathname === '/admin/logs';
 
   const avatarInitial = email ? email.charAt(0).toUpperCase() : 'A';
@@ -65,6 +68,27 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
           Users Audit
+        </Link>
+
+        <Link
+          href="/admin/catalog"
+          className={`${styles.navItem} ${isCatalogActive ? styles.navItemActive : ''}`}
+        >
+          Catalog
+        </Link>
+
+        <Link
+          href="/admin/orders"
+          className={`${styles.navItem} ${isOrdersActive ? styles.navItemActive : ''}`}
+        >
+          Orders
+        </Link>
+
+        <Link
+          href="/admin/shops"
+          className={`${styles.navItem} ${isShopsActive ? styles.navItemActive : ''}`}
+        >
+          Shops
         </Link>
 
         <Link
