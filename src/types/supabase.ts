@@ -489,6 +489,7 @@ export type Database = {
           image_urls: string[]
           price: number
           rejection_reason: string | null
+          resubmit_count: number
           review_count: number
           seller_id: string
           shop_id: string | null
@@ -516,6 +517,7 @@ export type Database = {
           image_urls?: string[]
           price: number
           rejection_reason?: string | null
+          resubmit_count?: number
           review_count?: number
           seller_id: string
           shop_id?: string | null
@@ -543,6 +545,7 @@ export type Database = {
           image_urls?: string[]
           price?: number
           rejection_reason?: string | null
+          resubmit_count?: number
           review_count?: number
           seller_id?: string
           shop_id?: string | null
@@ -587,6 +590,7 @@ export type Database = {
           address_line: string
           allows_bopis: boolean
           banner_url: string | null
+          branding_edits_used: number
           city: string
           created_at: string
           description: string | null
@@ -609,6 +613,7 @@ export type Database = {
           address_line: string
           allows_bopis?: boolean
           banner_url?: string | null
+          branding_edits_used?: number
           city: string
           created_at?: string
           description?: string | null
@@ -631,6 +636,7 @@ export type Database = {
           address_line?: string
           allows_bopis?: boolean
           banner_url?: string | null
+          branding_edits_used?: number
           city?: string
           created_at?: string
           description?: string | null

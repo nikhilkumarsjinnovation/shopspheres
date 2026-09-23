@@ -1,92 +1,78 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth';
+import { buildShopHealth } from '@/lib/seller-health';
+import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
-import SellerInventoryTabs from '@/components/SellerInventoryTabs';
-import * as styles from '../seller.css';
 import layoutStyles from '../seller.module.css';
 
 export default async function SellerDashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getAuthenticatedUser(supabase);
+  if (!session) redirect('/login');
 
-  if (!user) {
-    redirect('/login');
-  }
+  const { data: shop } = await supabase
+    .from('shops')
+    .select('id, name, branding_edits_used')
+    .eq('seller_id', session.user.id)
+    .maybeSingle();
 
-  // Query products belonging strictly to the currently logged-in seller
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
-    .eq('seller_id', user.id)
-    .order('created_at', { ascending: false });
+    .eq('seller_id', session.user.id);
+  const { data: sales } = await supabase
+    .from('order_items')
+    .select('order_id, quantity, unit_price, product:products(category)')
+    .eq('seller_id', session.user.id);
 
-  const productList = (products || []) as Product[];
-
-  const totalProducts = productList.length;
-  const approvedCount = productList.filter((p) => p.approval_status === 'approved').length;
-  const pendingCount = productList.filter((p) => (p.approval_status || 'pending') === 'pending').length;
-  const totalValue = productList.reduce((sum, item) => sum + Number(item.price), 0);
+  const saleRows = (sales ?? []).map((item) => {
+    const linked = item.product;
+    const details = Array.isArray(linked) ? linked[0] : linked;
+    const category = details && typeof details === 'object' && 'category' in details && typeof details.category === 'string'
+      ? details.category
+      : 'General';
+    return {
+      category,
+      quantity: item.quantity,
+      revenue: Number(item.unit_price) * item.quantity,
+      orderId: item.order_id,
+    };
+  });
+  const health = buildShopHealth((products ?? []) as Product[], saleRows);
+  const editsLeft = Math.max(0, 2 - (shop?.branding_edits_used ?? 0));
 
   return (
     <>
       <header className={layoutStyles.topBar}>
         <div>
-          <h1 className={layoutStyles.pageHeading}>Merchant Inventory Management</h1>
+          <h1 className={layoutStyles.pageHeading}>{shop?.name ?? 'Your shop'}</h1>
           <p style={{ margin: '0.2rem 0 0 0', color: '#64748b', fontSize: '0.85rem' }}>
-            Enterprise dynamic catalog tabs, product specifications, and live approval status tracking.
+            Branding edits left: {editsLeft}. {shop ? <Link href={`/shops/${shop.id}`}>View public shop</Link> : null}
           </p>
         </div>
-        <Link href="/seller/add-product" className={layoutStyles.buttonPrimary}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Add Product
-        </Link>
+        <Link href="/seller/add-product" className={layoutStyles.buttonPrimary}>Add Product</Link>
       </header>
-
-      <div className={styles.content}>
-        {error && (
-          <div className={styles.alertError}>
-            Failed to load products: {error.message}
-          </div>
-        )}
-
-        {/* Metrics Summary Grid */}
-        <div className={styles.metricsGrid}>
-          <div className={styles.metricCard}>
-            <p className={styles.metricLabel}>Total Catalog Products</p>
-            <p className={styles.metricValue}>{totalProducts}</p>
-          </div>
-
-          <div className={styles.metricCard}>
-            <p className={styles.metricLabel}>Approved & Live to Customers</p>
-            <p className={styles.metricValue} style={{ color: '#059669' }}>
-              {approvedCount}
-            </p>
-          </div>
-
-          <div className={styles.metricCard}>
-            <p className={styles.metricLabel}>Awaiting Administrator Review</p>
-            <p className={styles.metricValue} style={{ color: '#d97706' }}>
-              {pendingCount}
-            </p>
-          </div>
-
-          <div className={styles.metricCard}>
-            <p className={styles.metricLabel}>Total Inventory Value</p>
-            <p className={styles.metricValue}>
-              ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-        </div>
-
-        {/* Dynamic Radix UI Category Tabs */}
-        <SellerInventoryTabs products={productList} />
-      </div>
+      {error ? <p>{error.message}</p> : null}
+      <section>
+        <h2>Full shop health</h2>
+        <p>Live {health.live} · Pending {health.pending} · Rejected {health.rejected} · Low stock {health.lowStock}</p>
+        <p>Orders {health.orders} · Revenue {formatINR(health.revenue)}</p>
+      </section>
+      <section>
+        <h2>Mini-shops</h2>
+        <ul>
+          {health.categories.map((row) => (
+            <li key={row.category}>
+              <Link href={`/seller/inventory/${encodeURIComponent(row.category)}`}>{row.category}</Link>
+              <span> · {row.products} products · live {row.live} · pending {row.pending} · rejected {row.rejected}</span>
+              <span> · stock {formatINR(row.stockValue)} · sold {row.unitsSold} · {formatINR(row.revenue)}</span>
+            </li>
+          ))}
+        </ul>
+        {health.categories.length === 0 ? <p>No products yet. Add one to open a category mini-shop.</p> : null}
+      </section>
     </>
   );
 }
