@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CategoryResponseSchema, type CategoryResponse } from '@/lib/validations/ai';
+import { categorizeLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
+import { csrfMiddleware } from '@/lib/csrf';
 import { ZodError } from 'zod';
 
 const MAX_RETRIES = 3;
 
 export async function POST(request: NextRequest) {
   try {
+    const csrfError = csrfMiddleware(request);
+    if (csrfError) {
+      return csrfError;
+    }
+
+    const limited = await enforceRateLimit(categorizeLimiter, await rateLimitKey(request));
+    if (limited) {
+      return limited;
+    }
+
     const body = await request.json();
     const { title, description, condition } = body;
 
@@ -129,7 +141,7 @@ Strict Instructions:
 2. Deduce the fine-grained sub_category (e.g. "Over-Ear Headphones", "Men's Athletic Shoes", "Espresso Machines", "Moisturizers").
 3. Generate 3 to 7 relevant searchable lowercase keywords/tags.
 4. Provide a confidence score between 0.0 and 1.0.
-5. Provide a realistic suggested_price in USD (number).
+5. Provide a realistic suggested_price in INR (₹ Indian Rupees) as a number (e.g. 1499).
 6. CRITICAL: Generate a comprehensive list of 10 or more technical specifications and physical attributes in the "attributes" object. Key names must be readable titles (e.g. "Brand", "Model Number", "Color", "Material", "Dimensions", "Weight", "Warranty", "Manufacturer", "Country of Origin", "Connectivity", "Power Source", "Included Components"). All values in "attributes" must be strings.
 
 Strict Schema Requirement:

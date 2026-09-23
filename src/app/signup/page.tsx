@@ -22,6 +22,13 @@ export default function SignupPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Saksham Accessibility Preferences
+  const [wantsAccessibility, setWantsAccessibility] = useState(false);
+  const [accessHighContrast, setAccessHighContrast] = useState(false);
+  const [accessFontScale, setAccessFontScale] = useState(1.0);
+  const [accessLargeTouch, setAccessLargeTouch] = useState(false);
+  const [accessSimplifiedUI, setAccessSimplifiedUI] = useState(false);
+
   // Real-time password evaluation
   const passwordAnalysis = useMemo(() => {
     if (!password) {
@@ -140,6 +147,18 @@ export default function SignupPage() {
           email,
           full_name: fullName || null,
           role,
+        });
+      }
+
+      // If user enabled accessibility preferences, store profile
+      if (wantsAccessibility) {
+        await supabase.from('user_accessibility_profiles').upsert({
+          user_id: user.id,
+          has_disability: true,
+          visual_high_contrast: accessHighContrast,
+          visual_font_magnification: accessFontScale,
+          motor_large_touch_targets: accessLargeTouch,
+          cognitive_simplified_ui: accessSimplifiedUI,
         });
       }
 
@@ -337,6 +356,101 @@ export default function SignupPage() {
                 Seller (Merchant)
               </label>
             </div>
+          </div>
+
+          {/* Saksham Accessibility Preferences (Optional) */}
+          <div
+            style={{
+              padding: '14px',
+              borderRadius: '8px',
+              backgroundColor: wantsAccessibility ? '#f0f9ff' : '#f8fafc',
+              border: wantsAccessibility ? '1px solid #38bdf8' : '1px solid #e2e8f0',
+              marginBottom: '1rem',
+              transition: 'all 0.2s',
+            }}
+          >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#0f172a',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={wantsAccessibility}
+                onChange={(e) => setWantsAccessibility(e.target.checked)}
+                style={{ cursor: 'pointer' }}
+              />
+              <span>♿ Enable Saksham Inclusive Accessibility Options</span>
+            </label>
+
+            {wantsAccessibility && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid #cbd5e1',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                {/* High Contrast */}
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={accessHighContrast}
+                    onChange={(e) => setAccessHighContrast(e.target.checked)}
+                  />
+                  <span>High Contrast Visual Display</span>
+                </label>
+
+                {/* Font Scaling */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155' }}>
+                  <span>Text Size:</span>
+                  <select
+                    value={accessFontScale}
+                    onChange={(e) => setAccessFontScale(Number(e.target.value))}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '12px',
+                    }}
+                  >
+                    <option value={1.0}>100% (Standard)</option>
+                    <option value={1.25}>125% (Large)</option>
+                    <option value={1.5}>150% (Extra Large)</option>
+                    <option value={1.75}>175% (Maximum)</option>
+                  </select>
+                </div>
+
+                {/* Large Touch Targets */}
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={accessLargeTouch}
+                    onChange={(e) => setAccessLargeTouch(e.target.checked)}
+                  />
+                  <span>Large Touch Targets (Motor Ease)</span>
+                </label>
+
+                {/* Simplified UI */}
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={accessSimplifiedUI}
+                    onChange={(e) => setAccessSimplifiedUI(e.target.checked)}
+                  />
+                  <span>Simplified UI (Focus Assistance)</span>
+                </label>
+              </div>
+            )}
           </div>
 
           <button

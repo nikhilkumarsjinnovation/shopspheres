@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/auth';
 import AdminSidebar from '@/components/AdminSidebar';
 import * as styles from './admin.css';
 
@@ -9,27 +10,19 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getAuthenticatedUser(supabase);
 
-  if (!user) {
+  if (!session) {
     redirect('/login');
   }
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role, is_active')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin' || !profile.is_active) {
+  if (session.profile.role !== 'admin' || !session.profile.is_active) {
     redirect('/login?error=unauthorized');
   }
 
   return (
     <div className={styles.layoutContainer}>
-      <AdminSidebar email={user.email} role={profile.role} />
+      <AdminSidebar email={session.user.email} role={session.profile.role} />
       <main className={styles.mainContent}>{children}</main>
     </div>
   );
