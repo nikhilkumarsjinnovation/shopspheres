@@ -22,11 +22,12 @@ export default function SignOutButton() {
   return (
     <button
       type="button"
+      className="btn-signout"
       onClick={handleSignOut}
       title="Sign out"
       aria-label="Sign out"
     >
-      Exit
+      Sign out
     </button>
   );
 }

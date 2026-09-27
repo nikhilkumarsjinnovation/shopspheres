@@ -26,7 +26,7 @@ export default async function CustomerLayout({
     <CartProvider key={session.user.id} userId={session.user.id}>
       <div>
         <CustomerNavbar email={session.user.email} />
-        <main>{children}</main>
+        <main className="main-content container">{children}</main>
         <PersonalAiAssistant />
         <BehaviorTracker userId={session.user.id} />
       </div>

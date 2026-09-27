@@ -25,9 +25,9 @@ export default async function SellerLayout({
   }
 
   return (
-    <div>
+    <div className="portal-layout">
       <SellerSidebar email={session.user.email} />
-      <div>
+      <div className="portal-content">
         {children}
       </div>
     </div>

@@ -20,9 +20,9 @@ export default async function AdminLayout({
   }
 
   return (
-    <div>
+    <div className="portal-layout">
       <AdminSidebar email={session.user.email} role={session.profile.role} />
-      <main>{children}</main>
+      <main className="portal-content">{children}</main>
     </div>
   );
 }
