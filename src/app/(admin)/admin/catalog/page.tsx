@@ -23,51 +23,92 @@ export default async function CatalogPage({
   const { data: products, error } = await query;
 
   return (
-    <div>
-      <div>
-        <h1>Catalog</h1>
-        <p>Approve, reject with a reason, or pull a live product back to pending.</p>
+    <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Catalog Moderation</h1>
+        <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+          Approve, reject with feedback reasons, or review active and pending merchant listings.
+        </p>
       </div>
-      <p>
-        {FILTERS.map((item) => (
-          <Link key={item} href={item === 'pending' ? '/admin/catalog' : `/admin/catalog?status=${item}`}>
-            {item}
-          </Link>
-        ))}
-      </p>
-      {error ? <div>{error.message}</div> : null}
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Status</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Decision</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(products ?? []).map((product) => (
-              <tr key={product.id}>
-                <td>
-                  <div><Link href={`/admin/catalog/${product.id}`}>{product.title}</Link></div>
-                  <div>{product.category}</div>
-                  {product.rejection_reason ? <div>Reason: {product.rejection_reason}</div> : null}
-                </td>
-                <td>{product.approval_status}</td>
-                <td>{formatINR(product.price)}</td>
-                <td>{product.stock}</td>
-                <td>
-                  <p><Link href={`/admin/catalog/${product.id}`}>View details</Link></p>
-                  <ProductDecision productId={product.id} status={product.approval_status} />
-                </td>
+
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        {FILTERS.map((item) => {
+          const isActive = status === item;
+          return (
+            <Link
+              key={item}
+              href={item === 'pending' ? '/admin/catalog' : `/admin/catalog?status=${item}`}
+              className={`persona-pill ${isActive ? 'active' : ''}`}
+              style={{ textTransform: 'capitalize' }}
+            >
+              {item}
+            </Link>
+          );
+        })}
+      </div>
+
+      {error ? (
+        <div style={{ padding: '1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+          {error.message}
+        </div>
+      ) : null}
+
+      {(products ?? []).length === 0 ? (
+        <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', color: 'var(--fg-muted)' }}>
+          No products found with status &quot;{status}&quot;.
+        </div>
+      ) : (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <table className="portal-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th style={{ textAlign: 'right' }}>Actions & Decision</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {(products ?? []).length === 0 ? <div>No products in this filter.</div> : null}
+            </thead>
+            <tbody>
+              {(products ?? []).map((product) => (
+                <tr key={product.id}>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>
+                      <Link href={`/admin/catalog/${product.id}`} style={{ color: 'var(--fg-primary)' }}>
+                        {product.title}
+                      </Link>
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>{product.category}</div>
+                    {product.rejection_reason ? (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--danger)', marginTop: '0.25rem' }}>
+                        Reason: {product.rejection_reason}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td>
+                    <span className={`portal-badge ${product.approval_status}`}>
+                      {product.approval_status}
+                    </span>
+                  </td>
+                  <td><strong>{formatINR(product.price)}</strong></td>
+                  <td>{product.stock}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                      <Link
+                        href={`/admin/catalog/${product.id}`}
+                        style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent-electric)' }}
+                      >
+                        View details &rarr;
+                      </Link>
+                      <ProductDecision productId={product.id} status={product.approval_status} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

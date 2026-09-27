@@ -1,0 +1,230 @@
+[
+  {
+    "seller_key": "priya",
+    "email": "seller.priya@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Priya Sharma",
+    "shop": {
+      "name": "NovaTech Electronics",
+      "slug": "novatech-electronics",
+      "description": "Authorized retailer for premium computing, monitors, portable storage and smart digital workspace gear.",
+      "address_line": "104 Indiranagar 100ft Road, Stage 2",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "postal_code": "560038",
+      "latitude": 12.9716,
+      "longitude": 77.5946,
+      "rating": 4.9,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "rohan",
+    "email": "seller.rohan@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Rohan Verma",
+    "shop": {
+      "name": "SoundScape Audio Studio",
+      "slug": "soundscape-audio-studio",
+      "description": "Studio-grade audiophile headphones, wireless noise-cancelling earbuds, stage mics, and high-fidelity home cinema audio.",
+      "address_line": "42 Bandra Linking Road, Bandra West",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "postal_code": "400050",
+      "latitude": 19.0596,
+      "longitude": 72.8295,
+      "rating": 4.8,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "ananya",
+    "email": "seller.ananya@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Ananya Desai",
+    "shop": {
+      "name": "Vastram Ethnic Couture",
+      "slug": "vastram-ethnic-couture",
+      "description": "Artisanal handwoven heritage textiles, Banarasi & Kanjivaram silk sarees, Chikankari kurtas, and royal festive wedding ensembles.",
+      "address_line": "18 Johari Bazaar, Pink City",
+      "city": "Jaipur",
+      "state": "Rajasthan",
+      "postal_code": "302003",
+      "latitude": 26.9124,
+      "longitude": 75.7873,
+      "rating": 4.9,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "kabir",
+    "email": "seller.kabir@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Kabir Mehta",
+    "shop": {
+      "name": "UrbanEdge Fashion & Streetwear",
+      "slug": "urbanedge-streetwear",
+      "description": "Contemporary streetwear, heavyweight graphic tees, premium stretch denims, rugged jackets, and handcrafted leather accessories.",
+      "address_line": "56 Connaught Place, Block B",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "postal_code": "110001",
+      "latitude": 28.6315,
+      "longitude": 77.2167,
+      "rating": 4.7,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "vikram",
+    "email": "seller.vikram@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Vikram Patil",
+    "shop": {
+      "name": "RasoiCraft Modern Kitchen",
+      "slug": "rasoicraft-modern-kitchen",
+      "description": "Professional culinary cookware, pre-seasoned cast iron skillets, digital smart appliances, and precision Japanese steel knives.",
+      "address_line": "78 Fergusson College Road, Deccan Gymkhana",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "postal_code": "411004",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "rating": 4.8,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "sneha",
+    "email": "seller.sneha@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Sneha Kulkarni",
+    "shop": {
+      "name": "Aashiyana Home & Decor",
+      "slug": "aashiyana-home-decor",
+      "description": "Handcrafted Indian home accents, bohemian macrame, Egyptian cotton bed linens, artisanal ceramic dinnerware, and warm ambient lighting.",
+      "address_line": "25 CG Road, Navrangpura",
+      "city": "Ahmedabad",
+      "state": "Gujarat",
+      "postal_code": "380009",
+      "latitude": 23.0338,
+      "longitude": 72.563,
+      "rating": 4.8,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "rajesh",
+    "email": "seller.rajesh@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Rajesh Nair",
+    "shop": {
+      "name": "Malabar Spice & Organic Pantry",
+      "slug": "malabar-spice-pantry",
+      "description": "Direct-from-estate Kerala spices, single-origin Darjeeling tea, Kumbakonam filter coffee, cold-pressed oils, and A2 Gir cow Vedic ghee.",
+      "address_line": "12 Fort Kochi Heritage Road",
+      "city": "Kochi",
+      "state": "Kerala",
+      "postal_code": "682001",
+      "latitude": 9.9312,
+      "longitude": 76.2673,
+      "rating": 4.9,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "pooja",
+    "email": "seller.pooja@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Pooja Aggarwal",
+    "shop": {
+      "name": "Mithai & More Festive Delights",
+      "slug": "mithai-more-festive-delights",
+      "description": "Legendary Indian festive sweets, pure desi ghee Kaju Katli, bean-to-bar artisanal chocolates, gourmet gift hampers, and luxury confections.",
+      "address_line": "89 Park Street, Near Camac Street",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "postal_code": "700016",
+      "latitude": 22.5535,
+      "longitude": 88.3518,
+      "rating": 4.9,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "meera",
+    "email": "seller.meera@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Dr. Meera Sen",
+    "shop": {
+      "name": "AyurVeda Pure Botanicals",
+      "slug": "ayurveda-pure-botanicals",
+      "description": "Time-tested Ayurvedic beauty formulas, Kumkumadi night elixirs, steam-distilled rose mists, and cold-pressed therapeutic hair treatments.",
+      "address_line": "34 North Usman Road, T. Nagar",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "postal_code": "600017",
+      "latitude": 13.0418,
+      "longitude": 80.2341,
+      "rating": 4.9,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "ritu",
+    "email": "seller.ritu@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Ritu Kapoor",
+    "shop": {
+      "name": "Aura Luxury Fragrance & Grooming",
+      "slug": "aura-luxury-fragrance-grooming",
+      "description": "Niche designer perfumes, pure Kannauj attars, premium barber-grade grooming systems, and high-performance salon hair styling tools.",
+      "address_line": "67 Jubilee Hills Road No. 36",
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "postal_code": "500033",
+      "latitude": 17.4319,
+      "longitude": 78.4073,
+      "rating": 4.8,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "arjun",
+    "email": "seller.arjun@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Arjun Singh",
+    "shop": {
+      "name": "Shikhar Sports & Outdoor Trek",
+      "slug": "shikhar-sports-outdoor",
+      "description": "Tournament-ready badminton racquets, Kashmir willow cricket bats, cast iron fitness weights, and weatherproof Himalayan expedition gear.",
+      "address_line": "15 Sector 17-C, City Centre",
+      "city": "Chandigarh",
+      "state": "Punjab",
+      "postal_code": "160017",
+      "latitude": 30.7333,
+      "longitude": 76.7794,
+      "rating": 4.8,
+      "is_verified": true
+    }
+  },
+  {
+    "seller_key": "divya",
+    "email": "seller.divya@shopsphere.in",
+    "password": "Seller@ShopSphere2026!",
+    "full_name": "Divya Menon",
+    "shop": {
+      "name": "SmartPlay Kids & Active Gear",
+      "slug": "smartplay-kids-active",
+      "description": "Certified eco-friendly wooden toddler toys, STEM mechanical robotics kits, award-winning family strategy board games, and child active mobility.",
+      "address_line": "92 Cross Cut Road, Gandhipuram",
+      "city": "Coimbatore",
+      "state": "Tamil Nadu",
+      "postal_code": "641012",
+      "latitude": 11.0168,
+      "longitude": 76.9558,
+      "rating": 4.9,
+      "is_verified": true
+    }
+  }
+]

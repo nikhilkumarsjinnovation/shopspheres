@@ -20,8 +20,17 @@ export default function PersonaSelector({
 }) {
   return (
     <div
+      style={{
+        display: 'flex',
+        gap: '0.35rem',
+        padding: '0.65rem 1rem',
+        overflowX: 'auto',
+        background: 'var(--bg-subtle)',
+        borderBottom: '1px solid var(--border-subtle)',
+        scrollbarWidth: 'none',
+      }}
     >
-      {PERSONAS.map((persona, index) => {
+      {PERSONAS.map((persona) => {
         const selected = persona.id === value;
         return (
           <button
@@ -29,6 +38,19 @@ export default function PersonaSelector({
             type="button"
             onClick={() => onChange(persona.id)}
             aria-pressed={selected}
+            style={{
+              padding: '0.3rem 0.75rem',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.75rem',
+              fontWeight: selected ? 700 : 500,
+              background: selected ? 'var(--fg-primary)' : 'var(--bg-surface)',
+              color: selected ? 'var(--fg-inverted)' : 'var(--fg-secondary)',
+              border: `1px solid ${selected ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: selected ? 'var(--shadow-xs)' : 'none',
+              transition: 'all var(--transition-fast)',
+            }}
           >
             {persona.label}
           </button>

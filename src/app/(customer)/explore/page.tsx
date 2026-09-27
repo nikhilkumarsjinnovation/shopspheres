@@ -38,17 +38,21 @@ export default async function ExplorePage() {
   const availableCategories = Array.from(categorySet);
 
   return (
-    <div>
-      <div>
-        <h1>Explore</h1>
-        <p>
-          Products from verified shops across India. Prices in INR.
-        </p>
+    <div className="animate-slide-up">
+      <div className="section-header" style={{ marginBottom: '1.75rem' }}>
+        <div>
+          <h1 className="section-title" style={{ fontSize: '2rem', letterSpacing: '-0.03em' }}>
+            Explore Marketplace
+          </h1>
+          <p className="section-subtitle">
+            Curated products from verified shops across India · Free Express Delivery · Zero Hidden Fees
+          </p>
+        </div>
       </div>
 
       {error && (
-        <div>
-          Failed to load products: {error.message}
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--danger-bg)', border: '1px solid var(--danger-border)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', marginBottom: '1.5rem' }} role="alert">
+          Failed to load catalog products: {error.message}
         </div>
       )}
 

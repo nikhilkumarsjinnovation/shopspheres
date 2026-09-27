@@ -809,6 +809,12 @@ a {
   border-color: var(--border-medium);
 }
 
+.btn-card-toggle.active {
+  background: var(--fg-primary);
+  color: var(--fg-inverted);
+  border-color: var(--fg-primary);
+}
+
 .btn-card-add {
   display: inline-flex;
   align-items: center;
@@ -853,6 +859,7 @@ a {
 
 .card-expanded-content {
   overflow: hidden;
+  min-height: 0;
   padding: 0 1.25rem;
   transition: padding 340ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1642,3 +1649,665 @@ a {
 .pulse-badge {
   animation: pulseSubtle 2s infinite ease-in-out;
 }
+
+/* --- 18. Behavioral Offers Banner (Explore Page) --- */
+.offers-banner {
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.04) 0%, rgba(124, 58, 237, 0.08) 100%);
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.offers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.offers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.offer-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.offer-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-electric);
+}
+
+.offer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: var(--accent-glow);
+  color: var(--accent-electric);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.offer-code-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-subtle);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--fg-primary);
+}
+
+.btn-apply-offer {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--fg-primary);
+  color: var(--fg-inverted);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-apply-offer:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.btn-apply-offer.copied {
+  background: var(--success);
+}
+
+/* --- 19. Friends & Social Circle System --- */
+.friends-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+.friend-requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.friend-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-fast);
+}
+
+.friend-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.friend-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--fg-primary);
+}
+
+/* --- 20. Gifting Suite & Unboxing Views --- */
+.gifts-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.gift-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.gift-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.gift-reveal-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  max-width: 580px;
+  margin: 2rem auto;
+}
+
+/* --- 21. Payment Panels & Practice Checkout --- */
+.payment-panel-box {
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.upi-apps-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.upi-app-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--bg-surface);
+  color: var(--fg-secondary);
+  border: 1.5px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.upi-app-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--fg-primary);
+}
+
+.upi-app-btn.selected {
+  background: var(--fg-primary);
+  color: var(--fg-inverted);
+  border-color: var(--fg-primary);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.upi-qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 280px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+}
+
+/* --- 22. Floating Personal AI Assistant Drawer --- */
+.ai-assistant-drawer {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 90vw;
+  max-width: 420px;
+  height: 600px;
+  max-height: 82vh;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeInSlideUp 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ai-header {
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-messages-pane {
+  flex: 1;
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--bg-canvas);
+}
+
+.ai-bubble-assistant {
+  align-self: flex-start;
+  max-width: 85%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: 4px;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--fg-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.ai-bubble-user {
+  align-self: flex-end;
+  max-width: 85%;
+  background: var(--fg-primary);
+  color: var(--fg-inverted);
+  border-radius: var(--radius-lg);
+  border-bottom-right-radius: 4px;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ai-prompt-chips-row {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.6rem 1rem;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  scrollbar-width: none;
+}
+.ai-prompt-chips-row::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-prompt-chip {
+  white-space: nowrap;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ai-prompt-chip:hover {
+  background: var(--bg-surface-hover);
+  color: var(--fg-primary);
+}
+
+.ai-input-bar {
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-input-field {
+  flex: 1;
+  height: 2.6rem;
+  padding: 0 0.85rem;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  color: var(--fg-primary);
+}
+
+.ai-input-field:focus {
+  background: var(--bg-surface);
+  border-color: var(--fg-primary);
+}
+
+/* Floating AI Assistant Trigger Button */
+.ai-floating-trigger,
+#personal-ai-trigger {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 89;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.15rem;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ai-floating-trigger:hover,
+#personal-ai-trigger:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5), 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* --- 23. Saved Address Cards in Checkout --- */
+.saved-addresses-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+@media (min-width: 640px) {
+  .saved-addresses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.saved-address-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.15rem;
+  background: var(--bg-canvas);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.saved-address-card:hover {
+  background: var(--bg-surface);
+  border-color: var(--border-medium);
+}
+
+.saved-address-card.selected {
+  background: var(--bg-surface);
+  border-color: var(--fg-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.address-radio-input {
+  margin-top: 0.25rem;
+  accent-color: var(--fg-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.address-tag-pill {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--bg-subtle);
+  color: var(--fg-secondary);
+}
+
+.address-tag-pill.default {
+  background: var(--accent-glow);
+  color: var(--accent-electric);
+}
+
+.address-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-link-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-link-action:hover {
+  color: var(--fg-primary);
+}
+
+.btn-link-action.danger:hover {
+  color: var(--danger);
+}
+
+/* --- 24. Seller Onboarding Wizard & Portals --- */
+.wizard-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.75rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.wizard-step-node {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wizard-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--bg-subtle);
+  color: var(--fg-muted);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-fast);
+}
+
+.wizard-step-node.active .wizard-step-circle {
+  background: var(--fg-primary);
+  color: var(--fg-inverted);
+  border-color: var(--fg-primary);
+}
+
+.wizard-step-node.completed .wizard-step-circle {
+  background: var(--success);
+  color: #ffffff;
+  border-color: var(--success);
+}
+
+.wizard-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-subtle);
+  margin: 0 1rem;
+}
+
+.wizard-path-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .wizard-path-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.wizard-path-card {
+  padding: 2rem;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.wizard-path-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--fg-primary);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.wizard-path-card.highlight {
+  border-color: var(--accent-electric);
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.03) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.spec-input-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.spec-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+/* --- 25. Radix Tabs Pill Header for Inventory --- */
+.seller-tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.35rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  margin-bottom: 1.5rem;
+  scrollbar-width: none;
+}
+.seller-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.seller-tab-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--fg-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.seller-tab-trigger:hover {
+  color: var(--fg-primary);
+}
+
+.seller-tab-trigger[data-state="active"] {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.seller-tab-count {
+  display: inline-flex;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  background: var(--bg-canvas);
+  color: var(--fg-muted);
+}
+
+.seller-tab-trigger[data-state="active"] .seller-tab-count {
+  background: var(--fg-primary);
+  color: var(--fg-inverted);
+}
+
+/* Status Badges for Portals */
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.portal-badge.active {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+}
+
+.portal-badge.pending {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid var(--warning-border);
+}
+
+.portal-badge.suspended,
+.portal-badge.rejected {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+}
+
+
+

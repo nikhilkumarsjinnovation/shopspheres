@@ -264,7 +264,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Modular Options In-View Expand Trigger */}
             <button
               type="button"
-              className="btn-card-toggle"
+              className={`btn-card-toggle ${isExpanded ? 'active' : ''}`}
               onClick={toggleExpand}
               aria-expanded={isExpanded}
               aria-label={isExpanded ? "Collapse product options" : "Expand product variations and specifications"}

@@ -413,41 +413,36 @@ export default function CheckoutPage() {
 
   if (successOrder) {
     return (
-      <div>
-        <div>
-          <div>🎉</div>
-          <h1>
+      <div className="animate-slide-up" style={{ padding: '3rem 1rem', display: 'flex', justifyContent: 'center' }}>
+        <div className="checkout-card" style={{ maxWidth: '540px', width: '100%', textAlign: 'center', padding: '3rem 2rem' }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🎉</div>
+          <h1 style={{ fontSize: '1.85rem', fontWeight: 800, marginBottom: '0.5rem' }}>
             Order Confirmed & Placed!
           </h1>
-          <p>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', lineHeight: 1.5, marginBottom: '2rem' }}>
             Thank you for shopping on <strong>ShopSphere India</strong>. Your local order has been verified and sent to our neighborhood fulfillment hub.
           </p>
 
-          <div
-          >
-            <div>
-              <span>Order ID:</span>
-              <strong>{successOrder.id}</strong>
+          <div style={{ background: 'var(--bg-canvas)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', marginBottom: '2rem', textAlign: 'left' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.65rem', fontSize: '0.9rem' }}>
+              <span style={{ color: 'var(--fg-muted)' }}>Order ID:</span>
+              <strong style={{ fontFamily: 'var(--font-mono)' }}>SS-{successOrder.id.slice(0, 8).toUpperCase()}</strong>
             </div>
-            <div>
-              <span>Total Paid:</span>
-              <strong>{formatINR(successOrder.total)}</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.65rem', fontSize: '0.9rem' }}>
+              <span style={{ color: 'var(--fg-muted)' }}>Total Amount Paid:</span>
+              <strong style={{ color: 'var(--success)' }}>{formatINR(successOrder.total)}</strong>
             </div>
-            <div>
-              <span>Estimated Doorstep Delivery:</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+              <span style={{ color: 'var(--fg-muted)' }}>Estimated Delivery:</span>
               <strong>Tomorrow by 8:00 PM</strong>
             </div>
           </div>
 
-          <div>
-            <Link
-              href="/orders"
-            >
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <Link href="/orders" className="btn-card-add" style={{ padding: '0.65rem 1.5rem', fontSize: '0.9rem' }}>
               Track Order
             </Link>
-            <Link
-              href="/explore"
-            >
+            <Link href="/explore" className="btn-card-toggle" style={{ padding: '0.65rem 1.5rem', fontSize: '0.9rem' }}>
               Continue Shopping
             </Link>
           </div>
@@ -457,33 +452,36 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div>
-      <div>
-        <div>
-          <h1>Secure Checkout</h1>
-          <span
-          >
-            🇮🇳 100% Indian Marketplace
-          </span>
+    <div className="animate-slide-up" style={{ paddingBottom: '4rem' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Secure Checkout</h1>
+          <span className="section-badge">🇮🇳 100% Indian Marketplace</span>
         </div>
-        <p>
-          Review items, select your saved delivery address, choose Indian payment method, and confirm your order.
+        <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem' }}>
+          Review items, select your saved delivery address, choose an instant payment method, and confirm your order.
         </p>
       </div>
 
-      {errorMessage && <div>{errorMessage}</div>}
+      {errorMessage && (
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--danger-bg)', border: '1px solid var(--danger-border)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+          {errorMessage}
+        </div>
+      )}
 
-      <form onSubmit={handleSubmitOrder}>
-        <div>
+      <form onSubmit={handleSubmitOrder} className="checkout-layout">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
           {/* STEP 1: DELIVERY ADDRESS SELECTION */}
-          <div>
-            <div>
-              <h2>
+          <div className="checkout-card">
+            <div className="checkout-card-header">
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>
                 1. Select Delivery Address
               </h2>
               {savedAddresses.length > 0 && !isAddingNewAddress && (
                 <button
                   type="button"
+                  className="btn-card-toggle"
+                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }}
                   onClick={() => setIsAddingNewAddress(true)}
                 >
                   + Add New Address
@@ -493,45 +491,46 @@ export default function CheckoutPage() {
 
             {/* List of Saved Addresses */}
             {!isAddingNewAddress && savedAddresses.length > 0 ? (
-              <div>
+              <div className="saved-addresses-grid">
                 {savedAddresses.map((addr) => {
                   const isSelected = selectedAddressId === addr.id;
                   return (
                     <label
                       key={addr.id}
+                      className={`saved-address-card ${isSelected ? 'selected' : ''}`}
                     >
                       <input
                         type="radio"
                         name="savedAddress"
+                        className="address-radio-input"
                         checked={isSelected}
                         onChange={() => setSelectedAddressId(addr.id)}
                       />
-                      <div>
-                        <div>
-                          <strong>{addr.recipient_name}</strong>
-                          <span
-                          >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.35rem' }}>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--fg-primary)' }}>{addr.recipient_name}</strong>
+                          <span className="address-tag-pill">
                             {addr.label || 'Home'}
                           </span>
                           {addr.is_default && (
-                            <span
-                            >
+                            <span className="address-tag-pill default">
                               Default
                             </span>
                           )}
                         </div>
-                        <p>
+                        <p style={{ fontSize: '0.825rem', color: 'var(--fg-secondary)', lineHeight: 1.45, marginBottom: '0.35rem' }}>
                           {addr.address_line1}
                           {addr.address_line2 ? `, ${addr.address_line2}` : ''}
                           <br />
                           {addr.city}, {addr.state} — <strong>{addr.postal_code}</strong>
                         </p>
-                        <p>
-                          Phone number: <strong>+91 {addr.recipient_phone}</strong>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>
+                          Phone: <strong style={{ color: 'var(--fg-primary)' }}>+91 {addr.recipient_phone}</strong>
                         </p>
-                        <div>
+                        <div className="address-actions-bar">
                           <button
                             type="button"
+                            className="btn-link-action"
                             onClick={(event) => {
                               event.preventDefault();
                               setEditingAddressId(addr.id);
@@ -548,8 +547,10 @@ export default function CheckoutPage() {
                           >
                             Edit
                           </button>
+                          <span style={{ color: 'var(--border-medium)' }}>·</span>
                           <button
                             type="button"
+                            className="btn-link-action danger"
                             onClick={(event) => {
                               event.preventDefault();
                               void fetchWithCsrf(`/api/v1/addresses?id=${addr.id}`, { method: 'DELETE' }).then(() => {
@@ -567,21 +568,24 @@ export default function CheckoutPage() {
               </div>
             ) : (
               /* Add New Address Form */
-              <div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
                 {savedAddresses.length > 0 && (
                   <button
                     type="button"
+                    className="btn-card-toggle"
+                    style={{ alignSelf: 'flex-start', fontSize: '0.8rem', padding: '0.35rem 0.75rem' }}
                     onClick={() => setIsAddingNewAddress(false)}
                   >
                     ← Back to saved addresses
                   </button>
                 )}
 
-                <div>
-                  <div>
-                    <label>Full Name (First and Last name) *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Full Name (First and Last name) *</label>
                     <input
                       type="text"
+                      className="auth-input"
                       required
                       placeholder="e.g. Rahul Sharma"
                       value={recipientName}
@@ -589,15 +593,31 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <div>
-                    <label>10-Digit Mobile Number *</label>
-                    <div>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">10-Digit Mobile Number *</label>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span
+                        style={{
+                          height: '3.1rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '0 0.75rem',
+                          background: 'var(--bg-subtle)',
+                          border: '1px solid var(--border-subtle)',
+                          borderRight: 'none',
+                          borderTopLeftRadius: 'var(--radius-lg)',
+                          borderBottomLeftRadius: 'var(--radius-lg)',
+                          fontSize: '0.875rem',
+                          fontWeight: 600,
+                          color: 'var(--fg-muted)',
+                        }}
                       >
                         +91
                       </span>
                       <input
                         type="tel"
+                        className="auth-input"
+                        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                         required
                         maxLength={10}
                         placeholder="9876543210"
@@ -608,10 +628,11 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label>Flat, House no., Building, Company, Apartment *</label>
+                <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                  <label className="auth-label">Flat, House no., Building, Company, Apartment *</label>
                   <input
                     type="text"
+                    className="auth-input"
                     required
                     placeholder="e.g. Flat 402, Shanti Heights, Plot 14"
                     value={addressLine1}
@@ -619,21 +640,23 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                <div>
-                  <div>
-                    <label>Area, Street, Sector, Village</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Area, Street, Sector, Village</label>
                     <input
                       type="text"
+                      className="auth-input"
                       placeholder="e.g. Bandra West, Linking Road"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
                     />
                   </div>
 
-                  <div>
-                    <label>Landmark</label>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Landmark</label>
                     <input
                       type="text"
+                      className="auth-input"
                       placeholder="e.g. Near Lilavati Hospital"
                       value={landmark}
                       onChange={(e) => setLandmark(e.target.value)}
@@ -641,11 +664,12 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div>
-                  <div>
-                    <label>Town / City *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Town / City *</label>
                     <input
                       type="text"
+                      className="auth-input"
                       required
                       placeholder="e.g. Mumbai"
                       value={city}
@@ -653,9 +677,11 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <div>
-                    <label>State *</label>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">State *</label>
                     <select
+                      className="custom-select"
+                      style={{ width: '100%', height: '3.1rem' }}
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                     >
@@ -667,10 +693,11 @@ export default function CheckoutPage() {
                     </select>
                   </div>
 
-                  <div>
-                    <label>PIN Code (6 digits) *</label>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">PIN Code (6 digits) *</label>
                     <input
                       type="text"
+                      className="auth-input"
                       required
                       maxLength={6}
                       placeholder="e.g. 400050"
@@ -680,23 +707,37 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Save Address Checkbox */}
+                {/* Save Address Checkbox & Tag */}
                 <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    padding: '0.85rem 1rem',
+                    background: 'var(--bg-canvas)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                  }}
                 >
-                  <label>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 500 }}>
                     <input
                       type="checkbox"
                       checked={saveToAddressBook}
                       onChange={(e) => setSaveToAddressBook(e.target.checked)}
+                      style={{ accentColor: 'var(--fg-primary)', width: '16px', height: '16px' }}
                     />
                     <span>Save this address to my account for future orders</span>
                   </label>
 
-                  <div>
+                  <div style={{ display: 'flex', gap: '0.35rem' }}>
                     {(['Home', 'Work', 'Other'] as const).map((lbl) => (
                       <button
                         key={lbl}
                         type="button"
+                        className={`variant-option-chip ${addressLabel === lbl ? 'selected' : ''}`}
+                        style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem' }}
                         onClick={() => setAddressLabel(lbl)}
                       >
                         {lbl}
@@ -705,15 +746,17 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <button
                     type="button"
+                    className="btn-card-add"
+                    style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}
                     onClick={handleSaveAddressExplicitly}
                     disabled={savingAddress}
                   >
                     {savingAddress ? 'Saving Address...' : '💾 Save Address to Account'}
                   </button>
-                  <span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--fg-muted)' }}>
                     Saves to your ShopSphere India address book immediately
                   </span>
                 </div>
@@ -722,154 +765,189 @@ export default function CheckoutPage() {
           </div>
 
           {/* STEP 2: INDIAN PAYMENT METHODS */}
-          <div>
-            <h2>2. Payment Method (India)</h2>
-            <div>
+          <div className="checkout-card">
+            <div className="checkout-card-header">
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>2. Choose Payment Method</h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {/* UPI */}
               <label
+                style={{
+                  display: 'block',
+                  border: `2px solid ${paymentMethod === 'upi' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  background: paymentMethod === 'upi' ? 'var(--bg-surface)' : 'var(--bg-canvas)',
+                  transition: 'all var(--transition-fast)',
+                }}
               >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="upi"
-                  checked={paymentMethod === 'upi'}
-                  onChange={() => { setPaymentMethod('upi'); setPaymentReady(true); }}
-                />
-                <div>
-                  <div>
-                    <strong>UPI (Google Pay, PhonePe, Paytm, BHIM)</strong>
-                    <span>
-                      Fastest & Zero Fee
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="upi"
+                    checked={paymentMethod === 'upi'}
+                    onChange={() => { setPaymentMethod('upi'); setPaymentReady(true); }}
+                    style={{ accentColor: 'var(--fg-primary)' }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <strong style={{ fontSize: '0.95rem' }}>Instant UPI (Google Pay, PhonePe, Paytm, BHIM)</strong>
+                      <span className="section-badge" style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem' }}>Recommended</span>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                      Zero gateway fee · Instant dynamic QR scan or direct app authorization
+                    </p>
                   </div>
-                  <p>
-                    Instant verification via any UPI App or VPA.
-                  </p>
-                  {paymentMethod === 'upi' && (
-                    <UpiPaymentPanel amountLabel={formatINR(finalTotalINR)} />
-                  )}
                 </div>
+                {paymentMethod === 'upi' && (
+                  <UpiPaymentPanel amountLabel={formatINR(finalTotalINR)} />
+                )}
               </label>
-
-              {false && (
-              <label
-              >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="stripe"
-                  checked={paymentMethod === 'stripe'}
-                  onChange={() => { setPaymentMethod('stripe'); setPaymentReady(true); }}
-                />
-                <div>
-                  <strong>Card via Stripe (test)</strong>
-                  <p>
-                    Opens Stripe test checkout. Use card 4242 4242 4242 4242. No real charge.
-                  </p>
-                </div>
-              </label>
-              )}
 
               {/* Cash on Delivery */}
               <label
+                style={{
+                  display: 'block',
+                  border: `2px solid ${paymentMethod === 'cod' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  background: paymentMethod === 'cod' ? 'var(--bg-surface)' : 'var(--bg-canvas)',
+                  transition: 'all var(--transition-fast)',
+                }}
               >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="cod"
-                  checked={paymentMethod === 'cod'}
-                  onChange={() => { setPaymentMethod('cod'); setPaymentReady(true); }}
-                />
-                <div>
-                  <strong>Cash on Delivery / Pay on Delivery (Cash or QR)</strong>
-                  <p>
-                    Pay with Cash or scan delivery partner&apos;s UPI QR code upon arrival at your doorstep.
-                  </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod"
+                    checked={paymentMethod === 'cod'}
+                    onChange={() => { setPaymentMethod('cod'); setPaymentReady(true); }}
+                    style={{ accentColor: 'var(--fg-primary)' }}
+                  />
+                  <div>
+                    <strong style={{ fontSize: '0.95rem' }}>Pay on Delivery / Cash on Delivery</strong>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                      Pay with cash or scan delivery partner&apos;s UPI QR code upon arrival at your doorstep
+                    </p>
+                  </div>
                 </div>
               </label>
 
               {/* Debit / Credit Cards */}
               <label
+                style={{
+                  display: 'block',
+                  border: `2px solid ${paymentMethod === 'card' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  background: paymentMethod === 'card' ? 'var(--bg-surface)' : 'var(--bg-canvas)',
+                  transition: 'all var(--transition-fast)',
+                }}
               >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="card"
-                  checked={paymentMethod === 'card'}
-                  onChange={() => { setPaymentMethod('card'); setPaymentReady(false); }}
-                />
-                <div>
-                  <strong>Credit or Debit Card (RuPay, Visa, MasterCard)</strong>
-                  <p>
-                    Enter practice card details, then the OTP shown on this page.
-                  </p>
-                  {paymentMethod === 'card' ? (
-                    <PracticePaymentPanel mode="card" amountLabel={formatINR(finalTotalINR)} onReady={setPaymentReady} />
-                  ) : null}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="card"
+                    checked={paymentMethod === 'card'}
+                    onChange={() => { setPaymentMethod('card'); setPaymentReady(false); }}
+                    style={{ accentColor: 'var(--fg-primary)' }}
+                  />
+                  <div>
+                    <strong style={{ fontSize: '0.95rem' }}>Credit or Debit Card (RuPay, Visa, MasterCard)</strong>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                      Safe sandbox card checkout with 3D Secure simulation
+                    </p>
+                  </div>
                 </div>
+                {paymentMethod === 'card' && (
+                  <PracticePaymentPanel mode="card" amountLabel={formatINR(finalTotalINR)} onReady={setPaymentReady} />
+                )}
               </label>
 
               {/* Net Banking */}
               <label
+                style={{
+                  display: 'block',
+                  border: `2px solid ${paymentMethod === 'netbanking' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  background: paymentMethod === 'netbanking' ? 'var(--bg-surface)' : 'var(--bg-canvas)',
+                  transition: 'all var(--transition-fast)',
+                }}
               >
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="netbanking"
-                  checked={paymentMethod === 'netbanking'}
-                  onChange={() => { setPaymentMethod('netbanking'); setPaymentReady(false); }}
-                />
-                <div>
-                  <strong>Net Banking</strong>
-                  <p>
-                    Choose a bank, enter a practice user id, then the OTP shown on this page.
-                  </p>
-                  {paymentMethod === 'netbanking' ? (
-                    <PracticePaymentPanel mode="netbanking" amountLabel={formatINR(finalTotalINR)} onReady={setPaymentReady} />
-                  ) : null}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="netbanking"
+                    checked={paymentMethod === 'netbanking'}
+                    onChange={() => { setPaymentMethod('netbanking'); setPaymentReady(false); }}
+                    style={{ accentColor: 'var(--fg-primary)' }}
+                  />
+                  <div>
+                    <strong style={{ fontSize: '0.95rem' }}>Net Banking (All Indian Scheduled Banks)</strong>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                      SBI, HDFC, ICICI, Axis, Kotak, and 40+ leading financial institutions
+                    </p>
+                  </div>
                 </div>
+                {paymentMethod === 'netbanking' && (
+                  <PracticePaymentPanel mode="netbanking" amountLabel={formatINR(finalTotalINR)} onReady={setPaymentReady} />
+                )}
               </label>
             </div>
           </div>
 
           {/* STEP 3: GIFT FOR FRIEND (OPTIONAL) */}
-          <div>
-            <label>
+          <div className="checkout-card">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 600 }}>
               <input
                 type="checkbox"
                 checked={isGift}
                 onChange={(e) => setIsGift(e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: 'var(--fg-primary)' }}
               />
               <span>🎁 Send as a Surprise Gift for a Friend / Loved One</span>
             </label>
 
             {isGift && (
-              <div>
-                <div>
-                  <div>
-                    <label>Recipient Email Address</label>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Recipient Email Address</label>
                     <input
                       type="email"
+                      className="auth-input"
                       placeholder="friend@example.com"
                       value={giftRecipientEmail}
                       onChange={(e) => setGiftRecipientEmail(e.target.value)}
                     />
                   </div>
 
-                  <div>
-                    <label>Surprise Reveal Date</label>
+                  <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Surprise Reveal Date</label>
                     <input
                       type="date"
+                      className="auth-input"
                       value={giftRevealDate}
                       onChange={(e) => setGiftRevealDate(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label>Personal Gift Note / Greetings</label>
+                <div className="auth-form-group" style={{ marginBottom: 0 }}>
+                  <label className="auth-label">Personal Gift Note / Greetings</label>
                   <textarea
                     rows={2}
+                    className="auth-input"
+                    style={{ height: 'auto', padding: '0.75rem 1rem' }}
                     placeholder="Wishing you a very Happy Birthday! Enjoy the gift!"
                     value={giftMessage}
                     onChange={(e) => setGiftMessage(e.target.value)}
@@ -880,38 +958,38 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* ORDER SUMMARY (INR) */}
+        {/* RIGHT COLUMN: STICKY ORDER SUMMARY */}
         <div>
-          <div>
-            <h2>
-              Review items before payment
+          <div className="order-summary-panel">
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+              Order Summary
             </h2>
-            <p>
-              Change quantity or remove a product. The amount below updates before you pay.
+            <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginBottom: '1.25rem' }}>
+              {cart.length} unique {cart.length === 1 ? 'item' : 'items'} in your bag
             </p>
 
-            <div>
+            {/* Cart Items Preview */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '1.5rem', maxHeight: '280px', overflowY: 'auto' }}>
               {cart.map((item) => (
-                <div key={item.id}>
-                  <div>
-                    <div
-                    >
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div style={{ flex: 1, paddingRight: '0.75rem' }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg-primary)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {item.title}
                     </div>
-                    <div>
-                      <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem' }}>
+                      <div className="qty-stepper">
                         <button
                           type="button"
+                          className="qty-stepper-btn"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           aria-label="Decrease quantity"
                         >
                           −
                         </button>
-                        <span>
-                          {item.quantity}
-                        </span>
+                        <span className="qty-stepper-val">{item.quantity}</span>
                         <button
                           type="button"
+                          className="qty-stepper-btn"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           aria-label="Increase quantity"
                         >
@@ -920,14 +998,14 @@ export default function CheckoutPage() {
                       </div>
                       <button
                         type="button"
+                        style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.75rem', cursor: 'pointer' }}
                         onClick={() => removeFromCart(item.id)}
                       >
                         Remove
                       </button>
                     </div>
                   </div>
-                  <strong
-                  >
+                  <strong style={{ fontSize: '0.9rem', color: 'var(--fg-primary)' }}>
                     {formatINR(item.price * item.quantity)}
                   </strong>
                 </div>
@@ -935,128 +1013,96 @@ export default function CheckoutPage() {
             </div>
 
             {/* Behavioral Offers & Coupons Section */}
-            <div
-            >
-              <div>
-                <strong>
-                  Apply behavioral coupons
-                </strong>
-                <span
-                >
-                  AI matched
-                </span>
+            <div style={{ padding: '1rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <strong style={{ fontSize: '0.825rem' }}>Discount Coupons</strong>
+                <span className="section-badge" style={{ fontSize: '0.65rem' }}>AI matched</span>
               </div>
 
               {offerFeedback && (
-                <div
-                >
+                <div style={{ fontSize: '0.75rem', color: offerFeedback.type === 'success' ? 'var(--success)' : 'var(--danger)', fontWeight: 600, marginBottom: '0.5rem' }}>
                   {offerFeedback.message}
                 </div>
               )}
 
               {appliedOffer ? (
-                <div
-                >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
                   <div>
-                    <span>
-                      CODE APPLIED · {appliedOffer.code}
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)' }}>
+                      APPLIED: {appliedOffer.code}
                     </span>
-                    <div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--fg-muted)' }}>
                       {appliedOffer.title} (−{formatINR(appliedOffer.discountAmount)})
                     </div>
                   </div>
                   <button
                     type="button"
+                    style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
                     onClick={handleRemoveCoupon}
                   >
                     Remove
                   </button>
                 </div>
               ) : (
-                <>
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Enter coupon code"
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleApplyCoupon(couponInput)}
-                    >
-                      Apply
-                    </button>
-                  </div>
-
-                  {offers.length > 0 && (
-                    <div>
-                      <span>
-                        Available for your cart
-                      </span>
-                      {offers.slice(0, 3).map((off: any, idx: number) => (
-                        <div
-                          key={off.id}
-                        >
-                          <div>
-                            <strong>{off.code}</strong>
-                            <span> — {off.title}</span>
-                            <div>
-                              Min cart: {formatINR(off.minOrderAmount)}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleApplyCoupon(off.code)}
-                          >
-                            Apply
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    type="text"
+                    className="auth-input"
+                    style={{ height: '2.4rem', fontSize: '0.8rem', textTransform: 'uppercase' }}
+                    placeholder="Enter coupon code"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  />
+                  <button
+                    type="button"
+                    className="btn-card-add"
+                    style={{ padding: '0 1rem', fontSize: '0.8rem' }}
+                    onClick={() => handleApplyCoupon(couponInput)}
+                  >
+                    Apply
+                  </button>
+                </div>
               )}
             </div>
 
-            <div>
+            {/* Price Calculations */}
+            <div className="summary-row">
               <span>Items Subtotal</span>
               <span>{formatINR(totalAmount)}</span>
             </div>
 
             {appliedOffer && (
-              <div>
-                <span>Coupon ({appliedOffer.code})</span>
+              <div className="summary-row" style={{ color: 'var(--success)' }}>
+                <span>Coupon Discount ({appliedOffer.code})</span>
                 <span>−{formatINR(appliedOffer.discountAmount)}</span>
               </div>
             )}
 
-            <div>
-              <span>Delivery</span>
-              <span>
-                {deliveryFee === 0 ? 'FREE (above ₹499)' : formatINR(deliveryFee)}
-              </span>
+            <div className="summary-row">
+              <span>Delivery Fee</span>
+              <span>{deliveryFee === 0 ? 'FREE (Orders > ₹499)' : formatINR(deliveryFee)}</span>
             </div>
 
-            <div>
-              <span>Eco packaging & handling</span>
+            <div className="summary-row">
+              <span>Eco Packaging & Handling</span>
               <span>{formatINR(handlingFee)}</span>
             </div>
 
-            <div>
-              <span>Total payable</span>
+            <div className="summary-row total">
+              <span>Total Payable</span>
               <span>{formatINR(finalTotalINR)}</span>
             </div>
 
             <button
               type="submit"
+              className="btn-place-order"
               disabled={loading || cart.length === 0 || ((paymentMethod === 'card' || paymentMethod === 'netbanking') && !paymentReady)}
             >
-              {loading ? 'Processing order…' : `Place order · ${formatINR(finalTotalINR)}`}
+              {loading ? 'Processing Order…' : `Confirm Order · ${formatINR(finalTotalINR)}`}
             </button>
 
-            <div>
-              256-bit SSL · Genuine products · 7-day returns
+            <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--fg-muted)', marginTop: '0.85rem' }}>
+              🔒 256-Bit Encrypted · Authentic Indian Sellers · 30-Day Guarantee
             </div>
           </div>
         </div>

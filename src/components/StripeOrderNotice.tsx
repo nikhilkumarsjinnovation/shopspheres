@@ -25,5 +25,22 @@ export default function StripeOrderNotice() {
   }, [searchParams]);
 
   if (!message) return null;
-  return <p role="status">{message}</p>;
+  const isSuccess = message.includes('confirmed');
+  return (
+    <div
+      role="status"
+      style={{
+        padding: '0.85rem 1.25rem',
+        borderRadius: 'var(--radius-md)',
+        fontSize: '0.875rem',
+        fontWeight: 600,
+        marginBottom: '1.5rem',
+        background: isSuccess ? 'var(--success-bg)' : 'var(--danger-bg)',
+        color: isSuccess ? 'var(--success)' : 'var(--danger)',
+        border: `1px solid ${isSuccess ? 'var(--success-border)' : 'var(--danger)'}`,
+      }}
+    >
+      {message}
+    </div>
+  );
 }

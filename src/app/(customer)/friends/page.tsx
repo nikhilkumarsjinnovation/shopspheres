@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { UserPlus, Users } from 'lucide-react';
+import { UserPlus, Users, Check, X, Clock, UserCheck } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
 interface FriendRow {
@@ -51,72 +51,150 @@ export default function FriendsPage() {
       setError(payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string' ? payload.error : 'Could not update the request.');
       return;
     }
-    setNotice(status === 'accepted' ? 'You are now friends.' : 'Request declined.');
+    setNotice(status === 'accepted' ? 'You are now connected!' : 'Request declined.');
+    setTimeout(() => setNotice(null), 4000);
     load();
   };
 
   return (
-    <div>
+    <div className="friends-container animate-slide-up">
+      {/* Page Header */}
       <div>
-        <h1>Friends</h1>
-        <p>Accept requests here. After that, both of you appear in each other&apos;s lists.</p>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Friends & Social Circle</h1>
+        <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+          Connect with friends to send surprises, coordinate group gifts, and share favorite finds.
+        </p>
       </div>
-      {error ? <div role="alert">{error}</div> : null}
-      {notice ? <div role="status">{notice}</div> : null}
 
+      {error && (
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--danger-bg)', border: '1px solid var(--danger-border)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }} role="alert">
+          {error}
+        </div>
+      )}
+
+      {notice && (
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600 }} role="status">
+          ✓ {notice}
+        </div>
+      )}
+
+      {/* 1. Incoming Requests */}
       <section>
-        <h2>Requests waiting for you</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Connection Requests Waiting</h2>
+          {incoming.length > 0 && <span className="bag-badge">{incoming.length}</span>}
+        </div>
+
         {incoming.length === 0 ? (
-          <div><p>No one is waiting on you.</p></div>
+          <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', color: 'var(--fg-muted)', fontSize: '0.9rem' }}>
+            No incoming connection requests right now.
+          </div>
         ) : (
-          <div>
-            {incoming.map((row) => (
-              <div key={row.id}>
-                <strong>{row.label ?? 'ShopSphere user'}</strong>
-                <p>Sent you a friend request</p>
-                <div>
-                  <button type="button" onClick={() => { void respond(row.id, 'accepted'); }}>Accept</button>
-                  <button type="button" onClick={() => { void respond(row.id, 'blocked'); }}>Decline</button>
+          <div className="friend-requests-grid">
+            {incoming.map((row) => {
+              const name = row.label ?? 'ShopSphere User';
+              const initial = name.charAt(0).toUpperCase();
+
+              return (
+                <div key={row.id} className="friend-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <div className="friend-avatar">{initial}</div>
+                    <div>
+                      <strong style={{ fontSize: '0.95rem', display: 'block', color: 'var(--fg-primary)' }}>{name}</strong>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--fg-muted)' }}>Sent you a friend request</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      className="btn-card-add"
+                      style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                      onClick={() => { void respond(row.id, 'accepted'); }}
+                    >
+                      <Check size={14} /> Accept
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-card-toggle"
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                      onClick={() => { void respond(row.id, 'blocked'); }}
+                    >
+                      <X size={14} /> Decline
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
 
+      {/* 2. Outgoing Sent Requests */}
       <section>
-        <h2>Requests you sent</h2>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.25rem' }}>Sent Requests</h2>
         {outgoing.length === 0 ? (
-          <div><p>You have not sent a request.</p></div>
+          <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', color: 'var(--fg-muted)', fontSize: '0.9rem' }}>
+            No pending outgoing requests.
+          </div>
         ) : (
-          <div>
+          <div className="friend-requests-grid">
             {outgoing.map((row) => (
-              <div key={row.id}>
-                <div>
-                  <UserPlus size={16} aria-hidden />
-                  <strong>{row.label ?? 'ShopSphere user'}</strong>
+              <div key={row.id} className="friend-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  <div className="friend-avatar" style={{ background: 'var(--accent-glow)', color: 'var(--accent-electric)' }}>
+                    <UserPlus size={18} />
+                  </div>
+                  <div>
+                    <strong style={{ fontSize: '0.95rem', display: 'block' }}>{row.label ?? 'ShopSphere User'}</strong>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--warning)', fontWeight: 600 }}>
+                      <Clock size={12} /> Awaiting confirmation
+                    </span>
+                  </div>
                 </div>
-                <p>Waiting for them to accept</p>
               </div>
             ))}
           </div>
         )}
       </section>
 
+      {/* 3. My Friends Circle */}
       <section>
-        <h2>Friends</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Your Friends Circle</h2>
+          <span style={{ fontSize: '0.85rem', color: 'var(--fg-muted)', fontWeight: 600 }}>({friends.length})</span>
+        </div>
+
         {friends.length === 0 ? (
-          <div><p>No accepted friends yet.</p></div>
+          <div style={{ padding: '3.5rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>👥</div>
+            <h3 style={{ fontSize: '1.15rem', marginBottom: '0.35rem' }}>No friends added yet</h3>
+            <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem', maxWidth: '380px', margin: '0 auto' }}>
+              Connect with fellow shoppers to send secret gifts and share curated collections.
+            </p>
+          </div>
         ) : (
-          <div>
-            {friends.map((row) => (
-              <div key={row.id}>
-                <div>
-                  <Users size={16} aria-hidden />
-                  <strong>{row.label ?? 'ShopSphere user'}</strong>
+          <div className="friend-requests-grid">
+            {friends.map((row) => {
+              const name = row.label ?? 'ShopSphere User';
+              const initial = name.charAt(0).toUpperCase();
+
+              return (
+                <div key={row.id} className="friend-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <div className="friend-avatar" style={{ background: 'var(--fg-primary)', color: 'var(--fg-inverted)' }}>
+                      {initial}
+                    </div>
+                    <div>
+                      <strong style={{ fontSize: '0.95rem', display: 'block' }}>{name}</strong>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>
+                        <UserCheck size={12} /> Active Friend
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

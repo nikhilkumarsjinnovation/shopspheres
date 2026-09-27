@@ -13,10 +13,17 @@ export default function CancelOrderButton({ orderId, status }: { orderId: string
   }
 
   return (
-    <div>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
       <button
         type="button"
         disabled={pending}
+        className="btn-card-toggle"
+        style={{
+          padding: '0.35rem 0.75rem',
+          fontSize: '0.75rem',
+          color: 'var(--danger)',
+          borderColor: 'rgba(239, 68, 68, 0.3)',
+        }}
         onClick={() => {
           setPending(true);
           void fetchWithCsrf('/api/v1/orders', {
@@ -36,7 +43,7 @@ export default function CancelOrderButton({ orderId, status }: { orderId: string
       >
         {pending ? 'Cancelling…' : 'Cancel order'}
       </button>
-      {error ? <p role="alert">{error}</p> : null}
+      {error ? <span role="alert" style={{ fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 600 }}>{error}</span> : null}
     </div>
   );
 }
