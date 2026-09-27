@@ -66,7 +66,6 @@ function LoginForm() {
         .single();
 
       if (profileError || !profile) {
-        // Fallback to customer if profile has not populated yet
         router.push('/customer/dashboard');
         router.refresh();
         return;
@@ -115,31 +114,73 @@ function LoginForm() {
   };
 
   return (
-    <div>
-      <h1>Welcome Back</h1>
-      <p>Sign in to your ShopSphere account</p>
+    <div className="auth-card animate-slide-up">
+      <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+        <div className="brand-mark" style={{ width: '36px', height: '36px', fontSize: '1.1rem', margin: '0 auto 1rem' }}>
+          S
+        </div>
+        <h1 className="auth-title">Welcome Back</h1>
+        <p className="auth-subtitle">Sign in to your ShopSphere account</p>
+      </div>
 
-      {successMessage && <div>{successMessage}</div>}
-      {errorMessage && <div>{errorMessage}</div>}
+      {successMessage && (
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            background: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--success)',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            marginBottom: '1.25rem',
+          }}
+        >
+          {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            background: 'var(--danger-bg)',
+            border: '1px solid var(--danger-border)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--danger)',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            marginBottom: '1.25rem',
+          }}
+        >
+          {errorMessage}
+        </div>
+      )}
 
       <form onSubmit={handleEmailLogin}>
-        <div>
-          <label htmlFor="email">Email Address</label>
+        <div className="auth-form-group">
+          <label htmlFor="email" className="auth-label">
+            Email Address
+          </label>
           <input
             id="email"
             type="email"
             required
+            className="auth-input"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <div>
-          <div>
-            <label htmlFor="password">Password</label>
+        <div className="auth-form-group">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+            <label htmlFor="password" className="auth-label" style={{ marginBottom: 0 }}>
+              Password
+            </label>
             <Link
               href="/forgot-password"
+              style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', fontWeight: 500 }}
             >
               Forgot password?
             </Link>
@@ -148,6 +189,7 @@ function LoginForm() {
             id="password"
             type="password"
             required
+            className="auth-input"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -156,16 +198,20 @@ function LoginForm() {
 
         <button
           type="submit"
+          className="btn-primary-auth"
           disabled={loading}
         >
           {loading ? 'Signing In...' : 'Log In'}
         </button>
       </form>
 
-      <div>Or</div>
+      <div className="auth-divider">
+        <span>Or</span>
+      </div>
 
       <button
         type="button"
+        className="btn-oauth-google"
         onClick={handleGoogleLogin}
         disabled={loading}
       >
@@ -187,13 +233,13 @@ function LoginForm() {
             d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
           />
         </svg>
-        Continue with Google
+        <span>Continue with Google</span>
       </button>
 
-      <p>
+      <p style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.875rem', color: 'var(--fg-muted)' }}>
         Don&apos;t have an account?{' '}
-        <Link href="/signup">
-          Sign up
+        <Link href="/signup" style={{ color: 'var(--fg-primary)', fontWeight: 600, textDecoration: 'underline' }}>
+          Create an account
         </Link>
       </p>
     </div>
@@ -202,8 +248,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div>
-      <Suspense fallback={<div><p>Loading sign in...</p></div>}>
+    <div className="auth-wrapper">
+      <Suspense fallback={<div style={{ textAlign: 'center', padding: '2rem' }}><p>Loading sign in...</p></div>}>
         <LoginForm />
       </Suspense>
     </div>

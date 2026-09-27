@@ -244,45 +244,89 @@ export default function SignupPage() {
   };
 
   return (
-    <div>
-      <div>
-        <h1>Create Account</h1>
-        <p>Join ShopSphere as a Customer or Seller</p>
+    <div className="auth-wrapper">
+      <div className="auth-card animate-slide-up" style={{ maxWidth: '480px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <div className="brand-mark" style={{ width: '36px', height: '36px', fontSize: '1.1rem', margin: '0 auto 1rem' }}>
+            S
+          </div>
+          <h1 className="auth-title">Create Account</h1>
+          <p className="auth-subtitle">Join ShopSphere as a Customer or Seller</p>
+        </div>
 
-        {errorMessage && <div>{errorMessage}</div>}
-        {successMessage && <div>{successMessage}</div>}
+        {errorMessage && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              background: 'var(--danger-bg)',
+              border: '1px solid var(--danger-border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--danger)',
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              marginBottom: '1.25rem',
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              background: 'var(--success-bg)',
+              border: '1px solid var(--success-border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--success)',
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              marginBottom: '1.25rem',
+            }}
+          >
+            {successMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="fullName">Full Name</label>
+          <div className="auth-form-group">
+            <label htmlFor="fullName" className="auth-label">
+              Full Name
+            </label>
             <input
               id="fullName"
               type="text"
-              placeholder="John Doe"
+              className="auth-input"
+              placeholder="Priya Sharma"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
           </div>
 
-          <div>
-            <label htmlFor="email">Email Address</label>
+          <div className="auth-form-group">
+            <label htmlFor="email" className="auth-label">
+              Email Address
+            </label>
             <input
               id="email"
               type="email"
               required
+              className="auth-input"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <div>
-            <label htmlFor="password">Password (min. 8 characters)</label>
+          <div className="auth-form-group">
+            <label htmlFor="password" className="auth-label">
+              Password (min. 8 characters)
+            </label>
             <input
               id="password"
               type="password"
               required
               minLength={8}
+              className="auth-input"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -290,149 +334,102 @@ export default function SignupPage() {
 
             {/* Real-time Password Strength Meter */}
             {password.length > 0 && (
-              <div>
-                <div>
+              <div style={{ marginTop: '0.5rem' }}>
+                <div className="password-meter-bar">
                   <div
+                    className={`password-meter-fill ${
+                      passwordAnalysis.strength === 'Weak'
+                        ? 'weak'
+                        : passwordAnalysis.strength === 'Normal'
+                        ? 'normal'
+                        : 'strong'
+                    }`}
                   />
                 </div>
 
-                <div>
-                  <span>Password Strength:</span>
-                  <span
-                  >
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '0.35rem', color: 'var(--fg-muted)' }}>
+                  <span>Strength:</span>
+                  <span style={{ fontWeight: 700, color: passwordAnalysis.strength === 'Strong' ? 'var(--success)' : passwordAnalysis.strength === 'Normal' ? 'var(--warning)' : 'var(--danger)' }}>
                     {passwordAnalysis.strength}
                   </span>
-                </div>
-
-                <div>
-                  <div
-                  >
-                    <span>{passwordAnalysis.hasMinLength ? '✓' : '•'}</span>
-                    <span>At least 8 characters</span>
-                  </div>
-                  <div
-                  >
-                    <span>
-                      {passwordAnalysis.hasUpper && passwordAnalysis.hasLower ? '✓' : '•'}
-                    </span>
-                    <span>Uppercase and lowercase letters</span>
-                  </div>
-                  <div
-                  >
-                    <span>
-                      {passwordAnalysis.hasNumber || passwordAnalysis.hasSpecial ? '✓' : '•'}
-                    </span>
-                    <span>Numbers or symbols</span>
-                  </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div>
-            <span>Select Your Role</span>
-            <div>
-              <label>
+          <div className="auth-form-group">
+            <span className="auth-label">Select Your Account Role</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.35rem' }}>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  background: role === 'customer' ? 'var(--bg-surface-hover)' : 'var(--bg-canvas)',
+                  border: `2px solid ${role === 'customer' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
                 <input
                   type="radio"
                   name="role"
                   value="customer"
                   checked={role === 'customer'}
                   onChange={() => setRole('customer')}
+                  style={{ accentColor: 'var(--fg-primary)' }}
                 />
-                Customer (Buyer)
+                Customer
               </label>
 
-              <label>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem 1rem',
+                  background: role === 'seller' ? 'var(--bg-surface-hover)' : 'var(--bg-canvas)',
+                  border: `2px solid ${role === 'seller' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
                 <input
                   type="radio"
                   name="role"
                   value="seller"
                   checked={role === 'seller'}
                   onChange={() => setRole('seller')}
+                  style={{ accentColor: 'var(--fg-primary)' }}
                 />
-                Seller (Merchant)
+                Seller
               </label>
             </div>
           </div>
 
-          {/* Saksham Accessibility Preferences (Optional) — hidden until the feature is ready */}
-          {false && (
-          <div
-          >
-            <label
-            >
-              <input
-                type="checkbox"
-                checked={wantsAccessibility}
-                onChange={(e) => setWantsAccessibility(e.target.checked)}
-              />
-              <span>♿ Enable Saksham Inclusive Accessibility Options</span>
-            </label>
-
-            {wantsAccessibility && (
-              <div
-              >
-                {/* High Contrast */}
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={accessHighContrast}
-                    onChange={(e) => setAccessHighContrast(e.target.checked)}
-                  />
-                  <span>High Contrast Visual Display</span>
-                </label>
-
-                {/* Font Scaling */}
-                <div>
-                  <span>Text Size:</span>
-                  <select
-                    value={accessFontScale}
-                    onChange={(e) => setAccessFontScale(Number(e.target.value))}
-                  >
-                    <option value={1.0}>100% (Standard)</option>
-                    <option value={1.25}>125% (Large)</option>
-                    <option value={1.5}>150% (Extra Large)</option>
-                    <option value={1.75}>175% (Maximum)</option>
-                  </select>
-                </div>
-
-                {/* Large Touch Targets */}
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={accessLargeTouch}
-                    onChange={(e) => setAccessLargeTouch(e.target.checked)}
-                  />
-                  <span>Large Touch Targets (Motor Ease)</span>
-                </label>
-
-                {/* Simplified UI */}
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={accessSimplifiedUI}
-                    onChange={(e) => setAccessSimplifiedUI(e.target.checked)}
-                  />
-                  <span>Simplified UI (Focus Assistance)</span>
-                </label>
-              </div>
-            )}
-          </div>
-          )}
-
           <button
             type="submit"
+            className="btn-primary-auth"
             disabled={loading || (password.length > 0 && !passwordAnalysis.isValid)}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
-        <div>Or</div>
+        <div className="auth-divider">
+          <span>Or</span>
+        </div>
 
         <button
           type="button"
+          className="btn-oauth-google"
           onClick={handleGoogleSignup}
           disabled={loading}
         >
@@ -454,12 +451,12 @@ export default function SignupPage() {
               d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
             />
           </svg>
-          Continue with Google as {role === 'seller' ? 'Seller' : 'Customer'}
+          <span>Continue with Google as {role === 'seller' ? 'Seller' : 'Customer'}</span>
         </button>
 
-        <p>
+        <p style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.875rem', color: 'var(--fg-muted)' }}>
           Already have an account?{' '}
-          <Link href="/login">
+          <Link href="/login" style={{ color: 'var(--fg-primary)', fontWeight: 600, textDecoration: 'underline' }}>
             Log in
           </Link>
         </p>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ShoppingBag, Sparkles, Compass, Store, ReceiptText, Gift, Users } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import SignOutButton from '@/components/SignOutButton';
 
@@ -13,8 +14,13 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
   const pathname = usePathname();
   const { totalItems } = useCart();
 
-  const isExploreActive = pathname === '/explore' || pathname === '/';
-  const isCheckoutActive = pathname === '/checkout';
+  const navItems = [
+    { label: 'Explore', href: '/explore', icon: Compass },
+    { label: 'Shops', href: '/shops', icon: Store },
+    { label: 'Orders', href: '/orders', icon: ReceiptText },
+    { label: 'Gifts', href: '/gifts', icon: Gift },
+    { label: 'Friends', href: '/friends', icon: Users },
+  ];
 
   const handleOpenAI = () => {
     if (typeof window !== 'undefined') {
@@ -23,54 +29,70 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
   };
 
   return (
-    <header>
-      <div>
-        <Link href="/explore">
-          ShopSphere
+    <header className="site-header">
+      <div className="container site-header-inner">
+        {/* Brand Logo */}
+        <Link href="/explore" className="brand-logo" aria-label="ShopSphere Home">
+          <span className="brand-mark">S</span>
+          <span>ShopSphere</span>
         </Link>
-      </div>
 
-      <nav aria-label="Customer">
-        <Link href="/explore">
-          Index
-        </Link>
-        <Link href="/shops">
-          Rooms
-        </Link>
-        <Link href="/orders">
-          Ledger
-        </Link>
-        <Link href="/gifts">
-          Gifts
-        </Link>
-        <Link href="/friends">
-          Circle
-        </Link>
-      </nav>
+        {/* Center Primary Nav */}
+        <nav className="nav-links" aria-label="Main Navigation">
+          {navItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href === '/explore' && pathname === '/') ||
+              (item.href !== '/explore' && pathname?.startsWith(item.href));
 
-      <div>
-        <button
-          type="button"
-          onClick={handleOpenAI}
-          title="Ask AI"
-        >
-          Guide
-        </button>
-        <Link
-          href="/checkout"
-          aria-label={totalItems > 0 ? `Cart, ${totalItems} items` : 'Cart'}
-        >
-          Bag
-          {totalItems > 0 ? <span>{totalItems}</span> : null}
-        </Link>
-        {email ? (
-          <span
-            title={email}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-link-item ${isActive ? 'active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right Actions */}
+        <div className="header-actions">
+          {/* Ask AI Trigger */}
+          <button
+            type="button"
+            className="btn-ai-guide"
+            onClick={handleOpenAI}
+            title="Personal AI Shopping Assistant"
+            aria-label="Open AI Shopping Assistant"
           >
-            {email}
-          </span>
-        ) : null}
-        <SignOutButton />
+            <Sparkles size={14} />
+            <span>Ask AI</span>
+          </button>
+
+          {/* Shopping Bag Button */}
+          <Link
+            href="/checkout"
+            className="bag-btn"
+            aria-label={totalItems > 0 ? `Shopping Bag with ${totalItems} items` : 'Shopping Bag, empty'}
+          >
+            <ShoppingBag size={16} />
+            <span>Bag</span>
+            {totalItems > 0 && <span className="bag-badge">{totalItems}</span>}
+          </Link>
+
+          {/* User Account / Email */}
+          {email && (
+            <span className="user-email-chip" title={email}>
+              {email}
+            </span>
+          )}
+
+          {/* Sign Out */}
+          <SignOutButton />
+        </div>
       </div>
     </header>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { ArrowLeft, Gift, Sparkles, Send, Check } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import { formatINR } from '@/lib/formatters';
 
@@ -77,9 +78,11 @@ export default function GiftDetailPage() {
 
   if (!view) {
     return (
-      <div>
-        <p>{error ?? 'Loading gift…'}</p>
-        <Link href="/gifts">Back to gifts</Link>
+      <div style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+        <p style={{ color: 'var(--fg-muted)', marginBottom: '1rem' }}>{error ?? 'Loading gift package…'}</p>
+        <Link href="/gifts" className="btn-card-toggle" style={{ display: 'inline-flex' }}>
+          Back to gifts
+        </Link>
       </div>
     );
   }
@@ -87,62 +90,132 @@ export default function GiftDetailPage() {
   const { gift, role, sealed, product } = view;
 
   return (
-    <div>
-      <p><Link href="/gifts">Back to gifts</Link></p>
-      <div>
-        <h1>{sealed && role === 'recipient' ? 'A gift is waiting' : product?.title ?? 'Gift'}</h1>
-      </div>
-      {error ? <div role="alert">{error}</div> : null}
+    <div className="animate-slide-up" style={{ paddingBottom: '4rem' }}>
+      <Link
+        href="/gifts"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--fg-muted)', marginBottom: '1.5rem' }}
+      >
+        <ArrowLeft size={14} /> Back to gifts hub
+      </Link>
 
-      {sealed && role === 'sender' ? (
-        <section>
-          <p>This gift is still hidden from {gift.recipient_email ?? 'the recipient'}.</p>
-          {product ? <p>You chose {product.title} at {formatINR(product.price)}. They cannot see it until you reveal it.</p> : null}
-          {product?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={product.imageUrl} alt="" width={160} height={160} />
-          ) : null}
-          <p>Reveal trigger: {gift.reveal_trigger}</p>
-          <button type="button" disabled={pending} onClick={() => { void reveal(); }}>
-            {pending ? 'Revealing…' : 'Reveal gift'}
-          </button>
-        </section>
-      ) : null}
+      {error && (
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--danger-bg)', border: '1px solid var(--danger-border)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', marginBottom: '1.5rem' }} role="alert">
+          {error}
+        </div>
+      )}
 
-      {sealed && role === 'recipient' ? (
-        <section>
-          <p>
-            The sender has not opened this gift yet. The product stays hidden until they reveal it, or until the agreed date or delivery.
+      {/* Case 1: Sealed & Recipient (Unopened Mystery Box) */}
+      {sealed && role === 'recipient' && (
+        <div className="gift-reveal-box">
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }} className="pulse-badge">🎁</div>
+          <h1 style={{ fontSize: '1.85rem', fontWeight: 800, marginBottom: '0.5rem' }}>A Secret Gift Is Waiting For You!</h1>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '440px', margin: '0 auto 1.5rem' }}>
+            The sender has sealed this surprise. It will automatically unwrap on the reveal date or when delivered to your doorstep!
           </p>
-        </section>
-      ) : null}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', background: 'var(--accent-glow)', color: 'var(--accent-electric)', borderRadius: 'var(--radius-full)', fontSize: '0.825rem', fontWeight: 600 }}>
+            <Sparkles size={14} /> Reveal trigger: {gift.reveal_trigger}
+          </div>
+        </div>
+      )}
 
-      {!sealed ? (
-        <section>
-          <p>This gift is open.</p>
-          {product ? (
-            <>
-              {product.imageUrl ? (
+      {/* Case 2: Sealed & Sender (Sender Controls) */}
+      {sealed && role === 'sender' && (
+        <div className="gift-reveal-box">
+          <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>📦</div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem' }}>Gift Sent to {gift.recipient_email ?? 'Recipient'}</h1>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+            This item is currently hidden and will stay a mystery until revealed.
+          </p>
+
+          {product && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', marginBottom: '1.5rem', textAlign: 'left' }}>
+              {product.imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={product.imageUrl} alt="" width={200} height={200} />
-              ) : null}
-              <h2>{product.title}</h2>
-              <p>{formatINR(product.price)}</p>
-            </>
-          ) : <p>The product details are not on this gift.</p>}
-          {gift.message ? <p>Note: {gift.message}</p> : null}
-          {role === 'recipient' && gift.status !== 'thanked' ? (
-            <form onSubmit={(event) => { void thank(event); }}>
+                <img src={product.imageUrl} alt="" style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+              )}
               <div>
-                <label htmlFor="thanks">Thank-you note</label>
-                <textarea id="thanks" value={thanks} onChange={(event) => setThanks(event.target.value)} required />
+                <strong style={{ display: 'block', fontSize: '1rem' }}>{product.title}</strong>
+                <span style={{ fontSize: '0.875rem', color: 'var(--fg-muted)' }}>{formatINR(product.price)}</span>
               </div>
-              <button type="submit" disabled={pending}>Send thanks</button>
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="btn-card-add"
+            style={{ width: '100%', height: '3rem', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+            disabled={pending}
+            onClick={() => { void reveal(); }}
+          >
+            <Sparkles size={18} />
+            <span>{pending ? 'Revealing Surprise…' : 'Reveal Surprise Now'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Case 3: Revealed Gift (Unwrapped Box) */}
+      {!sealed && (
+        <div className="gift-reveal-box" style={{ maxWidth: '640px' }}>
+          <div style={{ display: 'inline-flex', padding: '0.35rem 0.95rem', background: 'var(--success-bg)', color: 'var(--success)', borderRadius: 'var(--radius-full)', fontSize: '0.825rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+            ✓ Surprise Unwrapped & Revealed!
+          </div>
+
+          {product && (
+            <div style={{ marginBottom: '1.75rem' }}>
+              {product.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={product.imageUrl}
+                  alt={product.title}
+                  style={{ width: '100%', maxHeight: '280px', objectFit: 'contain', borderRadius: 'var(--radius-lg)', background: 'var(--bg-canvas)', marginBottom: '1rem' }}
+                />
+              )}
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.35rem' }}>{product.title}</h2>
+              <p style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--fg-primary)' }}>{formatINR(product.price)}</p>
+            </div>
+          )}
+
+          {gift.message && (
+            <div style={{ padding: '1rem 1.25rem', background: 'var(--bg-canvas)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', fontStyle: 'italic', color: 'var(--fg-secondary)', marginBottom: '1.75rem' }}>
+              &quot;{gift.message}&quot;
+            </div>
+          )}
+
+          {/* Thank-you note form for recipient */}
+          {role === 'recipient' && gift.status !== 'thanked' && (
+            <form onSubmit={(event) => { void thank(event); }} style={{ textAlign: 'left', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-subtle)' }}>
+              <label htmlFor="thanks" className="auth-label">
+                Send a Thank-You Note to the Sender
+              </label>
+              <textarea
+                id="thanks"
+                rows={3}
+                required
+                className="auth-input"
+                style={{ height: 'auto', padding: '0.75rem 1rem', marginBottom: '0.75rem' }}
+                placeholder="Thank you so much for this wonderful gift! I love it..."
+                value={thanks}
+                onChange={(event) => setThanks(event.target.value)}
+              />
+              <button
+                type="submit"
+                className="btn-card-add"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1.4rem' }}
+                disabled={pending}
+              >
+                <Send size={14} />
+                <span>{pending ? 'Sending Note…' : 'Send Thank You'}</span>
+              </button>
             </form>
-          ) : null}
-          {gift.status === 'thanked' ? <p>Thanks were sent.</p> : null}
-        </section>
-      ) : null}
+          )}
+
+          {gift.status === 'thanked' && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem' }}>
+              <Check size={16} /> Thank-you note was received by the sender.
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Real-time password strength analysis matching Phase 1 security requirement
+  // Real-time password strength analysis
   const passwordAnalysis = useMemo(() => {
     if (!password) {
       return {
@@ -106,22 +106,43 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div>
-      <div>
-        <h1>Set New Password</h1>
-        <p>Enter your secure new password below</p>
+    <div className="auth-wrapper">
+      <div className="auth-card animate-slide-up">
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <div className="brand-mark" style={{ width: '36px', height: '36px', fontSize: '1.1rem', margin: '0 auto 1rem' }}>
+            S
+          </div>
+          <h1 className="auth-title">Set New Password</h1>
+          <p className="auth-subtitle">Enter your secure new password below</p>
+        </div>
 
-        {errorMessage && <div>{errorMessage}</div>}
+        {errorMessage && (
+          <div
+            style={{
+              padding: '0.85rem 1rem',
+              background: 'var(--danger-bg)',
+              border: '1px solid var(--danger-border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--danger)',
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              marginBottom: '1.5rem',
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
 
         <form onSubmit={handleUpdatePassword}>
-          <div>
-            <label htmlFor="newPassword">
+          <div className="auth-form-group">
+            <label htmlFor="newPassword" className="auth-label">
               New Password
             </label>
             <input
               id="newPassword"
               type="password"
               required
+              className="auth-input"
               placeholder="Min. 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -129,44 +150,38 @@ export default function ResetPasswordPage() {
 
             {/* Real-time Password Strength Meter */}
             {passwordAnalysis.strength && (
-              <div>
-                <div>
-                  <span>Password Strength</span>
-                  <span
-                  >
-                    {passwordAnalysis.strength}
-                  </span>
-                </div>
-
-                <div>
+              <div style={{ marginTop: '0.5rem' }}>
+                <div className="password-meter-bar">
                   <div
+                    className={`password-meter-fill ${
+                      passwordAnalysis.strength === 'Weak'
+                        ? 'weak'
+                        : passwordAnalysis.strength === 'Normal'
+                        ? 'normal'
+                        : 'strong'
+                    }`}
                   />
                 </div>
 
-                <div>
-                  <div
-                  >
-                    <span>{passwordAnalysis.hasMinLength ? '✓' : '○'}</span>
-                    <span>At least 8 characters</span>
-                  </div>
-                  <div
-                  >
-                    <span>{passwordAnalysis.strength !== 'Weak' ? '✓' : '○'}</span>
-                    <span>Contains mix of uppercase, lowercase, numbers, or symbols</span>
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '0.35rem', color: 'var(--fg-muted)' }}>
+                  <span>Strength:</span>
+                  <span style={{ fontWeight: 700, color: passwordAnalysis.strength === 'Strong' ? 'var(--success)' : passwordAnalysis.strength === 'Normal' ? 'var(--warning)' : 'var(--danger)' }}>
+                    {passwordAnalysis.strength}
+                  </span>
                 </div>
               </div>
             )}
           </div>
 
-          <div>
-            <label htmlFor="confirmPassword">
+          <div className="auth-form-group">
+            <label htmlFor="confirmPassword" className="auth-label">
               Confirm New Password
             </label>
             <input
               id="confirmPassword"
               type="password"
               required
+              className="auth-input"
               placeholder="Re-enter new password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -175,14 +190,15 @@ export default function ResetPasswordPage() {
 
           <button
             type="submit"
+            className="btn-primary-auth"
             disabled={loading || !passwordAnalysis.isValid}
           >
             {loading ? 'Updating Password...' : 'Save New Password'}
           </button>
         </form>
 
-        <p>
-          <Link href="/login">
+        <p style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.875rem' }}>
+          <Link href="/login" style={{ color: 'var(--fg-muted)', fontWeight: 500 }}>
             Cancel and return to login
           </Link>
         </p>

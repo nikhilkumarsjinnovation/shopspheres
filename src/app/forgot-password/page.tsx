@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
       }
 
       setSuccessMessage(
-        `A password reset link has been sent to ${email}. Please check your email inbox (and spam folder) and click the link to set a new password.`
+        `A password reset link has been sent to ${email}. Please check your email inbox and click the link to set a new password.`
       );
       setLoading(false);
     } catch (err: unknown) {
@@ -54,43 +54,82 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div>
-      <div>
-        <h1>Reset Password</h1>
-        <p>
-          Enter your email and we&apos;ll send you a link to reset your password.
-        </p>
+    <div className="auth-wrapper">
+      <div className="auth-card animate-slide-up">
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <div className="brand-mark" style={{ width: '36px', height: '36px', fontSize: '1.1rem', margin: '0 auto 1rem' }}>
+            S
+          </div>
+          <h1 className="auth-title">Reset Password</h1>
+          <p className="auth-subtitle">
+            Enter your email and we&apos;ll send you a recovery link
+          </p>
+        </div>
 
-        {successMessage && <div>{successMessage}</div>}
-        {errorMessage && <div>{errorMessage}</div>}
+        {successMessage && (
+          <div
+            style={{
+              padding: '0.85rem 1rem',
+              background: 'var(--success-bg)',
+              border: '1px solid var(--success-border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--success)',
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              marginBottom: '1.5rem',
+            }}
+          >
+            {successMessage}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div
+            style={{
+              padding: '0.85rem 1rem',
+              background: 'var(--danger-bg)',
+              border: '1px solid var(--danger-border)',
+              borderRadius: 'var(--radius-md)',
+              color: 'var(--danger)',
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              marginBottom: '1.5rem',
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
 
         {!successMessage ? (
           <form onSubmit={handleResetRequest}>
-            <div>
-              <label htmlFor="email">
+            <div className="auth-form-group">
+              <label htmlFor="email" className="auth-label">
                 Account Email Address
               </label>
               <input
                 id="email"
                 type="email"
                 required
+                className="auth-input"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
+            <button type="submit" className="btn-primary-auth" disabled={loading}>
+              {loading ? 'Sending Recovery Link...' : 'Send Recovery Link'}
             </button>
           </form>
         ) : (
-          <div>
-            <p>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--fg-muted)', marginBottom: '1.25rem' }}>
               Didn&apos;t receive an email? Check your spam folder or try again with a different email.
             </p>
             <button
               type="button"
+              className="btn-card-toggle"
+              style={{ width: '100%', justifyContent: 'center', height: '2.6rem' }}
               onClick={() => {
                 setSuccessMessage(null);
                 setEmail('');
@@ -101,9 +140,9 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        <p>
+        <p style={{ textAlign: 'center', marginTop: '1.75rem', fontSize: '0.875rem', color: 'var(--fg-muted)' }}>
           Remember your password?{' '}
-          <Link href="/login">
+          <Link href="/login" style={{ color: 'var(--fg-primary)', fontWeight: 600, textDecoration: 'underline' }}>
             Back to login
           </Link>
         </p>

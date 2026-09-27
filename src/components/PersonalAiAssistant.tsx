@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { Sparkles, Send, X, Bot } from 'lucide-react';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import PersonaSelector from '@/components/ai/PersonaSelector';
@@ -148,40 +149,45 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
       <button
         id="personal-ai-trigger"
         type="button"
+        className="ai-floating-trigger"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open Personal AI Shopping Guide"
       >
-        <span>{isOpen ? 'Close guide' : 'AI guide'}</span>
+        <Sparkles size={16} />
+        <span>{isOpen ? 'Close AI Guide' : 'Personal AI'}</span>
       </button>
 
       {isOpen && (
         <div
           role="dialog"
           aria-label="Personal AI Shopping Companion"
+          className="ai-assistant-drawer"
         >
-          <div>
+          {/* Header */}
+          <div className="ai-header">
             <div>
-              <div>
-                <span
-                >
-                  ShopSphere Guide
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Bot size={18} style={{ color: 'var(--accent-electric)' }} />
+                <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--fg-primary)' }}>
+                  ShopSphere AI Companion
                 </span>
-                <span
-                >
+                <span className="section-badge" style={{ fontSize: '0.62rem', padding: '0.1rem 0.45rem' }}>
                   Live
                 </span>
               </div>
-              <p>
-                Understands your style, answers questions & customizes your feed in ₹.
+              <p style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                Curates recommendations in ₹ · Answers questions · Real-time feed tuning
               </p>
             </div>
 
             <button
               type="button"
+              className="btn-card-toggle"
+              style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
               onClick={() => setIsOpen(false)}
               aria-label="Close guide"
             >
-              ✕
+              <X size={14} />
             </button>
           </div>
 
@@ -189,10 +195,23 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
 
           {feedNotification && (
             <div
+              style={{
+                margin: '0.5rem 1rem 0',
+                padding: '0.5rem 0.75rem',
+                background: 'var(--accent-glow)',
+                border: '1px solid rgba(79, 70, 229, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.75rem',
+                color: 'var(--accent-electric)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
             >
               <span>{feedNotification}</span>
               <button
                 type="button"
+                style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '0.8rem' }}
                 onClick={() => setFeedNotification(null)}
               >
                 ✕
@@ -200,63 +219,83 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
             </div>
           )}
 
-          <div>
-            {messages.map((m, index) => (
+          <div className="ai-messages-pane">
+            {messages.map((m) => (
               <div
                 key={m.id}
+                className={m.role === 'assistant' ? 'ai-bubble-assistant' : 'ai-bubble-user'}
               >
-                <div
-                >
-                  {m.content}
-                </div>
+                <div>{m.content}</div>
 
                 {m.recommendedProducts && m.recommendedProducts.length > 0 && (
-                  <div
-                  >
+                  <div style={{ marginTop: '0.85rem', paddingTop: '0.65rem', borderTop: '1px solid var(--border-subtle)' }}>
                     <span
+                      style={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        color: 'var(--accent-electric)',
+                        marginBottom: '0.5rem',
+                      }}
                     >
                       Recommended for you
                     </span>
-                    {m.recommendedProducts.map((prod) => (
-                      <Link
-                        key={prod.id}
-                        href={`/product/${prod.id}`}
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <div
-                        />
-                        <div>
-                          <p
-                          >
-                            {prod.title}
-                          </p>
-                          <div>
-                            <span>
-                              {formatINR(prod.price)}
-                            </span>
-                            <span>
-                              ★ {Number(prod.average_rating || 5).toFixed(1)}
-                            </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {m.recommendedProducts.map((prod) => (
+                        <Link
+                          key={prod.id}
+                          href={`/product/${prod.id}`}
+                          onClick={() => setIsOpen(false)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.65rem',
+                            padding: '0.45rem',
+                            background: 'var(--bg-canvas)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-md)',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-subtle)', overflow: 'hidden', flexShrink: 0 }}>
+                            {prod.image_urls?.[0] && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={prod.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            )}
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {prod.title}
+                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}>
+                              <span style={{ fontWeight: 700, color: 'var(--fg-primary)' }}>
+                                {formatINR(prod.price)}
+                              </span>
+                              <span style={{ color: 'var(--warning)', fontWeight: 600 }}>
+                                ★ {Number(prod.average_rating || 5).toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             ))}
 
             {loading && (
-              <div
-              >
-                Searching the catalog and tuning recommendations…
+              <div style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem' }}>
+                <Sparkles size={14} className="pulse-badge" /> Searching catalog and tuning recommendations…
               </div>
             )}
 
             <div ref={messagesEndRef} />
           </div>
 
-          <div>
+          <div className="ai-prompt-chips-row">
             {[
               'Smartphones under ₹15,000',
               'Wireless earbuds under ₹2,000',
@@ -266,6 +305,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
               <button
                 key={pill}
                 type="button"
+                className="ai-prompt-chip"
                 onClick={() => handleSendMessage(pill)}
               >
                 {pill}
@@ -279,6 +319,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
           )}
 
           <form
+            className="ai-input-bar"
             onSubmit={(e) => {
               e.preventDefault();
               void handleSendMessage();
@@ -287,6 +328,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
             <input
               ref={inputRef}
               type="text"
+              className="ai-input-field"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Ask anything or search with budget in ₹..."
@@ -294,9 +336,11 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
             />
             <button
               type="submit"
+              className="btn-card-add"
+              style={{ padding: '0 1rem', height: '2.6rem', fontSize: '0.825rem' }}
               disabled={loading || !inputMessage.trim()}
             >
-              Send
+              <Send size={14} />
             </button>
           </form>
         </div>

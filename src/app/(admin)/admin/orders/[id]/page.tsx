@@ -29,20 +29,50 @@ export default async function AdminOrderDetailPage({
   const shopBySeller = new Map((shops ?? []).map((shop) => [shop.seller_id, shop]));
 
   return (
-    <div>
-      <div>
-        <h1>{orderCode(order.id)}</h1>
-        <p>{order.status} · {formatINR(order.total_amount)} · {place.city} {place.pin}</p>
+    <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
+      <Link
+        href="/admin/orders"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          color: 'var(--fg-muted)',
+          marginBottom: '1.5rem',
+        }}
+      >
+        &larr; Back to orders
+      </Link>
+
+      <div className="checkout-card" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+          <div>
+            <span className="portal-badge active" style={{ textTransform: 'uppercase', fontSize: '0.72rem', marginBottom: '0.5rem' }}>
+              {order.status.replace(/_/g, ' ')}
+            </span>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{orderCode(order.id)}</h1>
+            <p style={{ color: 'var(--fg-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+              Destination: <strong>{place.city || 'Standard Delivery'} {place.pin}</strong> · Placed {new Date(order.created_at).toLocaleString('en-IN')}
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--fg-muted)', textTransform: 'uppercase' }}>Total Value</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--fg-primary)' }}>{formatINR(order.total_amount)}</div>
+          </div>
+        </div>
       </div>
-      <p><Link href="/admin/orders">Back to orders</Link></p>
-      <div>
-        <table>
+
+      <div className="checkout-card">
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.25rem' }}>Purchased Order Items</h2>
+        <table className="portal-table">
           <thead>
             <tr>
-              <th>Item</th>
-              <th>Qty</th>
-              <th>Price</th>
-              <th>Shop</th>
+              <th>Item Title</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Subtotal</th>
+              <th>Fulfillment Shop</th>
             </tr>
           </thead>
           <tbody>
@@ -51,10 +81,11 @@ export default async function AdminOrderDetailPage({
               const title = item.product && !Array.isArray(item.product) ? item.product.title : 'Product';
               return (
                 <tr key={item.id}>
-                  <td>{title}</td>
+                  <td><strong>{title}</strong></td>
                   <td>{item.quantity}</td>
                   <td>{formatINR(item.unit_price)}</td>
-                  <td>{shop ? `${shop.name}, ${shop.city}` : '—'}</td>
+                  <td><strong>{formatINR(Number(item.unit_price) * item.quantity)}</strong></td>
+                  <td>{shop ? `${shop.name} (${shop.city})` : '—'}</td>
                 </tr>
               );
             })}

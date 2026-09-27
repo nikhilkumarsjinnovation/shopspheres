@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchWithCsrf } from '@/lib/csrf-client';
+import { formatINR } from '@/lib/formatters';
 import type { Json } from '@/types/database.types';
 import ProductThumbnail from '@/components/ProductThumbnail';
+import { Check, X, ShieldCheck, ExternalLink } from 'lucide-react';
 
 export type QueueProduct = {
   id: string;
@@ -42,7 +44,7 @@ export default function AdminApprovalQueue({
   ) => {
     const rejectionReason = (reasons[productId] ?? '').trim();
     if (newStatus === 'rejected' && !rejectionReason) {
-      setErrorMessage('A rejection reason is required.');
+      setErrorMessage('A rejection reason is required before rejecting a listing.');
       return;
     }
     setLoadingId(productId);
@@ -60,13 +62,12 @@ export default function AdminApprovalQueue({
         throw new Error(payload?.error || 'Could not update this product.');
       }
 
-      // Optimistically remove from pending queue
       setPendingProducts((prev) => prev.filter((p) => p.id !== productId));
 
       if (newStatus === 'approved') {
-        setToastMessage(`✅ Approved "${productTitle}"! Product is now live in the Customer catalog.`);
+        setToastMessage(`✓ Approved "${productTitle}"! Product is now published to the marketplace catalog.`);
       } else {
-        setToastMessage(`❌ Rejected "${productTitle}". Status set to rejected.`);
+        setToastMessage(`Rejected "${productTitle}". Notification sent to merchant.`);
       }
 
       router.refresh();
@@ -79,49 +80,56 @@ export default function AdminApprovalQueue({
   };
 
   return (
-    <div>
-      <div>
+    <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', padding: '1.25rem 1.5rem', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)' }}>
         <div>
-          <span>Pending Product Approvals</span>
-          <span>
-            {pendingProducts.length} Awaiting Review
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Product Moderation Queue</h2>
+            <span className="portal-badge pending">
+              {pendingProducts.length} Awaiting Review
+            </span>
+          </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+            Marketplace compliance and catalog quality gate. Review seller submissions before publishing.
+          </p>
         </div>
-        <span>
-          Enterprise Merchant Compliance Gate
+
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--accent-electric)', fontWeight: 600 }}>
+          <ShieldCheck size={16} /> Administrator Clearance Active
         </span>
       </div>
 
-      {toastMessage && <div>{toastMessage}</div>}
+      {toastMessage && (
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--success-bg)', border: '1px solid var(--success-border)', color: 'var(--success)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600 }}>
+          {toastMessage}
+        </div>
+      )}
       {errorMessage && (
-        <div
-        >
+        <div style={{ padding: '0.85rem 1.25rem', background: 'var(--danger-bg)', border: '1px solid var(--danger-border)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>
           {errorMessage}
         </div>
       )}
 
-      <div>
-        {pendingProducts.length === 0 ? (
-          <div>
-            <div></div>
-            <p>
-              Approval Queue Cleared
-            </p>
-            <p>
-              All submitted products have been reviewed. When sellers onboard new items, they will appear
-              here for administrator inspection.
-            </p>
-          </div>
-        ) : (
-          <table>
+      {pendingProducts.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🎉</div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+            Approval Queue Cleared
+          </h3>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.9rem', maxWidth: '420px', margin: '0 auto' }}>
+            All submitted products have been reviewed. When sellers onboard new items, they will appear here for administrator inspection.
+          </p>
+        </div>
+      ) : (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', overflow: 'hidden', boxShadow: 'var(--shadow-xs)' }}>
+          <table className="portal-table">
             <thead>
               <tr>
-                <th>Image</th>
+                <th style={{ width: '60px' }}>Image</th>
                 <th>Product Details</th>
                 <th>Category</th>
                 <th>Condition</th>
                 <th>Price & Stock</th>
-                <th>Seller ID</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -147,85 +155,85 @@ export default function AdminApprovalQueue({
                     </td>
 
                     <td>
-                      <div>
-                        <Link href={`/admin/catalog/${product.id}`}>{product.title}</Link>
+                      <div style={{ fontWeight: 600, color: 'var(--fg-primary)' }}>
+                        <Link href={`/admin/catalog/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          {product.title}
+                        </Link>
                       </div>
                       {product.sub_category && (
-                        <div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginTop: '0.15rem' }}>
                           {product.sub_category}
                         </div>
                       )}
                       {specCount > 0 && (
-                        <div>
-                          <span>
-                            ⚡ {specCount} enterprise specs
-                          </span>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--accent-electric)', marginTop: '0.15rem', fontWeight: 500 }}>
+                          ⚡ {specCount} enterprise specs
                         </div>
                       )}
-                      <div>
-                        <Link href={`/admin/catalog/${product.id}`}>View full details</Link>
+                      <div style={{ marginTop: '0.35rem' }}>
+                        <Link href={`/admin/catalog/${product.id}`} style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', textDecoration: 'underline' }}>
+                          View full spec sheet &rarr;
+                        </Link>
                       </div>
                     </td>
 
                     <td>
-                      {product.category}
+                      <span className="section-badge" style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem' }}>
+                        {product.category}
+                      </span>
                     </td>
 
                     <td>
-                      <span
-                      >
+                      <span style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)' }}>
                         {product.condition || 'New'}
                       </span>
                     </td>
 
                     <td>
-                      <div>
-                        ${Number(product.price).toFixed(2)}
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--fg-primary)' }}>
+                        {formatINR(Number(product.price))}
                       </div>
-                      <div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginTop: '0.15rem' }}>
                         {product.stock} units
                       </div>
                     </td>
 
                     <td>
-                      <span title={product.seller_id}>
-                        {product.seller_id.slice(0, 8)}...
-                      </span>
-                    </td>
-
-                    <td>
-                      <div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '220px' }}>
                         <button
                           type="button"
-                          onClick={() =>
-                            handleUpdateStatus(product.id, product.title, 'approved')
-                          }
+                          className="btn-card-add"
+                          style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', background: 'var(--success)', justifyContent: 'center' }}
+                          onClick={() => handleUpdateStatus(product.id, product.title, 'approved')}
                           disabled={isOperating}
                           title="Approve listing and make live to customers"
                         >
-                          <span>✓</span>
-                          <span>{isOperating ? 'Saving...' : 'Approve'}</span>
+                          <Check size={14} />
+                          <span>{isOperating ? 'Saving…' : 'Approve & Publish'}</span>
                         </button>
 
-                        <input
-                          value={reasons[product.id] ?? ''}
-                          onChange={(event) =>
-                            setReasons((current) => ({ ...current, [product.id]: event.target.value }))
-                          }
-                          placeholder="Rejection reason"
-                          disabled={isOperating}
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleUpdateStatus(product.id, product.title, 'rejected')
-                          }
-                          disabled={isOperating}
-                          title="Reject listing"
-                        >
-                          <span>✕</span>
-                          <span>Reject</span>
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <input
+                            className="auth-input"
+                            style={{ height: '2.1rem', fontSize: '0.75rem', padding: '0 0.5rem' }}
+                            value={reasons[product.id] ?? ''}
+                            onChange={(event) =>
+                              setReasons((current) => ({ ...current, [product.id]: event.target.value }))
+                            }
+                            placeholder="Rejection reason…"
+                            disabled={isOperating}
+                          />
+                          <button
+                            type="button"
+                            className="btn-card-toggle"
+                            style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', color: 'var(--danger)' }}
+                            onClick={() => handleUpdateStatus(product.id, product.title, 'rejected')}
+                            disabled={isOperating}
+                            title="Reject listing"
+                          >
+                            <X size={14} /> Reject
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -233,8 +241,8 @@ export default function AdminApprovalQueue({
               })}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

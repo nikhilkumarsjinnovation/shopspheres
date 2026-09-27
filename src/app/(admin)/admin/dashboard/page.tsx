@@ -26,64 +26,87 @@ export default async function AdminDashboardPage() {
     .limit(10);
 
   return (
-    <div>
-      <div>
-        <h1>Platform Health</h1>
-        <p>
-          Marketplace totals, the approval queue, and the latest orders. Private chats and payment details stay hidden.
+    <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Platform Health & Moderation</h1>
+        <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+          High-level marketplace metrics, inventory approval queue, and recent orders feed.
         </p>
       </div>
 
       {statsError || !stats ? (
-        <div>
+        <div style={{ padding: '1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
           Stats are unavailable. Apply migration 009, then reload. {statsError?.message ?? ''}
         </div>
       ) : (
-        <div>
-          <Metric label="GMV" value={formatINR(stats.gmv)} note="Sum of order totals" />
-          <Metric label="Orders" value={String(orderTotal)} note={statusLine(stats.orders_by_status)} />
-          <Metric label="Active users" value={String(stats.users_active)} note={`${stats.users_customer} customers · ${stats.users_seller} sellers · ${stats.users_admin} admins`} />
-          <Metric label="Catalog" value={String(stats.products_approved)} note={`${stats.products_pending} pending · ${stats.products_rejected} rejected`} />
-          <Metric label="Shops" value={String(stats.shop_count)} note={`${stats.low_stock} products under 5 in stock`} />
-          <Metric label="Pending gifts" value={String(stats.gifts_pending)} note="Gifts still sealed" />
+        <div className="stat-cards-grid" style={{ marginBottom: '2.5rem' }}>
+          <Metric label="Gross Merchandise Value (GMV)" value={formatINR(stats.gmv)} note="Sum of order totals" />
+          <Metric label="Total Orders" value={String(orderTotal)} note={statusLine(stats.orders_by_status)} />
+          <Metric label="Active Accounts" value={String(stats.users_active)} note={`${stats.users_customer} cust · ${stats.users_seller} sellers · ${stats.users_admin} admin`} />
+          <Metric label="Catalog Approved" value={String(stats.products_approved)} note={`${stats.products_pending} pending · ${stats.products_rejected} rejected`} />
+          <Metric label="Verified Shops" value={String(stats.shop_count)} note={`${stats.low_stock} products under 5 stock`} />
+          <Metric label="Pending Gifts" value={String(stats.gifts_pending)} note="Gifts awaiting reveal" />
         </div>
       )}
 
-      <AdminApprovalQueue initialPendingProducts={(pendingProductsData ?? []) as QueueProduct[]} />
-
-      <div><span>Recent orders</span></div>
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Placed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(recentOrders ?? []).map((order) => (
-              <tr key={order.id}>
-                <td><Link href={`/admin/orders/${order.id}`}>{orderCode(order.id)}</Link></td>
-                <td>{order.status}</td>
-                <td>{formatINR(order.total_amount)}</td>
-                <td>{new Date(order.created_at).toLocaleString('en-IN')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <AdminApprovalQueue initialPendingProducts={(pendingProductsData ?? []) as QueueProduct[]} />
       </div>
+
+      <section>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Recent Platform Orders</h2>
+          <Link href="/admin/orders" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-electric)' }}>
+            View all orders &rarr;
+          </Link>
+        </div>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <table className="portal-table">
+            <thead>
+              <tr>
+                <th>Order Reference</th>
+                <th>Status</th>
+                <th>Total Value</th>
+                <th>Placed Timestamp</th>
+                <th style={{ textAlign: 'right' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(recentOrders ?? []).map((order) => (
+                <tr key={order.id}>
+                  <td>
+                    <Link href={`/admin/orders/${order.id}`} style={{ fontWeight: 600, color: 'var(--fg-primary)' }}>
+                      {orderCode(order.id)}
+                    </Link>
+                  </td>
+                  <td>
+                    <span className="portal-badge active" style={{ textTransform: 'uppercase', fontSize: '0.72rem' }}>
+                      {order.status.replace(/_/g, ' ')}
+                    </span>
+                  </td>
+                  <td><strong>{formatINR(order.total_amount)}</strong></td>
+                  <td style={{ color: 'var(--fg-muted)' }}>{new Date(order.created_at).toLocaleString('en-IN')}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <Link href={`/admin/orders/${order.id}`} style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-electric)' }}>
+                      Inspect &rarr;
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
 
 function Metric({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div>
-      <div>{label}</div>
-      <div>{value}</div>
-      <div>{note}</div>
+    <div className="stat-kpi-card">
+      <div className="stat-kpi-label">{label}</div>
+      <div className="stat-kpi-value">{value}</div>
+      <div style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>{note}</div>
     </div>
   );
 }

@@ -69,59 +69,97 @@ export default async function AdminProductDetailPage({
   const images = product.image_urls ?? [];
 
   return (
-    <div>
-      <div>
-        <h1>{product.title}</h1>
-        <p>
-          {product.approval_status} · {formatINR(product.price)} · stock {product.stock}
-        </p>
+    <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
+      <Link
+        href="/admin/catalog"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          color: 'var(--fg-muted)',
+          marginBottom: '1.5rem',
+        }}
+      >
+        &larr; Back to catalog
+      </Link>
+
+      <div className="checkout-card" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div>
+            <span className={`portal-badge ${product.approval_status}`} style={{ marginBottom: '0.65rem' }}>
+              {product.approval_status}
+            </span>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{product.title}</h1>
+            <p style={{ color: 'var(--fg-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+              Listed in <strong>{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</strong> · Stock: {product.stock} units
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--fg-primary)' }}>{formatINR(product.price)}</div>
+            {product.compare_at_price ? (
+              <div style={{ fontSize: '0.85rem', color: 'var(--fg-muted)', textDecoration: 'line-through' }}>
+                MSRP {formatINR(product.compare_at_price)}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+          <div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--fg-muted)', marginBottom: '0.25rem' }}>
+              Moderation Controls
+            </div>
+            {product.rejection_reason ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--danger)', margin: 0 }}>Rejection Reason: {product.rejection_reason}</p>
+            ) : null}
+            <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>Resubmits used: {product.resubmit_count}</span>
+          </div>
+          <ProductDecision productId={product.id} status={product.approval_status} />
+        </div>
       </div>
-      <p><Link href="/admin/catalog">Back to catalog</Link></p>
 
-      <div><span>Decision</span></div>
-      <ProductDecision productId={product.id} status={product.approval_status} />
-      {product.rejection_reason ? <p>Current rejection reason: {product.rejection_reason}</p> : null}
-      <p>Resubmits used: {product.resubmit_count}</p>
-
-      <div><span>Listing</span></div>
-      <div>
-        <table>
+      <div className="checkout-card" style={{ marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>Listing Details</h2>
+        <table className="portal-table">
           <tbody>
-            <tr><td>Description</td><td>{product.description}</td></tr>
-            <tr><td>Condition</td><td>{product.condition}</td></tr>
-            <tr><td>Category</td><td>{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</td></tr>
-            <tr><td>Compare at</td><td>{product.compare_at_price != null ? formatINR(product.compare_at_price) : '—'}</td></tr>
-            <tr><td>Tags</td><td>{(product.tags ?? []).join(', ') || '—'}</td></tr>
-            <tr><td>AI categorized</td><td>{product.ai_categorized ? 'Yes' : 'No'}</td></tr>
-            <tr><td>Rating</td><td>{product.average_rating} ({product.review_count} reviews)</td></tr>
-            <tr><td>Seller</td><td>{seller?.full_name || '—'} · {seller?.email || product.seller_id.slice(0, 8)}</td></tr>
-            <tr><td>Shop</td><td>{shop ? `${shop.name}, ${shop.city}` : '—'}</td></tr>
-            <tr><td>Created</td><td>{new Date(product.created_at).toLocaleString('en-IN')}</td></tr>
-            <tr><td>Updated</td><td>{new Date(product.updated_at).toLocaleString('en-IN')}</td></tr>
+            <tr><td style={{ width: '200px', fontWeight: 600 }}>Description</td><td>{product.description}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Condition</td><td><span style={{ textTransform: 'capitalize' }}>{product.condition}</span></td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Category</td><td>{product.category}{product.sub_category ? ` / ${product.sub_category}` : ''}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Tags</td><td>{(product.tags ?? []).join(', ') || '—'}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>AI Categorized</td><td>{product.ai_categorized ? 'Yes (Automated)' : 'Manual'}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Rating</td><td>{product.average_rating} ★ ({product.review_count} reviews)</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Seller</td><td>{seller?.full_name || '—'} · {seller?.email || product.seller_id.slice(0, 8)}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Shop</td><td>{shop ? `${shop.name}, ${shop.city}` : '—'}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Created</td><td>{new Date(product.created_at).toLocaleString('en-IN')}</td></tr>
+            <tr><td style={{ fontWeight: 600 }}>Updated</td><td>{new Date(product.updated_at).toLocaleString('en-IN')}</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div><span>Images</span></div>
-      {images.length === 0 ? (
-        <p>No images uploaded.</p>
-      ) : (
-        <div>
-          {images.map((url) => (
-            <div key={url}>
-              <ProductThumbnail src={url} alt={product.title} />
-              <div>{url}</div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="checkout-card" style={{ marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>Product Images</h2>
+        {images.length === 0 ? (
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem' }}>No images uploaded.</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+            {images.map((url) => (
+              <div key={url} style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: 'var(--bg-canvas)', padding: '0.5rem' }}>
+                <ProductThumbnail src={url} alt={product.title} />
+                <div style={{ fontSize: '0.7rem', color: 'var(--fg-muted)', marginTop: '0.4rem', wordBreak: 'break-all' }}>{url}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <div><span>Specifications</span></div>
-      {Object.keys(attributes).length === 0 ? (
-        <p>No technical specifications.</p>
-      ) : (
-        <div>
-          <table>
+      <div className="checkout-card">
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>Technical Specifications</h2>
+        {Object.keys(attributes).length === 0 ? (
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem' }}>No technical specifications specified.</p>
+        ) : (
+          <table className="portal-table">
             <thead>
               <tr>
                 <th>Attribute</th>
@@ -131,14 +169,14 @@ export default async function AdminProductDetailPage({
             <tbody>
               {Object.entries(attributes).map(([key, value]) => (
                 <tr key={key}>
-                  <td>{key}</td>
+                  <td style={{ fontWeight: 600, width: '200px' }}>{key}</td>
                   <td>{value}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

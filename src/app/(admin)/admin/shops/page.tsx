@@ -15,37 +15,56 @@ export default async function AdminShopsPage() {
   }
 
   return (
-    <div>
-      <div>
-        <h1>Shops</h1>
-        <p>Shop name, city, catalog size, and branding edits. Street addresses stay on the seller&apos;s own page.</p>
+    <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Merchant Storefronts & Quotas</h1>
+        <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+          Overview of registered shops, active catalog volumes, and branding edit allowances.
+        </p>
       </div>
-      {error ? <div>{error.message}</div> : null}
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Shop</th>
-              <th>City</th>
-              <th>Products</th>
-              <th>Branding edits used</th>
-              <th>Reset</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(shops ?? []).map((shop) => (
-              <tr key={shop.id}>
-                <td>{shop.name}</td>
-                <td>{shop.city}</td>
-                <td>{counts.get(shop.id) ?? 0}</td>
-                <td>{shop.branding_edits_used} / 2</td>
-                <td><ResetBrandingButton sellerId={shop.seller_id} /></td>
+
+      {error ? (
+        <div style={{ padding: '1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+          {error.message}
+        </div>
+      ) : null}
+
+      {(shops ?? []).length === 0 ? (
+        <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-subtle)', color: 'var(--fg-muted)' }}>
+          No shops registered yet.
+        </div>
+      ) : (
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <table className="portal-table">
+            <thead>
+              <tr>
+                <th>Storefront Name</th>
+                <th>Base City</th>
+                <th>Catalog Items</th>
+                <th>Branding Edits Used</th>
+                <th style={{ textAlign: 'right' }}>Admin Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {(shops ?? []).length === 0 ? <div>No shops yet.</div> : null}
+            </thead>
+            <tbody>
+              {(shops ?? []).map((shop) => (
+                <tr key={shop.id}>
+                  <td><strong>{shop.name}</strong></td>
+                  <td style={{ color: 'var(--fg-secondary)' }}>{shop.city}</td>
+                  <td>{counts.get(shop.id) ?? 0} listings</td>
+                  <td>
+                    <span style={{ fontWeight: 600, color: shop.branding_edits_used >= 2 ? 'var(--danger)' : 'var(--fg-primary)' }}>
+                      {shop.branding_edits_used} / 2
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <ResetBrandingButton sellerId={shop.seller_id} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

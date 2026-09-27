@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Search, X, Sparkles, SlidersHorizontal, RefreshCw } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import BehavioralOffersBanner from '@/components/BehavioralOffersBanner';
 import type { FeedCarousel } from '@/app/api/v1/feed/personalized/route';
@@ -172,67 +173,83 @@ export default function ExploreFeedClient({
   }, [initialProducts, searchQuery, selectedCategory, minPrice, maxPrice, minRating, inStockOnly, sortBy]);
 
   return (
-    <div>
-      {/* Top Behavioral Offers & Discounts Banner */}
+    <div className="animate-slide-up">
+      {/* Top Behavioral Offers Banner */}
       <BehavioralOffersBanner />
 
-      {/* Top Banner / Feed Status */}
+      {/* Real-time AI consultation update notice */}
       {feedJustUpdated && (
         <div
+          style={{
+            margin: '1rem 0',
+            padding: '0.85rem 1.25rem',
+            background: 'var(--accent-glow)',
+            border: '1px solid rgba(79, 70, 229, 0.3)',
+            borderRadius: 'var(--radius-lg)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            color: 'var(--accent-electric)',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+          }}
         >
-          
-          <span>Feed customized in real-time based on your Personal AI consultation!</span>
+          <Sparkles size={16} />
+          <span>Catalog tailored in real-time based on your Personal AI consultation!</span>
         </div>
       )}
 
-      {/* Main Search & Amazon-Grade Facet Controls */}
-      <div>
-        <div
-          aria-hidden
-        />
+      {/* Main Search & Facet Control Hub */}
+      <div className="feed-filter-bar">
+        {/* Row 1: Search Input & AI Trigger */}
+        <div className="search-row">
+          <div className="search-input-wrap">
+            <Search size={18} className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search 300+ items by name, category, brand, or feature..."
+              aria-label="Search marketplace catalog"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search input"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
 
-        {/* Search Bar — spans left, AI sits offset right */}
-        <div>
-          <span
+          <button
+            type="button"
+            className="btn-ai-guide"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('shopsphere:open-ai'));
+              }
+            }}
           >
-            🔍
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by product name, category, brand, or feature..."
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              type="button"
-            >
-              ✕
-            </button>
-          )}
+            <Sparkles size={14} />
+            <span>AI Assistant</span>
+          </button>
         </div>
 
-        <button
-          onClick={() => {
-            if (typeof window !== 'undefined') {
-              window.dispatchEvent(new CustomEvent('shopsphere:open-ai'));
-            }
-          }}
-          type="button"
-        >
-          <span>Ask Personal AI</span>
-        </button>
-
-        {/* Category Pills — full width row under */}
-        <div
-        >
+        {/* Row 2: Category Filter Pills */}
+        <div className="category-pills-row" role="tablist" aria-label="Product categories">
           {['All', ...availableCategories].map((cat) => {
             const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
             return (
               <button
                 key={cat}
                 type="button"
+                role="tab"
+                aria-selected={isSelected}
+                className={`category-pill ${isSelected ? 'active' : ''}`}
                 onClick={() => setSelectedCategory(cat)}
               >
                 {cat}
@@ -241,32 +258,39 @@ export default function ExploreFeedClient({
           })}
         </div>
 
-        {/* Filter Controls Row */}
-        <div
-        >
-          <div>
-            <div>
-              <span>Price</span>
+        {/* Row 3: Facet Controls Row (Price, Rating, Stock, Sorting) */}
+        <div className="facets-row">
+          <div className="facets-group">
+            {/* Price Range */}
+            <div className="filter-input-chip">
+              <span>Price:</span>
               <input
                 type="number"
                 placeholder="Min ₹"
+                className="price-mini-input"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
+                aria-label="Minimum price in INR"
               />
               <span>–</span>
               <input
                 type="number"
                 placeholder="Max ₹"
+                className="price-mini-input"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
+                aria-label="Maximum price in INR"
               />
             </div>
 
-            <div>
-              <span>Rating</span>
+            {/* Minimum Rating */}
+            <div className="filter-input-chip">
+              <span>Rating:</span>
               <select
+                className="custom-select"
                 value={minRating}
                 onChange={(e) => setMinRating(Number(e.target.value))}
+                aria-label="Minimum customer rating"
               >
                 <option value={0}>All Ratings</option>
                 <option value={4}>4★ & above</option>
@@ -274,27 +298,32 @@ export default function ExploreFeedClient({
               </select>
             </div>
 
-            <label>
+            {/* In Stock Only Checkbox */}
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={inStockOnly}
                 onChange={(e) => setInStockOnly(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--fg-primary)' }}
               />
               In Stock Only
             </label>
           </div>
 
-          <div>
-            <div>
-              <span>Sort</span>
+          <div className="facets-group">
+            {/* Sort Dropdown */}
+            <div className="filter-input-chip">
+              <span>Sort:</span>
               <select
+                className="custom-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
+                aria-label="Sort products by"
               >
-                <option value="featured">Featured</option>
+                <option value="featured">Featured / Best Match</option>
                 <option value="price_asc">Price: Low to High</option>
                 <option value="price_desc">Price: High to Low</option>
-                <option value="rating">Avg. Customer Review</option>
+                <option value="rating">Highest Customer Rating</option>
                 <option value="newest">Newest Arrivals</option>
               </select>
             </div>
@@ -302,6 +331,7 @@ export default function ExploreFeedClient({
             {isFiltering && (
               <button
                 type="button"
+                className="btn-reset-filters"
                 onClick={handleClearFilters}
               >
                 Reset Filters
@@ -313,101 +343,129 @@ export default function ExploreFeedClient({
 
       {/* VIEW 1: ACTIVE FILTER / SEARCH RESULTS */}
       {isFiltering ? (
-        <div>
-          <div>
+        <section style={{ marginBottom: '3rem' }}>
+          <div className="section-header">
             <div>
-              <h2>
-                Search Results
-              </h2>
-              <p>
-                Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'} matching your criteria
+              <h2 className="section-title">Search & Filtered Results</h2>
+              <p className="section-subtitle">
+                Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'} matching your current criteria
               </p>
             </div>
+            {isFiltering && (
+              <button
+                type="button"
+                className="btn-reset-filters"
+                onClick={handleClearFilters}
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
 
           {filteredProducts.length === 0 ? (
-            <div>
-              <div>🔍</div>
-              <h3>
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '4rem 2rem',
+                background: 'var(--bg-surface)',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔍</div>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>
                 No products match your filters
               </h3>
-              <p>
-                Try adjusting your search terms, expanding the price range, or clearing category selections.
+              <p style={{ maxWidth: '420px', margin: '0 auto 1.5rem', color: 'var(--fg-muted)' }}>
+                Try adjusting your search terms, expanding the price range, or clearing selected category filters.
               </p>
               <button
+                type="button"
+                className="btn-card-add"
+                style={{ padding: '0.65rem 1.5rem', fontSize: '0.9rem' }}
                 onClick={handleClearFilters}
               >
                 Reset All Filters
               </button>
             </div>
           ) : (
-            <div>
+            <div className="product-grid">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
-        </div>
+        </section>
       ) : (
         /* VIEW 2: PERSONALIZED AI DYNAMIC FEED CAROUSELS */
         <div>
           {isPersonalized && feedSummary && (
             <div
+              style={{
+                marginBottom: '2rem',
+                padding: '1rem 1.5rem',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-lg)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: 'var(--shadow-xs)',
+              }}
             >
-              <div>
-                <span
-                />
-                <span>
-                  {feedSummary}
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <Sparkles size={18} style={{ color: 'var(--accent-electric)' }} />
+                <span style={{ fontSize: '0.925rem', fontWeight: 600 }}>{feedSummary}</span>
               </div>
-              <span
-              >
-                Dynamic AI Active
-              </span>
+              <span className="section-badge">Dynamic AI Feed Active</span>
             </div>
           )}
 
           {feedLoading ? (
-            <div>
-              <div></div>
-              <p>Analyzing catalog and tailoring your personalized marketplace feed...</p>
+            <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+              <RefreshCw size={24} className="pulse-badge" style={{ margin: '0 auto 1rem', color: 'var(--fg-muted)' }} />
+              <p style={{ color: 'var(--fg-muted)', fontWeight: 500 }}>
+                Analyzing catalog and curating your personalized marketplace feed...
+              </p>
             </div>
           ) : carousels.length === 0 ? (
             /* Fallback to standard product grid if carousels empty */
             <div>
-              {initialProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              <div className="section-header">
+                <div>
+                  <h2 className="section-title">Explore Catalog</h2>
+                  <p className="section-subtitle">Browse curated products across all categories</p>
+                </div>
+              </div>
+              <div className="product-grid">
+                {initialProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
             </div>
           ) : (
             carousels.map((carousel) => (
-              <div key={carousel.id}>
-                <div>
+              <section key={carousel.id} style={{ marginBottom: '3.5rem' }}>
+                <div className="section-header">
                   <div>
-                    <div>
-                      <h2>
-                        {carousel.title}
-                      </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <h2 className="section-title">{carousel.title}</h2>
                       {carousel.badge && (
-                        <span
-                        >
-                          {carousel.badge}
-                        </span>
+                        <span className="section-badge">{carousel.badge}</span>
                       )}
                     </div>
-                    <p>
-                      {carousel.subtitle}
-                    </p>
+                    {carousel.subtitle && (
+                      <p className="section-subtitle">{carousel.subtitle}</p>
+                    )}
                   </div>
                 </div>
 
-                <div>
+                <div className="product-grid">
                   {carousel.products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
-              </div>
+              </section>
             ))
           )}
         </div>

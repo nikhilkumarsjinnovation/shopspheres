@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import '@/styles/globals.css';
 import { AccessibilityProvider } from '@/context/AccessibilityContext';
 
 export const metadata: Metadata = {
