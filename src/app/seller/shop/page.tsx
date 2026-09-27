@@ -12,11 +12,23 @@ export default async function ShopDetailsPage() {
     .select('address_line, city, state, postal_code, pickup_radius_km, allows_bopis')
     .eq('seller_id', session.user.id)
     .maybeSingle();
-  if (!shop) return <p>Your shop is not ready yet. Refresh this page.</p>;
+  if (!shop) {
+    return (
+      <div>
+        <div><p>Your shop is not ready yet. Refresh this page.</p></div>
+      </div>
+    );
+  }
   return (
-    <main>
-      <h1>Shop details</h1>
-      <ShopDetailsForm shop={shop} />
-    </main>
+    <>
+      <header>
+        <h1>Shop details</h1>
+      </header>
+      <div>
+        <div>
+          <ShopDetailsForm shop={shop} />
+        </div>
+      </div>
+    </>
   );
 }

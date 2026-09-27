@@ -203,38 +203,13 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
         type="button"
         onClick={() => setIsOpenModal(!isOpenModal)}
         aria-label="Open Saksham Accessibility Settings"
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          left: '24px',
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '12px 18px',
-          borderRadius: '9999px',
-          backgroundColor: '#0284c7',
-          color: '#ffffff',
-          boxShadow: '0 10px 25px -5px rgba(2, 132, 199, 0.4)',
-          border: '1px solid #38bdf8',
-          cursor: 'pointer',
-          fontWeight: 600,
-          fontSize: '13px',
-          transition: 'all 0.2s ease',
-        }}
       >
-        <span style={{ fontSize: '18px' }} aria-hidden="true">
-          ♿
+        <span aria-hidden="true">
+          
         </span>
         <span>Saksham Access</span>
         {settings.hasDisability && (
           <span
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#4ade80',
-            }}
           />
         )}
       </button>
@@ -244,66 +219,37 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
         <div
           role="dialog"
           aria-label="Saksham Inclusive Accessibility Controls"
-          style={{
-            position: 'fixed',
-            bottom: '84px',
-            left: '24px',
-            zIndex: 50,
-            width: 'min(92vw, 380px)',
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #cbd5e1',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
         >
           {/* Header */}
           <div
-            style={{
-              padding: '16px',
-              backgroundColor: '#0369a1',
-              color: '#ffffff',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '18px' }}>♿</span>
-                <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700 }}>
+              <div>
+                <span></span>
+                <h2>
                   Saksham Access Hub
                 </h2>
               </div>
-              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#e0f2fe' }}>
+              <p>
                 Inclusive accessibility tailored for all abilities
               </p>
             </div>
             <button
               type="button"
               onClick={() => setIsOpenModal(false)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#ffffff',
-                fontSize: '18px',
-                cursor: 'pointer',
-              }}
             >
               ✕
             </button>
           </div>
 
           {/* Controls Body */}
-          <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
             {/* Font Magnification */}
             <div>
-              <label style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', display: 'block', marginBottom: '6px' }}>
+              <label>
                 Text Magnification:
               </label>
-              <div style={{ display: 'flex', gap: '6px' }}>
+              <div>
                 {[
                   { label: '100%', scale: 1.0 },
                   { label: '125%', scale: 1.25 },
@@ -314,17 +260,6 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                     key={item.scale}
                     type="button"
                     onClick={() => setFontMagnification(item.scale)}
-                    style={{
-                      flex: 1,
-                      padding: '8px 4px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      border: settings.visualFontMagnification === item.scale ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      backgroundColor: settings.visualFontMagnification === item.scale ? '#f0f9ff' : '#ffffff',
-                      color: settings.visualFontMagnification === item.scale ? '#0369a1' : '#334155',
-                      cursor: 'pointer',
-                    }}
                   >
                     {item.label}
                   </button>
@@ -334,37 +269,18 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
             {/* High Contrast Toggle */}
             <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-              }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'block' }}>
+                <span>
                   High Contrast Mode
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                <span>
                   Amplifies contrast for low vision & reading ease
                 </span>
               </div>
               <button
                 type="button"
                 onClick={toggleHighContrast}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  backgroundColor: settings.visualHighContrast ? '#059669' : '#cbd5e1',
-                  color: '#ffffff',
-                }}
               >
                 {settings.visualHighContrast ? 'ON' : 'OFF'}
               </button>
@@ -372,37 +288,18 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
             {/* Large Touch Targets Toggle */}
             <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-              }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'block' }}>
+                <span>
                   Large Touch Targets
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                <span>
                   Enlarges buttons for motor & tremor accessibility
                 </span>
               </div>
               <button
                 type="button"
                 onClick={toggleLargeTouchTargets}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  backgroundColor: settings.motorLargeTouchTargets ? '#059669' : '#cbd5e1',
-                  color: '#ffffff',
-                }}
               >
                 {settings.motorLargeTouchTargets ? 'ON' : 'OFF'}
               </button>
@@ -410,37 +307,18 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
             {/* Simplified Cognitive UI Toggle */}
             <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-              }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', display: 'block' }}>
+                <span>
                   Simplified Interface
                 </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                <span>
                   Reduces visual distractions for focus ease
                 </span>
               </div>
               <button
                 type="button"
                 onClick={toggleSimplifiedUI}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  backgroundColor: settings.cognitiveSimplifiedUI ? '#059669' : '#cbd5e1',
-                  color: '#ffffff',
-                }}
               >
                 {settings.cognitiveSimplifiedUI ? 'ON' : 'OFF'}
               </button>
@@ -448,21 +326,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
             {/* Voice Guide / Screen Reader TTS */}
             <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 12px',
-                backgroundColor: '#f0fdf4',
-                borderRadius: '8px',
-                border: '1px solid #bbf7d0',
-              }}
             >
               <div>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#14532d', display: 'block' }}>
-                  🔊 Voice Guide (Screen Reader)
+                <span>
+                  Voice Guide (Screen Reader)
                 </span>
-                <span style={{ fontSize: '11px', color: '#166534' }}>
+                <span>
                   Reads active page and prices in clear natural voice
                 </span>
               </div>
@@ -478,50 +347,22 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
                     window.speechSynthesis.speak(u);
                   }
                 }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #16a34a',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  backgroundColor: '#16a34a',
-                  color: '#ffffff',
-                }}
               >
                 Speak
               </button>
             </div>
 
             {/* Reset Defaults */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px' }}>
+            <div>
               <button
                 type="button"
                 onClick={resetSettings}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#64748b',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
               >
                 Reset to Standard
               </button>
               <button
                 type="button"
                 onClick={() => setIsOpenModal(false)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  backgroundColor: '#0f172a',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
               >
                 Done
               </button>

@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import ExploreFeedClient from '@/components/ExploreFeedClient';
-import * as styles from '../customer.css';
 
 export default async function ExplorePage() {
   const supabase = await createClient();
@@ -40,31 +39,15 @@ export default async function ExplorePage() {
 
   return (
     <div>
-      <div className={styles.headerContainer}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <h1 className={styles.heading}>Explore Marketplace</h1>
-          <span
-            style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#047857',
-              backgroundColor: '#d1fae5',
-              padding: '3px 8px',
-              borderRadius: '4px',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-            }}
-          >
-            🇮🇳 India Live Catalog
-          </span>
-        </div>
-        <p className={styles.subheading}>
-          Discover authentic products with prices in INR (₹) listed directly by verified Indian merchants, with real-time AI personalization.
+      <div>
+        <h1>Explore</h1>
+        <p>
+          Products from verified shops across India. Prices in INR.
         </p>
       </div>
 
       {error && (
-        <div className={styles.alertError}>
+        <div>
           Failed to load products: {error.message}
         </div>
       )}

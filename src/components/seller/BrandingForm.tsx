@@ -38,7 +38,11 @@ export default function BrandingForm({
 
   return (
     <form onSubmit={(event) => { void save(event); }}>
-      <p>{locked ? 'You have used both branding updates. Contact an admin to change this again.' : `${2 - used} branding save${2 - used === 1 ? '' : 's'} left.`}</p>
+      <p>
+        {locked
+          ? 'You have used both branding updates. Contact an admin to change this again.'
+          : `${2 - used} branding save${2 - used === 1 ? '' : 's'} left.`}
+      </p>
       <label>Name <input value={name} onChange={(event) => setName(event.target.value)} disabled={locked} /></label>
       <label>Description <textarea value={description} onChange={(event) => setDescription(event.target.value)} disabled={locked} /></label>
       <label>Logo URL <input value={logoUrl} onChange={(event) => setLogoUrl(event.target.value)} disabled={locked} /></label>

@@ -39,10 +39,20 @@ export default async function SellerProductPage({ params }: { params: Promise<{ 
     .maybeSingle();
   if (!product) notFound();
   return (
-    <main>
-      <p><Link href="/seller/dashboard">Back to dashboard</Link></p>
-      <h1>{product.title}</h1>
-      <ProductEditor product={product} />
-    </main>
+    <>
+      <header>
+        <div>
+          <p>
+            <Link href="/seller/dashboard">Dashboard</Link>
+          </p>
+          <h1>{product.title}</h1>
+        </div>
+      </header>
+      <div>
+        <div>
+          <ProductEditor product={product} />
+        </div>
+      </div>
+    </>
   );
 }

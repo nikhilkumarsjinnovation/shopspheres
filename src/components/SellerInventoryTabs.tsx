@@ -5,7 +5,6 @@ import Link from 'next/link';
 import * as Tabs from '@radix-ui/react-tabs';
 import type { Product } from '@/types/database.types';
 import ProductThumbnail from '@/components/ProductThumbnail';
-import * as styles from '@/app/seller/seller.css';
 
 interface SellerInventoryTabsProps {
   products: Product[];
@@ -32,20 +31,20 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
     switch (status) {
       case 'approved':
         return (
-          <span className={`${styles.statusBadge} ${styles.statusBadgeApproved}`}>
+          <span>
             <span>✅</span> Approved
           </span>
         );
       case 'rejected':
         return (
-          <span className={`${styles.statusBadge} ${styles.statusBadgeRejected}`}>
+          <span>
             <span>❌</span> Rejected
           </span>
         );
       case 'pending':
       default:
         return (
-          <span className={`${styles.statusBadge} ${styles.statusBadgePending}`}>
+          <span>
             <span>⏳</span> Pending Review
           </span>
         );
@@ -55,15 +54,15 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
   const renderProductsTable = (items: Product[]) => {
     if (items.length === 0) {
       return (
-        <div className={styles.emptyState}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📦</div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem 0' }}>
+        <div>
+          <div>📦</div>
+          <h3>
             No products in this category
           </h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem 0' }}>
+          <p>
             List a new product under this category to populate this inventory tab.
           </p>
-          <Link href="/seller/add-product" className={styles.buttonPrimary}>
+          <Link href="/seller/add-product">
             Add Product
           </Link>
         </div>
@@ -71,18 +70,18 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
     }
 
     return (
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
+      <div>
+        <table>
           <thead>
             <tr>
-              <th className={styles.th} style={{ width: '64px' }}>Image</th>
-              <th className={styles.th}>Product Details</th>
-              <th className={styles.th}>Condition</th>
-              <th className={styles.th}>Category</th>
-              <th className={styles.th}>Price</th>
-              <th className={styles.th}>Stock</th>
-              <th className={styles.th}>Approval Status</th>
-              <th className={styles.th}>Created</th>
+              <th>Image</th>
+              <th>Product Details</th>
+              <th>Condition</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Approval Status</th>
+              <th>Created</th>
             </tr>
           </thead>
           <tbody>
@@ -100,62 +99,55 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
               const specCount = Object.keys(attributesObj).length;
 
               return (
-                <tr key={product.id} className={styles.tr}>
-                  <td className={styles.td}>
+                <tr key={product.id}>
+                  <td>
                     <ProductThumbnail src={firstImage} alt={product.title} />
                   </td>
 
-                  <td className={styles.td}>
-                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{product.title}</div>
+                  <td>
+                    <div>{product.title}</div>
                     {product.sub_category && (
-                      <div style={{ fontSize: '0.8rem', color: '#2563eb', marginTop: '2px' }}>
+                      <div>
                         {product.sub_category}
                       </div>
                     )}
                     {specCount > 0 && (
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                      <div>
                         ⚡ {specCount} enterprise specifications
                       </div>
                     )}
                   </td>
 
-                  <td className={styles.td}>
-                    <span className={styles.conditionBadge}>
+                  <td>
+                    <span>
                       {product.condition || 'New'}
                     </span>
                   </td>
 
-                  <td className={styles.td}>
-                    <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
+                  <td>
+                    <span>
                       {product.category}
                     </span>
                   </td>
 
-                  <td className={styles.td}>
-                    <strong style={{ color: '#0f172a' }}>
+                  <td>
+                    <strong>
                       ${Number(product.price).toFixed(2)}
                     </strong>
                   </td>
 
-                  <td className={styles.td}>
+                  <td>
                     <span
-                      style={{
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                        color: product.stock > 0 ? '#059669' : '#dc2626',
-                      }}
                     >
                       {product.stock} in stock
                     </span>
                   </td>
 
-                  <td className={styles.td}>
+                  <td>
                     {getStatusBadge(product.approval_status || 'pending')}
                   </td>
 
                   <td
-                    className={styles.td}
-                    style={{ fontSize: '0.8rem', color: '#94a3b8' }}
                     suppressHydrationWarning
                   >
                     {formatDate(product.created_at)}
@@ -171,16 +163,16 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
 
   if (products.length === 0) {
     return (
-      <div className={styles.tableContainer}>
-        <div className={styles.emptyState}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1e293b', margin: '0 0 0.5rem 0' }}>
+      <div>
+        <div>
+          <div>📦</div>
+          <h3>
             No products in your catalog yet
           </h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem 0' }}>
+          <p>
             Start onboarding products using our AI-assisted enterprise pipeline or manual entry.
           </p>
-          <Link href="/seller/add-product" className={styles.buttonPrimary}>
+          <Link href="/seller/add-product">
             Add Your First Product
           </Link>
         </div>
@@ -192,30 +184,29 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
     <Tabs.Root
       value={activeTab}
       onValueChange={setActiveTab}
-      className={styles.tabsRoot}
     >
       {/* Dynamically Generated Radix Tabs List */}
-      <Tabs.List className={styles.tabsList} aria-label="Filter inventory by category">
+      <Tabs.List aria-label="Filter inventory by category">
         {/* All Products Tab */}
-        <Tabs.Trigger value="all" className={styles.tabTrigger}>
+        <Tabs.Trigger value="all">
           <span>All Products</span>
-          <span className={styles.tabCountBadge}>{products.length}</span>
+          <span>{products.length}</span>
         </Tabs.Trigger>
 
         {/* Dynamic Category Tabs */}
         {uniqueCategories.map((cat) => {
           const count = products.filter((p) => (p.category?.trim() || 'General') === cat).length;
           return (
-            <Tabs.Trigger key={cat} value={cat} className={styles.tabTrigger}>
+            <Tabs.Trigger key={cat} value={cat}>
               <span>{cat}</span>
-              <span className={styles.tabCountBadge}>{count}</span>
+              <span>{count}</span>
             </Tabs.Trigger>
           );
         })}
       </Tabs.List>
 
       {/* Tab Content: All Products */}
-      <Tabs.Content value="all" className={styles.tabsContent}>
+      <Tabs.Content value="all">
         {renderProductsTable(products)}
       </Tabs.Content>
 
@@ -223,7 +214,7 @@ export default function SellerInventoryTabs({ products }: SellerInventoryTabsPro
       {uniqueCategories.map((cat) => {
         const filtered = products.filter((p) => (p.category?.trim() || 'General') === cat);
         return (
-          <Tabs.Content key={cat} value={cat} className={styles.tabsContent}>
+          <Tabs.Content key={cat} value={cat}>
             {renderProductsTable(filtered)}
           </Tabs.Content>
         );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { UserPlus, Users } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
 interface FriendRow {
@@ -50,51 +51,75 @@ export default function FriendsPage() {
       setError(payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string' ? payload.error : 'Could not update the request.');
       return;
     }
-    setNotice(status === 'accepted' ? 'You are now friends. They will see you in their Friends list too.' : 'Request declined.');
+    setNotice(status === 'accepted' ? 'You are now friends.' : 'Request declined.');
     load();
   };
 
   return (
-    <main>
-      <h1>Friends</h1>
-      <p>When someone sends you a request, accept it here. After that, both of you see each other under Friends.</p>
-      {error ? <p role="alert">{error}</p> : null}
-      {notice ? <p role="status">{notice}</p> : null}
+    <div>
+      <div>
+        <h1>Friends</h1>
+        <p>Accept requests here. After that, both of you appear in each other&apos;s lists.</p>
+      </div>
+      {error ? <div role="alert">{error}</div> : null}
+      {notice ? <div role="status">{notice}</div> : null}
 
       <section>
         <h2>Requests waiting for you</h2>
-        {incoming.length === 0 ? <p>No one is waiting on you.</p> : (
-          <ul>
+        {incoming.length === 0 ? (
+          <div><p>No one is waiting on you.</p></div>
+        ) : (
+          <div>
             {incoming.map((row) => (
-              <li key={row.id}>
-                {row.label ?? 'ShopSphere user'} sent you a request.
-                <button type="button" onClick={() => { void respond(row.id, 'accepted'); }}>Accept</button>
-                <button type="button" onClick={() => { void respond(row.id, 'blocked'); }}>Decline</button>
-              </li>
+              <div key={row.id}>
+                <strong>{row.label ?? 'ShopSphere user'}</strong>
+                <p>Sent you a friend request</p>
+                <div>
+                  <button type="button" onClick={() => { void respond(row.id, 'accepted'); }}>Accept</button>
+                  <button type="button" onClick={() => { void respond(row.id, 'blocked'); }}>Decline</button>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
       <section>
         <h2>Requests you sent</h2>
-        {outgoing.length === 0 ? <p>You have not sent a request.</p> : (
-          <ul>
+        {outgoing.length === 0 ? (
+          <div><p>You have not sent a request.</p></div>
+        ) : (
+          <div>
             {outgoing.map((row) => (
-              <li key={row.id}>{row.label ?? 'ShopSphere user'} · waiting for them to accept</li>
+              <div key={row.id}>
+                <div>
+                  <UserPlus size={16} aria-hidden />
+                  <strong>{row.label ?? 'ShopSphere user'}</strong>
+                </div>
+                <p>Waiting for them to accept</p>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
 
       <section>
         <h2>Friends</h2>
-        {friends.length === 0 ? <p>No accepted friends yet.</p> : (
-          <ul>
-            {friends.map((row) => <li key={row.id}>{row.label ?? 'ShopSphere user'}</li>)}
-          </ul>
+        {friends.length === 0 ? (
+          <div><p>No accepted friends yet.</p></div>
+        ) : (
+          <div>
+            {friends.map((row) => (
+              <div key={row.id}>
+                <div>
+                  <Users size={16} aria-hidden />
+                  <strong>{row.label ?? 'ShopSphere user'}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

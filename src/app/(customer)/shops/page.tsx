@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { Store } from 'lucide-react';
 
 export default async function ShopsPage() {
   const supabase = await createClient();
@@ -13,21 +14,28 @@ export default async function ShopsPage() {
     .order('name');
 
   return (
-    <main>
-      <h1>Shops</h1>
-      <p>Browse products by the shop that sells them.</p>
-      <ul>
-        {(shops ?? []).map((shop) => (
-          <li key={shop.id}>
-            <Link href={`/shops/${shop.id}`}>
-              {shop.name} · {shop.city}, {shop.state} · {shop.rating.toFixed(1)}
-              {shop.is_verified ? ' · Verified' : ''}
+    <div>
+      <div>
+        <h1>Shops</h1>
+        <p>Browse products by the shop that sells them.</p>
+      </div>
+      {(shops ?? []).length === 0 ? (
+        <div>No shops are listed yet.</div>
+      ) : (
+        <div>
+          {(shops ?? []).map((shop) => (
+            <Link key={shop.id} href={`/shops/${shop.id}`}>
+              <div>
+                <Store size={16} aria-hidden />
+                <strong>{shop.name}</strong>
+                {shop.is_verified ? <span>Verified</span> : null}
+              </div>
+              <p>{shop.city}, {shop.state} · {shop.rating.toFixed(1)}</p>
+              {shop.description ? <p>{shop.description}</p> : null}
             </Link>
-            {shop.description ? <p>{shop.description}</p> : null}
-          </li>
-        ))}
-      </ul>
-      {(shops ?? []).length === 0 ? <p>No shops are listed yet.</p> : null}
-    </main>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

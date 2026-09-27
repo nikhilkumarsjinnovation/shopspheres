@@ -7,8 +7,6 @@ import * as Separator from '@radix-ui/react-separator';
 import { createClient } from '@/lib/supabase/client';
 import type { CategoryResponse } from '@/lib/validations/ai';
 import { fetchWithCsrf } from '@/lib/csrf-client';
-import * as styles from '../seller.css';
-import layoutStyles from '../seller.module.css';
 
 interface AttributeItem {
   id: string;
@@ -268,152 +266,138 @@ export default function AddProductPage() {
 
   return (
     <>
-      <header className={layoutStyles.topBar}>
-        <h1 className={layoutStyles.pageHeading}>Enterprise Product Onboarding</h1>
-        <Link href="/seller/dashboard" className={layoutStyles.buttonSecondary}>
+      <header>
+        <h1>Enterprise Product Onboarding</h1>
+        <Link href="/seller/dashboard">
           Back to Inventory
         </Link>
       </header>
 
-      <div className={styles.content}>
+      <div>
         {/* Wizard Progress Bar */}
-        <div className={styles.wizardProgressContainer}>
-          <div className={styles.wizardStep}>
+        <div>
+          <div>
             <div
-              className={`${styles.wizardStepCircle} ${
-                step === 1 ? styles.wizardStepCircleActive : styles.wizardStepCircleCompleted
-              }`}
             >
               {step > 1 ? '✓' : '1'}
             </div>
-            <div className={styles.wizardStepText}>
-              <span className={styles.wizardStepTitle}>Step 1</span>
-              <span className={styles.wizardStepSubtitle}>Onboarding Mode</span>
+            <div>
+              <span>Step 1</span>
+              <span>Onboarding Mode</span>
             </div>
           </div>
 
-          <div className={styles.wizardDivider} />
+          <div />
 
-          <div className={styles.wizardStep}>
+          <div>
             <div
-              className={`${styles.wizardStepCircle} ${
-                step === 2
-                  ? styles.wizardStepCircleActive
-                  : step > 2
-                  ? styles.wizardStepCircleCompleted
-                  : ''
-              }`}
             >
               {step > 2 ? '✓' : '2'}
             </div>
-            <div className={styles.wizardStepText}>
-              <span className={styles.wizardStepTitle}>Step 2</span>
-              <span className={styles.wizardStepSubtitle}>
+            <div>
+              <span>Step 2</span>
+              <span>
                 {entryMode === 'ai' ? 'AI Extraction' : 'Catalog Setup'}
               </span>
             </div>
           </div>
 
-          <div className={styles.wizardDivider} />
+          <div />
 
-          <div className={styles.wizardStep}>
+          <div>
             <div
-              className={`${styles.wizardStepCircle} ${
-                step === 3 ? styles.wizardStepCircleActive : ''
-              }`}
             >
               3
             </div>
-            <div className={styles.wizardStepText}>
-              <span className={styles.wizardStepTitle}>Step 3</span>
-              <span className={styles.wizardStepSubtitle}>Verification & Review</span>
+            <div>
+              <span>Step 3</span>
+              <span>Verification & Review</span>
             </div>
           </div>
         </div>
 
-        {errorMessage && <div className={styles.alertError}>{errorMessage}</div>}
-        {successMessage && <div className={styles.alertSuccess}>{successMessage}</div>}
+        {errorMessage && <div>{errorMessage}</div>}
+        {successMessage && <div>{successMessage}</div>}
 
         {/* ========================================================================= */}
         {/* STEP 1: PATH SELECTION (Manual vs AI-Assisted) */}
         {/* ========================================================================= */}
         {step === 1 && (
           <div>
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem 0' }}>
+            <div>
+              <h2>
                 How would you like to onboard this product?
               </h2>
-              <p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>
+              <p>
                 Choose between automated Amazon-grade AI catalog generation or standard manual entry.
               </p>
             </div>
 
-            <div className={styles.pathSelectionGrid}>
+            <div>
               {/* Option A: AI Assisted (Fast) */}
-              <div className={styles.pathCard} onClick={handleSelectAIPath}>
+              <div onClick={handleSelectAIPath}>
                 <div>
-                  <span className={`${styles.pathBadge} ${styles.pathBadgeAI}`}>
+                  <span>
                     ✨ Recommended • Enterprise Speed
                   </span>
-                  <h3 className={styles.pathCardTitle}>
+                  <h3>
                     <span>AI-Assisted (Fast)</span>
                   </h3>
-                  <p className={styles.pathCardDesc}>
+                  <p>
                     Provide a brief product name. Our Master E-commerce Data Entry Agent automatically
                     generates categories, sub-categories, 10+ technical specifications, and search tags.
                   </p>
-                  <ul className={styles.pathFeaturesList}>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#7c3aed' }}>✓</span> 10+ Technical Specifications Generated
+                  <ul>
+                    <li>
+                      <span>✓</span> 10+ Technical Specifications Generated
                     </li>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#7c3aed' }}>✓</span> Automatic Marketplace Taxonomy
+                    <li>
+                      <span>✓</span> Automatic Marketplace Taxonomy
                     </li>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#7c3aed' }}>✓</span> Suggested Competitive Retail Price
+                    <li>
+                      <span>✓</span> Suggested Competitive Retail Price
                     </li>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#7c3aed' }}>✓</span> 100% Seller Verification & Edit Control
+                    <li>
+                      <span>✓</span> 100% Seller Verification & Edit Control
                     </li>
                   </ul>
                 </div>
-                <button type="button" className={`${styles.pathButton} ${styles.pathButtonAI}`}>
+                <button type="button">
                   Launch AI-Assisted Mode ⚡
                 </button>
               </div>
 
               {/* Option B: Manual Entry */}
               <div
-                className={`${styles.pathCard} ${styles.pathCardManual}`}
                 onClick={handleSelectManualPath}
               >
                 <div>
-                  <span className={`${styles.pathBadge} ${styles.pathBadgeManual}`}>
+                  <span>
                     Standard Entry
                   </span>
-                  <h3 className={styles.pathCardTitle}>
+                  <h3>
                     <span>Manual Entry</span>
                   </h3>
-                  <p className={styles.pathCardDesc}>
+                  <p>
                     Prefer to craft your product details by hand? Fill out every product attribute,
                     taxonomic category, and custom specification manually from scratch.
                   </p>
-                  <ul className={styles.pathFeaturesList}>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Complete Granular Control
+                  <ul>
+                    <li>
+                      <span>✓</span> Complete Granular Control
                     </li>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Add Custom Specifications Manually
+                    <li>
+                      <span>✓</span> Add Custom Specifications Manually
                     </li>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Set Own Pricing & Tags
+                    <li>
+                      <span>✓</span> Set Own Pricing & Tags
                     </li>
-                    <li className={styles.pathFeatureItem}>
-                      <span style={{ color: '#0f172a' }}>✓</span> Standard Admin Approval Workflow
+                    <li>
+                      <span>✓</span> Standard Admin Approval Workflow
                     </li>
                   </ul>
                 </div>
-                <button type="button" className={`${styles.pathButton} ${styles.pathButtonManual}`}>
+                <button type="button">
                   Continue with Manual Entry ✍️
                 </button>
               </div>
@@ -425,79 +409,75 @@ export default function AddProductPage() {
         {/* STEP 2: AI MINI-FORM & SKELETON LOADING */}
         {/* ========================================================================= */}
         {step === 2 && entryMode === 'ai' && (
-          <div className={styles.formCard}>
+          <div>
             {aiLoading ? (
-              <div className={styles.skeletonCard}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖✨</div>
-                <div className={styles.skeletonPulseText}>
+              <div>
+                <div>🤖✨</div>
+                <div>
                   Master E-commerce Agent is Analyzing Product...
                 </div>
-                <p className={styles.skeletonSubtext}>
+                <p>
                   Deducing marketplace taxonomy, generating 10+ technical specifications, and calculating pricing.
                 </p>
 
-                <div className={styles.skeletonGrid}>
-                  <div className={styles.skeletonBar} style={{ width: '85%' }} />
-                  <div className={styles.skeletonBar} style={{ width: '95%' }} />
-                  <div className={styles.skeletonBar} style={{ width: '70%' }} />
-                  <div className={styles.skeletonBar} style={{ width: '90%' }} />
-                  <div className={styles.skeletonBar} style={{ width: '60%' }} />
+                <div>
+                  <div />
+                  <div />
+                  <div />
+                  <div />
+                  <div />
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleRunAICategorizer} className={styles.form}>
-                <div className={styles.sectionHeader}>
+              <form onSubmit={handleRunAICategorizer}>
+                <div>
                   <div>
-                    <h2 className={styles.sectionTitle}>AI Fast-Track Input</h2>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
+                    <h2>AI Fast-Track Input</h2>
+                    <p>
                       Give us the basics. The AI Agent will handle the heavy catalog enrichment.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className={styles.buttonSecondary}
                   >
                     ← Change Mode
                   </button>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="ai_title">
+                <div>
+                  <label htmlFor="ai_title">
                     Product Name / Brand & Model *
                   </label>
                   <input
                     id="ai_title"
                     type="text"
                     required
-                    className={styles.input}
                     placeholder="e.g. Sony WH-1000XM5 Wireless Headphones"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="ai_briefDesc">
+                <div>
+                  <label htmlFor="ai_briefDesc">
                     Brief Product Summary / Keywords (Optional)
                   </label>
                   <textarea
                     id="ai_briefDesc"
-                    className={styles.textarea}
                     placeholder="e.g. Over-ear active noise cancelling bluetooth headphones with 30-hour battery life..."
                     value={briefDescription}
                     onChange={(e) => setBriefDescription(e.target.value)}
                   />
                 </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="ai_condition">
+                <div>
+                  <div>
+                    <label htmlFor="ai_condition">
                       Product Condition *
                     </label>
                     <select
                       id="ai_condition"
-                      className={styles.select}
                       value={condition}
                       onChange={(e) =>
                         setCondition(e.target.value as 'New' | 'Renewed' | 'Used')
@@ -509,8 +489,8 @@ export default function AddProductPage() {
                     </select>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="ai_stock">
+                  <div>
+                    <label htmlFor="ai_stock">
                       Initial Inventory Stock Quantity *
                     </label>
                     <input
@@ -518,7 +498,6 @@ export default function AddProductPage() {
                       type="number"
                       min="0"
                       required
-                      className={styles.input}
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
                     />
@@ -528,8 +507,6 @@ export default function AddProductPage() {
                 <button
                   type="submit"
                   disabled={aiLoading || !title.trim()}
-                  className={styles.buttonPrimary}
-                  style={{ backgroundColor: '#7c3aed' }}
                 >
                   Generate Enterprise Specifications ✨
                 </button>
@@ -542,89 +519,84 @@ export default function AddProductPage() {
         {/* STEP 3: VERIFICATION & RICH FORM (Massive Editable Form) */}
         {/* ========================================================================= */}
         {step === 3 && (
-          <div className={styles.formCard}>
-            <div className={styles.sectionHeader}>
+          <div>
+            <div>
               <div>
-                <h2 className={styles.sectionTitle}>
+                <h2>
                   {entryMode === 'ai'
                     ? 'Verify & Refine AI-Enriched Listing'
                     : 'Product Specification Form'}
                 </h2>
-                <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.25rem 0 0 0' }}>
+                <p>
                   Review all specifications. You maintain complete control to edit any field before
                   submitting for administrator approval.
                 </p>
               </div>
 
               {isAiCategorized && aiConfidence !== null && (
-                <span className={styles.aiBadge}>
+                <span>
                   <span>✨</span>
                   <span>AI Validated ({(aiConfidence * 100).toFixed(0)}% confidence)</span>
                 </span>
               )}
             </div>
 
-            <Separator.Root className={styles.separator} orientation="horizontal" />
+            <Separator.Root orientation="horizontal" />
 
-            <form onSubmit={handleSubmitProduct} className={styles.form}>
+            <form onSubmit={handleSubmitProduct}>
               {/* Section 1: Core Catalog Information */}
-              <div className={styles.formSection}>
-                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+              <div>
+                <h3>
                   1. Core Catalog Details
                 </h3>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="final_title">
+                <div>
+                  <label htmlFor="final_title">
                     Product Title *
                   </label>
                   <input
                     id="final_title"
                     type="text"
                     required
-                    className={styles.input}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="final_description">
+                <div>
+                  <label htmlFor="final_description">
                     Full Description *
                   </label>
                   <textarea
                     id="final_description"
                     required
-                    className={styles.textarea}
-                    style={{ minHeight: '120px' }}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="final_category">
+                <div>
+                  <div>
+                    <label htmlFor="final_category">
                       Marketplace Category *
                     </label>
                     <input
                       id="final_category"
                       type="text"
                       required
-                      className={styles.input}
                       placeholder="e.g. Electronics"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="final_subcategory">
+                  <div>
+                    <label htmlFor="final_subcategory">
                       Sub-Category
                     </label>
                     <input
                       id="final_subcategory"
                       type="text"
-                      className={styles.input}
                       placeholder="e.g. Headphones & Portable Audio"
                       value={subCategory}
                       onChange={(e) => setSubCategory(e.target.value)}
@@ -632,9 +604,9 @@ export default function AddProductPage() {
                   </div>
                 </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="final_price">
+                <div>
+                  <div>
+                    <label htmlFor="final_price">
                       Unit Price (₹ INR) *
                     </label>
                     <input
@@ -643,15 +615,14 @@ export default function AddProductPage() {
                       step="0.01"
                       min="0"
                       required
-                      className={styles.input}
                       placeholder="1499.00"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="final_stock">
+                  <div>
+                    <label htmlFor="final_stock">
                       Stock Quantity *
                     </label>
                     <input
@@ -659,19 +630,17 @@ export default function AddProductPage() {
                       type="number"
                       min="0"
                       required
-                      className={styles.input}
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="final_condition">
+                  <div>
+                    <label htmlFor="final_condition">
                       Condition *
                     </label>
                     <select
                       id="final_condition"
-                      className={styles.select}
                       value={condition}
                       onChange={(e) =>
                         setCondition(e.target.value as 'New' | 'Renewed' | 'Used')
@@ -684,56 +653,53 @@ export default function AddProductPage() {
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="final_image">
+                <div>
+                  <label htmlFor="final_image">
                     Product Image URL
                   </label>
                   <input
                     id="final_image"
                     type="url"
-                    className={styles.input}
                     placeholder="https://images.unsplash.com/photo-..."
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                   />
                   {imageUrl && (
-                    <div className={styles.imagePreviewContainer}>
+                    <div>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imageUrl}
                         alt="Preview"
-                        className={styles.imagePreview}
                         onError={(e) => {
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                      <span>
                         Image Asset Verified
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label} htmlFor="final_tags">
+                <div>
+                  <label htmlFor="final_tags">
                     Search & Indexing Tags (Comma separated)
                   </label>
                   <input
                     id="final_tags"
                     type="text"
-                    className={styles.input}
                     placeholder="e.g. wireless, noise cancelling, bluetooth"
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
                   />
                   {tagsInput && (
-                    <div className={styles.tagsContainer}>
+                    <div>
                       {tagsInput
                         .split(',')
                         .map((t) => t.trim())
                         .filter(Boolean)
                         .map((tag, idx) => (
-                          <span key={idx} className={styles.tagChip}>
+                          <span key={idx}>
                             #{tag}
                           </span>
                         ))}
@@ -742,16 +708,16 @@ export default function AddProductPage() {
                 </div>
               </div>
 
-              <Separator.Root className={styles.separator} orientation="horizontal" />
+              <Separator.Root orientation="horizontal" />
 
               {/* Section 2: Dynamic Technical Attributes (Amazon/Flipkart Spec Grid) */}
-              <div className={styles.formSection}>
-                <div className={styles.sectionHeader}>
+              <div>
+                <div>
                   <div>
-                    <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    <h3>
                       2. Dynamic Technical Specifications ({attributesList.length} Attributes)
                     </h3>
-                    <p style={{ color: '#64748b', fontSize: '0.8rem', margin: '0.2rem 0 0 0' }}>
+                    <p>
                       Enterprise specifications displayed on product detail pages. Edit keys or values
                       freely.
                     </p>
@@ -759,18 +725,16 @@ export default function AddProductPage() {
                   <button
                     type="button"
                     onClick={handleAddAttribute}
-                    className={styles.addAttrBtn}
                   >
                     + Add Specification
                   </button>
                 </div>
 
-                <div className={styles.attributesContainer}>
+                <div>
                   {attributesList.map((attr) => (
-                    <div key={attr.id} className={styles.attributeRow}>
+                    <div key={attr.id}>
                       <input
                         type="text"
-                        className={styles.input}
                         placeholder="Specification Name (e.g. Material)"
                         value={attr.key}
                         onChange={(e) =>
@@ -779,7 +743,6 @@ export default function AddProductPage() {
                       />
                       <input
                         type="text"
-                        className={styles.input}
                         placeholder="Specification Value (e.g. Aluminum & Leather)"
                         value={attr.value}
                         onChange={(e) =>
@@ -789,7 +752,6 @@ export default function AddProductPage() {
                       <button
                         type="button"
                         onClick={() => handleRemoveAttribute(attr.id)}
-                        className={styles.removeAttrBtn}
                         title="Remove attribute"
                       >
                         ✕
@@ -799,36 +761,33 @@ export default function AddProductPage() {
                 </div>
               </div>
 
-              <Separator.Root className={styles.separator} orientation="horizontal" />
+              <Separator.Root orientation="horizontal" />
 
               {/* Section 3: Compliance & Verification Consent Checkbox */}
-              <div className={styles.consentCard}>
-                <label className={styles.consentLabel}>
+              <div>
+                <label>
                   <input
                     type="checkbox"
                     required
                     checked={verifiedConsent}
                     onChange={(e) => setVerifiedConsent(e.target.checked)}
-                    className={styles.consentCheckbox}
                   />
                   <span>
                     I manually verify these details are accurate and comply with marketplace catalog policies.
                   </span>
                 </label>
-                <p className={styles.consentWarning}>
+                <p>
                   🔒 <strong>Admin Review Protocol:</strong> All listings are initially registered under{' '}
-                  <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>PENDING</span> status.
+                  <span>PENDING</span> status.
                   An administrator will review and approve your submission before it is published to
                   customers.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div>
                 <button
                   type="submit"
                   disabled={loading || !verifiedConsent}
-                  className={styles.buttonPrimary}
-                  style={{ flex: 1 }}
                 >
                   {loading ? 'Submitting for Review...' : 'Submit for Admin Approval (Pending Review)'}
                 </button>
@@ -836,7 +795,6 @@ export default function AddProductPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className={styles.buttonSecondary}
                   disabled={loading}
                 >
                   Reset Wizard

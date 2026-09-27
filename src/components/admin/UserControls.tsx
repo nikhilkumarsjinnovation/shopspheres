@@ -40,8 +40,12 @@ export default function UserControls({
   }
 
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-      <select value={nextRole} disabled={busy} onChange={(event) => setNextRole(event.target.value as UserRole)}>
+    <div>
+      <select
+        value={nextRole}
+        disabled={busy}
+        onChange={(event) => setNextRole(event.target.value as UserRole)}
+      >
         {ROLES.map((item) => (
           <option key={item} value={item}>{item}</option>
         ))}

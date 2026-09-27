@@ -5,7 +5,6 @@ import { CartProvider } from '@/context/CartContext';
 import CustomerNavbar from '@/components/CustomerNavbar';
 import PersonalAiAssistant from '@/components/PersonalAiAssistant';
 import BehaviorTracker from '@/components/BehaviorTracker';
-import * as styles from './customer.css';
 
 export default async function CustomerLayout({
   children,
@@ -25,9 +24,9 @@ export default async function CustomerLayout({
 
   return (
     <CartProvider key={session.user.id} userId={session.user.id}>
-      <div className={styles.layout}>
+      <div>
         <CustomerNavbar email={session.user.email} />
-        <main className={styles.mainContent}>{children}</main>
+        <main>{children}</main>
         <PersonalAiAssistant />
         <BehaviorTracker userId={session.user.id} />
       </div>

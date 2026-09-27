@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import styles from '../auth.module.css';
 
 export default function ForgotPasswordPage() {
   const supabase = createClient();
@@ -55,40 +54,39 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Reset Password</h1>
-        <p className={styles.subtitle}>
+    <div>
+      <div>
+        <h1>Reset Password</h1>
+        <p>
           Enter your email and we&apos;ll send you a link to reset your password.
         </p>
 
-        {successMessage && <div className={styles.successAlert}>{successMessage}</div>}
-        {errorMessage && <div className={styles.errorAlert}>{errorMessage}</div>}
+        {successMessage && <div>{successMessage}</div>}
+        {errorMessage && <div>{errorMessage}</div>}
 
         {!successMessage ? (
-          <form onSubmit={handleResetRequest} className={styles.form}>
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="email">
+          <form onSubmit={handleResetRequest}>
+            <div>
+              <label htmlFor="email">
                 Account Email Address
               </label>
               <input
                 id="email"
                 type="email"
                 required
-                className={styles.input}
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            <button type="submit" disabled={loading} className={styles.buttonPrimary}>
+            <button type="submit" disabled={loading}>
               {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
             </button>
           </form>
         ) : (
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1.25rem' }}>
+          <div>
+            <p>
               Didn&apos;t receive an email? Check your spam folder or try again with a different email.
             </p>
             <button
@@ -97,16 +95,15 @@ export default function ForgotPasswordPage() {
                 setSuccessMessage(null);
                 setEmail('');
               }}
-              className={styles.buttonGoogle}
             >
               Try Another Email
             </button>
           </div>
         )}
 
-        <p className={styles.footerText}>
+        <p>
           Remember your password?{' '}
-          <Link href="/login" className={styles.link}>
+          <Link href="/login">
             Back to login
           </Link>
         </p>

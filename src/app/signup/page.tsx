@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { getRoleDashboardUrl } from '@/lib/auth/roles';
 import type { UserRole } from '@/types/database.types';
-import styles from '../auth.module.css';
 
 type PasswordStrength = 'Weak' | 'Normal' | 'Strong';
 
@@ -245,48 +244,45 @@ export default function SignupPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Create Account</h1>
-        <p className={styles.subtitle}>Join ShopSphere as a Customer or Seller</p>
+    <div>
+      <div>
+        <h1>Create Account</h1>
+        <p>Join ShopSphere as a Customer or Seller</p>
 
-        {errorMessage && <div className={styles.errorAlert}>{errorMessage}</div>}
-        {successMessage && <div className={styles.successAlert}>{successMessage}</div>}
+        {errorMessage && <div>{errorMessage}</div>}
+        {successMessage && <div>{successMessage}</div>}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="fullName">Full Name</label>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="fullName">Full Name</label>
             <input
               id="fullName"
               type="text"
-              className={styles.input}
               placeholder="John Doe"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="email">Email Address</label>
+          <div>
+            <label htmlFor="email">Email Address</label>
             <input
               id="email"
               type="email"
               required
-              className={styles.input}
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="password">Password (min. 8 characters)</label>
+          <div>
+            <label htmlFor="password">Password (min. 8 characters)</label>
             <input
               id="password"
               type="password"
               required
               minLength={8}
-              className={styles.input}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -295,48 +291,26 @@ export default function SignupPage() {
             {/* Real-time Password Strength Meter */}
             {password.length > 0 && (
               <div>
-                <div className={styles.meterTrack}>
+                <div>
                   <div
-                    className={`${styles.meterFill} ${
-                      passwordAnalysis.strength === 'Strong'
-                        ? styles.meterFillStrong
-                        : passwordAnalysis.strength === 'Normal'
-                        ? styles.meterFillNormal
-                        : styles.meterFillWeak
-                    }`}
                   />
                 </div>
 
-                <div className={styles.meterHeader}>
-                  <span className={styles.meterLabel}>Password Strength:</span>
+                <div>
+                  <span>Password Strength:</span>
                   <span
-                    className={`${styles.meterBadge} ${
-                      passwordAnalysis.strength === 'Strong'
-                        ? styles.badgeStrong
-                        : passwordAnalysis.strength === 'Normal'
-                        ? styles.badgeNormal
-                        : styles.badgeWeak
-                    }`}
                   >
                     {passwordAnalysis.strength}
                   </span>
                 </div>
 
-                <div className={styles.checklist}>
+                <div>
                   <div
-                    className={`${styles.checklistItem} ${
-                      passwordAnalysis.hasMinLength ? styles.checklistItemValid : ''
-                    }`}
                   >
                     <span>{passwordAnalysis.hasMinLength ? '✓' : '•'}</span>
                     <span>At least 8 characters</span>
                   </div>
                   <div
-                    className={`${styles.checklistItem} ${
-                      passwordAnalysis.hasUpper && passwordAnalysis.hasLower
-                        ? styles.checklistItemValid
-                        : ''
-                    }`}
                   >
                     <span>
                       {passwordAnalysis.hasUpper && passwordAnalysis.hasLower ? '✓' : '•'}
@@ -344,11 +318,6 @@ export default function SignupPage() {
                     <span>Uppercase and lowercase letters</span>
                   </div>
                   <div
-                    className={`${styles.checklistItem} ${
-                      passwordAnalysis.hasNumber || passwordAnalysis.hasSpecial
-                        ? styles.checklistItemValid
-                        : ''
-                    }`}
                   >
                     <span>
                       {passwordAnalysis.hasNumber || passwordAnalysis.hasSpecial ? '✓' : '•'}
@@ -360,29 +329,27 @@ export default function SignupPage() {
             )}
           </div>
 
-          <div className={styles.formGroup}>
-            <span className={styles.label}>Select Your Role</span>
-            <div className={styles.roleGroup}>
-              <label className={`${styles.roleCard} ${role === 'customer' ? styles.roleCardActive : ''}`}>
+          <div>
+            <span>Select Your Role</span>
+            <div>
+              <label>
                 <input
                   type="radio"
                   name="role"
                   value="customer"
                   checked={role === 'customer'}
                   onChange={() => setRole('customer')}
-                  className={styles.radioInput}
                 />
                 Customer (Buyer)
               </label>
 
-              <label className={`${styles.roleCard} ${role === 'seller' ? styles.roleCardActive : ''}`}>
+              <label>
                 <input
                   type="radio"
                   name="role"
                   value="seller"
                   checked={role === 'seller'}
                   onChange={() => setRole('seller')}
-                  className={styles.radioInput}
                 />
                 Seller (Merchant)
               </label>
@@ -392,48 +359,22 @@ export default function SignupPage() {
           {/* Saksham Accessibility Preferences (Optional) — hidden until the feature is ready */}
           {false && (
           <div
-            style={{
-              padding: '14px',
-              borderRadius: '8px',
-              backgroundColor: wantsAccessibility ? '#f0f9ff' : '#f8fafc',
-              border: wantsAccessibility ? '1px solid #38bdf8' : '1px solid #e2e8f0',
-              marginBottom: '1rem',
-              transition: 'all 0.2s',
-            }}
           >
             <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#0f172a',
-              }}
             >
               <input
                 type="checkbox"
                 checked={wantsAccessibility}
                 onChange={(e) => setWantsAccessibility(e.target.checked)}
-                style={{ cursor: 'pointer' }}
               />
               <span>♿ Enable Saksham Inclusive Accessibility Options</span>
             </label>
 
             {wantsAccessibility && (
               <div
-                style={{
-                  marginTop: '12px',
-                  paddingTop: '12px',
-                  borderTop: '1px solid #cbd5e1',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                }}
               >
                 {/* High Contrast */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                <label>
                   <input
                     type="checkbox"
                     checked={accessHighContrast}
@@ -443,17 +384,11 @@ export default function SignupPage() {
                 </label>
 
                 {/* Font Scaling */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155' }}>
+                <div>
                   <span>Text Size:</span>
                   <select
                     value={accessFontScale}
                     onChange={(e) => setAccessFontScale(Number(e.target.value))}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '12px',
-                    }}
                   >
                     <option value={1.0}>100% (Standard)</option>
                     <option value={1.25}>125% (Large)</option>
@@ -463,7 +398,7 @@ export default function SignupPage() {
                 </div>
 
                 {/* Large Touch Targets */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                <label>
                   <input
                     type="checkbox"
                     checked={accessLargeTouch}
@@ -473,7 +408,7 @@ export default function SignupPage() {
                 </label>
 
                 {/* Simplified UI */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#334155', cursor: 'pointer' }}>
+                <label>
                   <input
                     type="checkbox"
                     checked={accessSimplifiedUI}
@@ -489,19 +424,17 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading || (password.length > 0 && !passwordAnalysis.isValid)}
-            className={styles.buttonPrimary}
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
 
-        <div className={styles.divider}>Or</div>
+        <div>Or</div>
 
         <button
           type="button"
           onClick={handleGoogleSignup}
           disabled={loading}
-          className={styles.buttonGoogle}
         >
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path
@@ -524,9 +457,9 @@ export default function SignupPage() {
           Continue with Google as {role === 'seller' ? 'Seller' : 'Customer'}
         </button>
 
-        <p className={styles.footerText}>
+        <p>
           Already have an account?{' '}
-          <Link href="/login" className={styles.link}>
+          <Link href="/login">
             Log in
           </Link>
         </p>

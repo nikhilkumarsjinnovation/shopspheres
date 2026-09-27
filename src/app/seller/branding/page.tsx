@@ -12,11 +12,23 @@ export default async function BrandingPage() {
     .select('name, description, logo_url, banner_url, branding_edits_used')
     .eq('seller_id', session.user.id)
     .maybeSingle();
-  if (!shop) return <p>Your shop is not ready yet. Refresh this page.</p>;
+  if (!shop) {
+    return (
+      <div>
+        <div><p>Your shop is not ready yet. Refresh this page.</p></div>
+      </div>
+    );
+  }
   return (
-    <main>
-      <h1>Shop branding</h1>
-      <BrandingForm shop={shop} />
-    </main>
+    <>
+      <header>
+        <h1>Shop branding</h1>
+      </header>
+      <div>
+        <div>
+          <BrandingForm shop={shop} />
+        </div>
+      </div>
+    </>
   );
 }

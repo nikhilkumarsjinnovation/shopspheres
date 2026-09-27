@@ -21,19 +21,12 @@ export default function SignOutButton() {
 
   return (
     <button
+      type="button"
       onClick={handleSignOut}
-      style={{
-        padding: '0.5rem 1rem',
-        backgroundColor: '#ef4444',
-        color: '#ffffff',
-        border: 'none',
-        borderRadius: '6px',
-        fontWeight: 600,
-        fontSize: '0.875rem',
-        cursor: 'pointer',
-      }}
+      title="Sign out"
+      aria-label="Sign out"
     >
-      Sign Out
+      Exit
     </button>
   );
 }

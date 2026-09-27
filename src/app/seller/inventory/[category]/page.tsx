@@ -32,21 +32,43 @@ export default async function MiniShopPage({ params }: { params: Promise<{ categ
   const list = ((products ?? []) as Product[]).filter((product) => categoryKey(product.category) === name);
 
   return (
-    <main>
-      <p><Link href="/seller/dashboard">All mini-shops</Link></p>
-      <h1>{name}</h1>
-      {row ? (
-        <p>Products {row.products} · live {row.live} · pending {row.pending} · rejected {row.rejected} · low stock {row.lowStock} · sold {row.unitsSold} · {formatINR(row.revenue)}</p>
-      ) : <p>No products in this mini-shop yet.</p>}
-      <p><Link href={`/seller/add-product?category=${encodeURIComponent(name)}`}>Add a product here</Link></p>
-      <ul>
-        {list.map((product) => (
-          <li key={product.id}>
-            <Link href={`/seller/products/${product.id}`}>{product.title}</Link>
-            {' '}· {product.approval_status} · stock {product.stock} · {formatINR(product.price)}
-          </li>
-        ))}
-      </ul>
-    </main>
+    <>
+      <header>
+        <div>
+          <p>
+            <Link href="/seller/dashboard">All mini-shops</Link>
+          </p>
+          <h1>{name}</h1>
+        </div>
+        <Link href={`/seller/add-product?category=${encodeURIComponent(name)}`}>
+          Add product
+        </Link>
+      </header>
+      <div>
+        {row ? (
+          <div>
+            <div><p>Products</p><p>{row.products}</p></div>
+            <div><p>Live</p><p>{row.live}</p></div>
+            <div><p>Pending</p><p>{row.pending}</p></div>
+            <div><p>Revenue</p><p>{formatINR(row.revenue)}</p></div>
+          </div>
+        ) : (
+          <div><p>No products in this mini-shop yet.</p></div>
+        )}
+        <section>
+          <h2>Products</h2>
+          <ul>
+            {list.map((product) => (
+              <li key={product.id}>
+                <Link href={`/seller/products/${product.id}`}>{product.title}</Link>
+                <span>
+                  {product.approval_status} · stock {product.stock} · {formatINR(product.price)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </>
   );
 }

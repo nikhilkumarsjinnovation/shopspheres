@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { formatINR } from '@/lib/formatters';
 import { orderCode } from '@/lib/platform-stats';
 import type { OrderStatus } from '@/types/database.types';
-import * as styles from '../../admin.css';
 
 const STATUSES: OrderStatus[] = [
   'pending',
@@ -37,40 +36,40 @@ export default async function AdminOrdersPage({
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.headerTitle}>Orders</h1>
-        <p className={styles.headerSubtitle}>Status and totals only. Street addresses and phone numbers are not on this list.</p>
+      <div>
+        <h1>Orders</h1>
+        <p>Status and totals only. Street addresses and phone numbers are not on this list.</p>
       </div>
       <p>
-        <Link href="/admin/orders" style={{ marginRight: '0.75rem' }}>all</Link>
+        <Link href="/admin/orders">all</Link>
         {STATUSES.map((item) => (
-          <Link key={item} href={`/admin/orders?status=${item}`} style={{ marginRight: '0.75rem' }}>{item}</Link>
+          <Link key={item} href={`/admin/orders?status=${item}`}>{item}</Link>
         ))}
       </p>
-      {error ? <div className={styles.emptyState}>{error.message}</div> : null}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
+      {error ? <div>{error.message}</div> : null}
+      <div>
+        <table>
           <thead>
             <tr>
-              <th className={styles.th}>Order</th>
-              <th className={styles.th}>Status</th>
-              <th className={styles.th}>Total</th>
-              <th className={styles.th}>Placed</th>
+              <th>Order</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Placed</th>
             </tr>
           </thead>
           <tbody>
             {(orders ?? []).map((order) => (
-              <tr key={order.id} className={styles.tr}>
-                <td className={styles.td}><Link href={`/admin/orders/${order.id}`}>{orderCode(order.id)}</Link></td>
-                <td className={styles.td}>{order.status}</td>
-                <td className={styles.td}>{formatINR(order.total_amount)}</td>
-                <td className={styles.td}>{new Date(order.created_at).toLocaleString('en-IN')}</td>
+              <tr key={order.id}>
+                <td><Link href={`/admin/orders/${order.id}`}>{orderCode(order.id)}</Link></td>
+                <td>{order.status}</td>
+                <td>{formatINR(order.total_amount)}</td>
+                <td>{new Date(order.created_at).toLocaleString('en-IN')}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {(orders ?? []).length === 0 ? <div className={styles.emptyState}>No orders in this filter.</div> : null}
+      {(orders ?? []).length === 0 ? <div>No orders in this filter.</div> : null}
     </div>
   );
 }

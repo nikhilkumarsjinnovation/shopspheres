@@ -45,14 +45,17 @@ export default function FriendSelector({
 
   return (
     <section aria-label="Choose a friend">
-      <label>
-        Friend email
-        <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
-      </label>
-      <button type="button" onClick={() => { void send(email); }}>Send request</button>
-      <label>
-        Import contacts
+      <div>
+        <label htmlFor="friend-email">Friend email</label>
+        <input id="friend-email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" />
+      </div>
+      <div>
+        <button type="button" onClick={() => { void send(email); }}>Send request</button>
+      </div>
+      <div>
+        <label htmlFor="import-contacts">Import contacts</label>
         <input
+          id="import-contacts"
           type="file"
           accept=".txt,.csv"
           onChange={(event) => {
@@ -64,16 +67,20 @@ export default function FriendSelector({
             });
           }}
         />
-      </label>
+      </div>
       {notice ? <p role="status">{notice}</p> : null}
       <h3>Requests you sent</h3>
-      <ul>
-        {outgoing.map((row) => <li key={row.id}>{row.label} · {row.status}</li>)}
-      </ul>
+      <div>
+        {outgoing.length === 0 ? <p>None yet.</p> : outgoing.map((row) => (
+          <div key={row.id}>{row.label} · {row.status}</div>
+        ))}
+      </div>
       <h3>Friends</h3>
-      <ul>
-        {friends.map((row) => <li key={row.id}>{row.label}</li>)}
-      </ul>
+      <div>
+        {friends.length === 0 ? <p>No friends yet.</p> : friends.map((row) => (
+          <div key={row.id}>{row.label}</div>
+        ))}
+      </div>
     </section>
   );
 }

@@ -3,7 +3,6 @@ import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import ProductCard from '@/components/ProductCard';
-import { formatINR } from '@/lib/formatters';
 
 export default async function ShopDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,17 +18,22 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
     .eq('approval_status', 'approved');
 
   return (
-    <main>
+    <div>
       <p><Link href="/shops">All shops</Link></p>
-      <h1>{shop.name}</h1>
-      <p>{shop.city}, {shop.state}</p>
-      {shop.description ? <p>{shop.description}</p> : null}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-        {(products ?? []).map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+      <div>
+        <h1>{shop.name}</h1>
+        <p>{shop.city}, {shop.state}</p>
+        {shop.description ? <p>{shop.description}</p> : null}
       </div>
-      {(products ?? []).length === 0 ? <p>This shop has no approved products yet. Prices start from {formatINR(0)}.</p> : null}
-    </main>
+      {(products ?? []).length === 0 ? (
+        <div>This shop has no approved products yet.</div>
+      ) : (
+        <div>
+          {(products ?? []).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

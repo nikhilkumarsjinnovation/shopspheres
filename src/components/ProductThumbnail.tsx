@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import styles from '@/app/seller/seller.module.css';
 
 interface ProductThumbnailProps {
   src?: string | null;
@@ -12,7 +11,7 @@ export default function ProductThumbnail({ src, alt }: ProductThumbnailProps) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
-    return <div className={styles.placeholderThumb}>No Img</div>;
+    return <div>No Img</div>;
   }
 
   return (
@@ -20,7 +19,6 @@ export default function ProductThumbnail({ src, alt }: ProductThumbnailProps) {
     <img
       src={src}
       alt={alt}
-      className={styles.productThumb}
       onError={() => setHasError(true)}
     />
   );

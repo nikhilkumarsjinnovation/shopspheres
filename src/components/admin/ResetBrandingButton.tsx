@@ -17,7 +17,7 @@ export default function ResetBrandingButton({ sellerId }: { sellerId: string }) 
           }).then((response) => setMessage(response.ok ? 'Branding edits reset.' : 'Could not reset.'));
         }}
       >
-        Reset branding edits
+        Reset branding
       </button>
       {message ? <span>{message}</span> : null}
     </div>

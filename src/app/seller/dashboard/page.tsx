@@ -5,7 +5,6 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { buildShopHealth } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
-import layoutStyles from '../seller.module.css';
 
 export default async function SellerDashboardPage() {
   const supabase = await createClient();
@@ -45,34 +44,63 @@ export default async function SellerDashboardPage() {
 
   return (
     <>
-      <header className={layoutStyles.topBar}>
+      <header>
         <div>
-          <h1 className={layoutStyles.pageHeading}>{shop?.name ?? 'Your shop'}</h1>
-          <p style={{ margin: '0.2rem 0 0 0', color: '#64748b', fontSize: '0.85rem' }}>
-            Branding edits left: {editsLeft}. {shop ? <Link href={`/shops/${shop.id}`}>View public shop</Link> : null}
+          <h1>{shop?.name ?? 'Your shop'}</h1>
+          <p>
+            {editsLeft} branding edit{editsLeft === 1 ? '' : 's'} left
+            {shop ? <> · <Link href={`/shops/${shop.id}`}>Public shop</Link></> : null}
           </p>
         </div>
-        <Link href="/seller/add-product" className={layoutStyles.buttonPrimary}>Add Product</Link>
+        <Link href="/seller/add-product">Add product</Link>
       </header>
-      {error ? <p>{error.message}</p> : null}
-      <section>
-        <h2>Full shop health</h2>
-        <p>Live {health.live} · Pending {health.pending} · Rejected {health.rejected} · Low stock {health.lowStock}</p>
-        <p>Orders {health.orders} · Revenue {formatINR(health.revenue)}</p>
-      </section>
-      <section>
-        <h2>Mini-shops</h2>
-        <ul>
-          {health.categories.map((row) => (
-            <li key={row.category}>
-              <Link href={`/seller/inventory/${encodeURIComponent(row.category)}`}>{row.category}</Link>
-              <span> · {row.products} products · live {row.live} · pending {row.pending} · rejected {row.rejected}</span>
-              <span> · stock {formatINR(row.stockValue)} · sold {row.unitsSold} · {formatINR(row.revenue)}</span>
-            </li>
-          ))}
-        </ul>
-        {health.categories.length === 0 ? <p>No products yet. Add one to open a category mini-shop.</p> : null}
-      </section>
+      <div>
+        {error ? <p>{error.message}</p> : null}
+        <div>
+          <div>
+            <p>Live</p>
+            <p>{health.live}</p>
+          </div>
+          <div>
+            <p>Pending</p>
+            <p>{health.pending}</p>
+          </div>
+          <div>
+            <p>Rejected</p>
+            <p>{health.rejected}</p>
+          </div>
+          <div>
+            <p>Low stock</p>
+            <p>{health.lowStock}</p>
+          </div>
+          <div>
+            <p>Orders</p>
+            <p>{health.orders}</p>
+          </div>
+          <div>
+            <p>Revenue</p>
+            <p>{formatINR(health.revenue)}</p>
+          </div>
+        </div>
+        <section>
+          <h2>Category mini-shops</h2>
+          {health.categories.length === 0 ? (
+            <p>No products yet. Add one to open a category mini-shop.</p>
+          ) : (
+            <ul>
+              {health.categories.map((row) => (
+                <li key={row.category}>
+                  <Link href={`/seller/inventory/${encodeURIComponent(row.category)}`}>{row.category}</Link>
+                  <span>
+                    {row.products} products · live {row.live} · pending {row.pending} · rejected {row.rejected}
+                    · sold {row.unitsSold} · {formatINR(row.revenue)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </>
   );
 }

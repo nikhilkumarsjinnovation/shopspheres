@@ -19,15 +19,10 @@ export default function OrderTrack({ status }: { status: string }) {
     return <p>This order was cancelled.</p>;
   }
   return (
-    <ol style={{ display: 'flex', gap: '8px', listStyle: 'none', padding: 0, margin: '8px 0 0', flexWrap: 'wrap' }}>
+    <ol>
       {STEPS.map((step, index) => (
         <li
           key={step.key}
-          style={{
-            fontSize: '12px',
-            fontWeight: index <= current ? 700 : 500,
-            color: index <= current ? '#065f46' : '#94a3b8',
-          }}
         >
           {index <= current ? '●' : '○'} {step.label}
           {index < STEPS.length - 1 ? ' →' : ''}

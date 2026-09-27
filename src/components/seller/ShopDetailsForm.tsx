@@ -35,11 +35,12 @@ export default function ShopDetailsForm({
 
   return (
     <form onSubmit={(event) => { void save(event); }}>
+      <p>Address and pickup settings can be changed anytime.</p>
       <label>Address <input value={addressLine} onChange={(event) => setAddressLine(event.target.value)} /></label>
       <label>City <input value={city} onChange={(event) => setCity(event.target.value)} /></label>
       <label>State <input value={state} onChange={(event) => setState(event.target.value)} /></label>
       <label>PIN <input value={postalCode} onChange={(event) => setPostalCode(event.target.value)} /></label>
-      <label>Pickup radius km <input type="number" value={pickupRadiusKm} onChange={(event) => setPickupRadiusKm(Number(event.target.value))} /></label>
+      <label>Pickup radius (km) <input type="number" value={pickupRadiusKm} onChange={(event) => setPickupRadiusKm(Number(event.target.value))} /></label>
       <label>
         <input type="checkbox" checked={allowsBopis} onChange={(event) => setAllowsBopis(event.target.checked)} />
         Buy online, pick up in store

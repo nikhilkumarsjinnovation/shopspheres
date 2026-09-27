@@ -40,11 +40,11 @@ export default function ProductDecision({
   }
 
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+    <div>
       {status !== 'approved' ? (
         <button type="button" disabled={busy} onClick={() => void send('approved')}>Approve</button>
       ) : (
-        <button type="button" disabled={busy} onClick={() => void send('pending')}>Pull back to pending</button>
+        <button type="button" disabled={busy} onClick={() => void send('pending')}>Pull to pending</button>
       )}
       <input
         value={reason}

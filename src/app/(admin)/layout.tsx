@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import AdminSidebar from '@/components/AdminSidebar';
-import * as styles from './admin.css';
 
 export default async function AdminLayout({
   children,
@@ -21,9 +20,9 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className={styles.layoutContainer}>
+    <div>
       <AdminSidebar email={session.user.email} role={session.profile.role} />
-      <main className={styles.mainContent}>{children}</main>
+      <main>{children}</main>
     </div>
   );
 }

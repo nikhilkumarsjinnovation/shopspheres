@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import GiftFlow from '@/components/gifting/GiftFlow';
@@ -15,10 +16,15 @@ export default async function SendGiftPage() {
     .limit(100);
 
   return (
-    <main>
-      <h1>Send a gift</h1>
-      <p>Pick the product first, then the person who should receive it.</p>
-      <GiftFlow products={products ?? []} />
-    </main>
+    <div>
+      <p><Link href="/gifts">Back to gifts</Link></p>
+      <div>
+        <h1>Send a gift</h1>
+        <p>Pick the product first, then the person who should receive it.</p>
+      </div>
+      <div>
+        <GiftFlow products={products ?? []} />
+      </div>
+    </div>
   );
 }
