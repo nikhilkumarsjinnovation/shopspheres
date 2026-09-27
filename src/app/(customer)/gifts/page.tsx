@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Gift } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
-import * as styles from '@/app/(customer)/customer.css';
 
 interface GiftRow {
   id: string;
@@ -52,46 +51,46 @@ export default function GiftsPage() {
 
   return (
     <div>
-      <div className={styles.headerContainer}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div>
+        <div>
           <div>
-            <h1 className={styles.heading}>Gifts</h1>
-            <p className={styles.subheading}>Send and open gifts for friends.</p>
+            <h1>Gifts</h1>
+            <p>Send and open gifts for friends.</p>
           </div>
-          <Link href="/gifts/send" className={styles.buttonAddToCart} style={{ textDecoration: 'none' }}>
+          <Link href="/gifts/send">
             <Gift size={15} aria-hidden />
             Send a gift
           </Link>
         </div>
       </div>
-      {error ? <div className={styles.alertError} role="alert">{error}</div> : null}
+      {error ? <div role="alert">{error}</div> : null}
 
-      <section className={styles.sectionBlock}>
-        <h2 className={styles.sectionLabel}>Sent</h2>
+      <section>
+        <h2>Sent</h2>
         {sent.length === 0 ? (
-          <div className={styles.listCard}><p className={styles.listMeta}>No gifts sent yet.</p></div>
+          <div><p>No gifts sent yet.</p></div>
         ) : (
-          <div className={styles.stack}>
+          <div>
             {sent.map((gift) => (
-              <div key={gift.id} className={styles.listCard}>
-                <Link className={styles.quietLink} href={`/gifts/${gift.id}`}>{gift.recipient_email ?? gift.id}</Link>
-                <p className={styles.listMeta}>{gift.status}</p>
+              <div key={gift.id}>
+                <Link href={`/gifts/${gift.id}`}>{gift.recipient_email ?? gift.id}</Link>
+                <p>{gift.status}</p>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      <section className={styles.sectionBlock}>
-        <h2 className={styles.sectionLabel}>Received</h2>
+      <section>
+        <h2>Received</h2>
         {received.length === 0 ? (
-          <div className={styles.listCard}><p className={styles.listMeta}>No gifts received yet.</p></div>
+          <div><p>No gifts received yet.</p></div>
         ) : (
-          <div className={styles.stack}>
+          <div>
             {received.map((gift) => (
-              <div key={gift.id} className={styles.listCard}>
-                <Link className={styles.quietLink} href={`/gifts/${gift.id}`}>Open gift</Link>
-                <p className={styles.listMeta}>{gift.status}</p>
+              <div key={gift.id}>
+                <Link href={`/gifts/${gift.id}`}>Open gift</Link>
+                <p>{gift.status}</p>
               </div>
             ))}
           </div>

@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { ensureSellerShop } from '@/lib/seller-shop';
 import SellerSidebar from '@/components/SellerSidebar';
-import styles from './seller.module.css';
 
 export default async function SellerLayout({
   children,
@@ -26,9 +25,9 @@ export default async function SellerLayout({
   }
 
   return (
-    <div className={styles.layout}>
+    <div>
       <SellerSidebar email={session.user.email} />
-      <div className={styles.main}>
+      <div>
         {children}
       </div>
     </div>

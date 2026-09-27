@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import ExploreFeedClient from '@/components/ExploreFeedClient';
-import * as styles from '../customer.css';
 
 export default async function ExplorePage() {
   const supabase = await createClient();
@@ -40,15 +39,15 @@ export default async function ExplorePage() {
 
   return (
     <div>
-      <div className={styles.headerContainer}>
-        <h1 className={styles.heading}>Explore</h1>
-        <p className={styles.subheading}>
+      <div>
+        <h1>Explore</h1>
+        <p>
           Products from verified shops across India. Prices in INR.
         </p>
       </div>
 
       {error && (
-        <div className={styles.alertError}>
+        <div>
           Failed to load products: {error.message}
         </div>
       )}

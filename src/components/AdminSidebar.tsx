@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SignOutButton from '@/components/SignOutButton';
-import * as styles from '@/app/(admin)/admin.css';
 
 interface AdminSidebarProps {
   email?: string;
@@ -24,29 +23,28 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
   const avatarInitial = email ? email.charAt(0).toUpperCase() : 'A';
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.brandSection}>
-        <div className={styles.brandRow}>
-          <Link href="/admin/dashboard" className={styles.brandTitle}>
+    <aside>
+      <div>
+        <div>
+          <Link href="/admin/dashboard">
             ShopSphere
           </Link>
-          <span className={styles.adminBadge}>Ops</span>
+          <span>Ops</span>
         </div>
-        <p className={styles.brandSubtitle}>Monochrome control</p>
+        <p>Monochrome control</p>
       </div>
 
-      <div className={styles.separator} />
+      <div />
 
-      <nav className={styles.navSection} aria-label="Admin">
+      <nav aria-label="Admin">
         {links.map((link) => {
           const active = link.match(pathname);
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
             >
-              <span style={{ fontSize: '0.58rem', letterSpacing: '0.1em', opacity: 0.5, minWidth: 18 }}>
+              <span>
                 {link.index}
               </span>
               {link.label}
@@ -55,16 +53,16 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
         })}
       </nav>
 
-      <div className={styles.separator} />
+      <div />
 
-      <div className={styles.sidebarFooter}>
-        <div className={styles.adminProfileCard}>
-          <div className={styles.adminAvatar}>{avatarInitial}</div>
-          <div className={styles.adminDetails}>
-            <span className={styles.adminEmail} title={email}>
+      <div>
+        <div>
+          <div>{avatarInitial}</div>
+          <div>
+            <span title={email}>
               {email || 'admin'}
             </span>
-            <span className={styles.adminRole}>{role}</span>
+            <span>{role}</span>
           </div>
         </div>
         <SignOutButton />

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import type { UserRole } from '@/types/database.types';
-import * as styles from '@/app/(admin)/admin.css';
 
 const ROLES: UserRole[] = ['customer', 'seller', 'admin'];
 
@@ -41,24 +40,23 @@ export default function UserControls({
   }
 
   return (
-    <div className={styles.actionButtonGroup}>
+    <div>
       <select
         value={nextRole}
         disabled={busy}
         onChange={(event) => setNextRole(event.target.value as UserRole)}
-        style={{ height: 32, borderRadius: 0, border: '1px solid #404040', background: '#161616', color: '#e6e6e6', padding: '0 0.5rem' }}
       >
         {ROLES.map((item) => (
           <option key={item} value={item}>{item}</option>
         ))}
       </select>
-      <button type="button" className={styles.approveBtn} disabled={busy || nextRole === role} onClick={() => void send({ role: nextRole })}>
+      <button type="button" disabled={busy || nextRole === role} onClick={() => void send({ role: nextRole })}>
         Save role
       </button>
-      <button type="button" className={isActive ? styles.rejectBtn : styles.approveBtn} disabled={busy} onClick={() => void send({ is_active: !isActive })}>
+      <button type="button" disabled={busy} onClick={() => void send({ is_active: !isActive })}>
         {isActive ? 'Suspend' : 'Restore'}
       </button>
-      {message ? <span style={{ fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8a8a' }}>{message}</span> : null}
+      {message ? <span>{message}</span> : null}
     </div>
   );
 }

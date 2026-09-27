@@ -3,7 +3,6 @@ import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import ProductEditor from '@/components/seller/ProductEditor';
-import layoutStyles from '../../seller.module.css';
 
 export default async function SellerProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -41,16 +40,16 @@ export default async function SellerProductPage({ params }: { params: Promise<{ 
   if (!product) notFound();
   return (
     <>
-      <header className={layoutStyles.topBar}>
+      <header>
         <div>
-          <p className={layoutStyles.muted} style={{ marginBottom: '0.25rem' }}>
+          <p>
             <Link href="/seller/dashboard">Dashboard</Link>
           </p>
-          <h1 className={layoutStyles.pageHeading}>{product.title}</h1>
+          <h1>{product.title}</h1>
         </div>
       </header>
-      <div className={layoutStyles.pageBody}>
-        <div className={layoutStyles.panel}>
+      <div>
+        <div>
           <ProductEditor product={product} />
         </div>
       </div>

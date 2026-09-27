@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import type { Json } from '@/types/database.types';
 import ProductThumbnail from '@/components/ProductThumbnail';
-import * as styles from '@/app/(admin)/admin.css';
 
 export type QueueProduct = {
   id: string;
@@ -80,59 +79,50 @@ export default function AdminApprovalQueue({
   };
 
   return (
-    <div className={styles.approvalSection}>
-      <div className={styles.sectionTitle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+    <div>
+      <div>
+        <div>
           <span>Pending Product Approvals</span>
-          <span className={styles.queueBadge}>
+          <span>
             {pendingProducts.length} Awaiting Review
           </span>
         </div>
-        <span style={{ fontSize: '0.8rem', color: '#8a8a8a', fontWeight: 400 }}>
+        <span>
           Enterprise Merchant Compliance Gate
         </span>
       </div>
 
-      {toastMessage && <div className={styles.queueSuccessToast}>{toastMessage}</div>}
+      {toastMessage && <div>{toastMessage}</div>}
       {errorMessage && (
         <div
-          style={{
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            color: '#8a8a8a',
-            padding: '0.75rem 1rem',
-            borderRadius: 0,
-            fontSize: '0.875rem',
-            marginBottom: '1rem',
-          }}
         >
           {errorMessage}
         </div>
       )}
 
-      <div className={styles.tableWrapper}>
+      <div>
         {pendingProducts.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}></div>
-            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, color: '#f2f2f2', fontSize: '1.05rem' }}>
+          <div>
+            <div></div>
+            <p>
               Approval Queue Cleared
             </p>
-            <p style={{ margin: 0, fontSize: '0.875rem' }}>
+            <p>
               All submitted products have been reviewed. When sellers onboard new items, they will appear
               here for administrator inspection.
             </p>
           </div>
         ) : (
-          <table className={styles.table}>
+          <table>
             <thead>
               <tr>
-                <th className={styles.th} style={{ width: '56px' }}>Image</th>
-                <th className={styles.th}>Product Details</th>
-                <th className={styles.th}>Category</th>
-                <th className={styles.th}>Condition</th>
-                <th className={styles.th}>Price & Stock</th>
-                <th className={styles.th}>Seller ID</th>
-                <th className={styles.th} style={{ textAlign: 'center' }}>Actions</th>
+                <th>Image</th>
+                <th>Product Details</th>
+                <th>Category</th>
+                <th>Condition</th>
+                <th>Price & Stock</th>
+                <th>Seller ID</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -151,75 +141,66 @@ export default function AdminApprovalQueue({
                 const isOperating = loadingId === product.id;
 
                 return (
-                  <tr key={product.id} className={styles.tr}>
-                    <td className={styles.td}>
+                  <tr key={product.id}>
+                    <td>
                       <ProductThumbnail src={firstImage} alt={product.title} />
                     </td>
 
-                    <td className={styles.td}>
-                      <div style={{ fontWeight: 600, color: '#f2f2f2' }}>
+                    <td>
+                      <div>
                         <Link href={`/admin/catalog/${product.id}`}>{product.title}</Link>
                       </div>
                       {product.sub_category && (
-                        <div style={{ fontSize: '0.8rem', color: '#8a8a8a', marginTop: '2px' }}>
+                        <div>
                           {product.sub_category}
                         </div>
                       )}
                       {specCount > 0 && (
-                        <div style={{ marginTop: '4px' }}>
-                          <span className={styles.specCountChip}>
+                        <div>
+                          <span>
                             ⚡ {specCount} enterprise specs
                           </span>
                         </div>
                       )}
-                      <div style={{ marginTop: '0.35rem' }}>
+                      <div>
                         <Link href={`/admin/catalog/${product.id}`}>View full details</Link>
                       </div>
                     </td>
 
-                    <td className={styles.td} style={{ color: '#cccccc' }}>
+                    <td>
                       {product.category}
                     </td>
 
-                    <td className={styles.td}>
+                    <td>
                       <span
-                        style={{
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          backgroundColor: '#161616',
-                          color: '#f2f2f2',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: 0,
-                        }}
                       >
                         {product.condition || 'New'}
                       </span>
                     </td>
 
-                    <td className={styles.td}>
-                      <div style={{ fontWeight: 600, color: '#f2f2f2' }}>
+                    <td>
+                      <div>
                         ${Number(product.price).toFixed(2)}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: '#8a8a8a' }}>
+                      <div>
                         {product.stock} units
                       </div>
                     </td>
 
-                    <td className={styles.td}>
-                      <span className={styles.uuidCell} title={product.seller_id}>
+                    <td>
+                      <span title={product.seller_id}>
                         {product.seller_id.slice(0, 8)}...
                       </span>
                     </td>
 
-                    <td className={styles.td} style={{ textAlign: 'center' }}>
-                      <div className={styles.actionButtonGroup} style={{ justifyContent: 'center' }}>
+                    <td>
+                      <div>
                         <button
                           type="button"
                           onClick={() =>
                             handleUpdateStatus(product.id, product.title, 'approved')
                           }
                           disabled={isOperating}
-                          className={styles.approveBtn}
                           title="Approve listing and make live to customers"
                         >
                           <span>✓</span>
@@ -240,7 +221,6 @@ export default function AdminApprovalQueue({
                             handleUpdateStatus(product.id, product.title, 'rejected')
                           }
                           disabled={isOperating}
-                          className={styles.rejectBtn}
                           title="Reject listing"
                         >
                           <span>✕</span>

@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import GiftFlow from '@/components/gifting/GiftFlow';
-import * as styles from '../../customer.css';
 
 export default async function SendGiftPage() {
   const supabase = await createClient();
@@ -18,12 +17,12 @@ export default async function SendGiftPage() {
 
   return (
     <div>
-      <p style={{ marginBottom: '1rem' }}><Link className={styles.quietLink} href="/gifts">Back to gifts</Link></p>
-      <div className={styles.headerContainer}>
-        <h1 className={styles.heading}>Send a gift</h1>
-        <p className={styles.subheading}>Pick the product first, then the person who should receive it.</p>
+      <p><Link href="/gifts">Back to gifts</Link></p>
+      <div>
+        <h1>Send a gift</h1>
+        <p>Pick the product first, then the person who should receive it.</p>
       </div>
-      <div className={styles.surfaceCard}>
+      <div>
         <GiftFlow products={products ?? []} />
       </div>
     </div>

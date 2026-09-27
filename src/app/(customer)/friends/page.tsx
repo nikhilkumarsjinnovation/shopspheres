@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { UserPlus, Users } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
-import * as styles from '@/app/(customer)/customer.css';
 
 interface FriendRow {
   id: string;
@@ -58,26 +57,26 @@ export default function FriendsPage() {
 
   return (
     <div>
-      <div className={styles.headerContainer}>
-        <h1 className={styles.heading}>Friends</h1>
-        <p className={styles.subheading}>Accept requests here. After that, both of you appear in each other&apos;s lists.</p>
+      <div>
+        <h1>Friends</h1>
+        <p>Accept requests here. After that, both of you appear in each other&apos;s lists.</p>
       </div>
-      {error ? <div className={styles.alertError} role="alert">{error}</div> : null}
-      {notice ? <div className={styles.alertSuccess} role="status">{notice}</div> : null}
+      {error ? <div role="alert">{error}</div> : null}
+      {notice ? <div role="status">{notice}</div> : null}
 
-      <section className={styles.sectionBlock}>
-        <h2 className={styles.sectionLabel}>Requests waiting for you</h2>
+      <section>
+        <h2>Requests waiting for you</h2>
         {incoming.length === 0 ? (
-          <div className={styles.listCard}><p className={styles.listMeta}>No one is waiting on you.</p></div>
+          <div><p>No one is waiting on you.</p></div>
         ) : (
-          <div className={styles.stack}>
+          <div>
             {incoming.map((row) => (
-              <div key={row.id} className={styles.listCard}>
+              <div key={row.id}>
                 <strong>{row.label ?? 'ShopSphere user'}</strong>
-                <p className={styles.listMeta}>Sent you a friend request</p>
-                <div className={styles.inlineActions}>
-                  <button type="button" className={styles.buttonAddToCart} onClick={() => { void respond(row.id, 'accepted'); }}>Accept</button>
-                  <button type="button" className={styles.buttonSecondary} onClick={() => { void respond(row.id, 'blocked'); }}>Decline</button>
+                <p>Sent you a friend request</p>
+                <div>
+                  <button type="button" onClick={() => { void respond(row.id, 'accepted'); }}>Accept</button>
+                  <button type="button" onClick={() => { void respond(row.id, 'blocked'); }}>Decline</button>
                 </div>
               </div>
             ))}
@@ -85,34 +84,34 @@ export default function FriendsPage() {
         )}
       </section>
 
-      <section className={styles.sectionBlock}>
-        <h2 className={styles.sectionLabel}>Requests you sent</h2>
+      <section>
+        <h2>Requests you sent</h2>
         {outgoing.length === 0 ? (
-          <div className={styles.listCard}><p className={styles.listMeta}>You have not sent a request.</p></div>
+          <div><p>You have not sent a request.</p></div>
         ) : (
-          <div className={styles.stack}>
+          <div>
             {outgoing.map((row) => (
-              <div key={row.id} className={styles.listCard}>
-                <div className={styles.inlineActions}>
+              <div key={row.id}>
+                <div>
                   <UserPlus size={16} aria-hidden />
                   <strong>{row.label ?? 'ShopSphere user'}</strong>
                 </div>
-                <p className={styles.listMeta}>Waiting for them to accept</p>
+                <p>Waiting for them to accept</p>
               </div>
             ))}
           </div>
         )}
       </section>
 
-      <section className={styles.sectionBlock}>
-        <h2 className={styles.sectionLabel}>Friends</h2>
+      <section>
+        <h2>Friends</h2>
         {friends.length === 0 ? (
-          <div className={styles.listCard}><p className={styles.listMeta}>No accepted friends yet.</p></div>
+          <div><p>No accepted friends yet.</p></div>
         ) : (
-          <div className={styles.stack}>
+          <div>
             {friends.map((row) => (
-              <div key={row.id} className={styles.listCard}>
-                <div className={styles.inlineActions}>
+              <div key={row.id}>
+                <div>
                   <Users size={16} aria-hidden />
                   <strong>{row.label ?? 'ShopSphere user'}</strong>
                 </div>

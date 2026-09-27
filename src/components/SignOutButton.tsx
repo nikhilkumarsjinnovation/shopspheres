@@ -25,20 +25,6 @@ export default function SignOutButton() {
       onClick={handleSignOut}
       title="Sign out"
       aria-label="Sign out"
-      style={{
-        height: 34,
-        padding: '0 12px',
-        border: '1px solid currentColor',
-        background: 'transparent',
-        color: 'currentColor',
-        fontSize: '0.65rem',
-        fontWeight: 700,
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
-        cursor: 'pointer',
-        fontFamily: 'inherit',
-        opacity: 0.9,
-      }}
     >
       Exit
     </button>

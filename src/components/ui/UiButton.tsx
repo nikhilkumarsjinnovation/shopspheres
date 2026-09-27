@@ -1,28 +1,22 @@
 'use client';
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { buttonBase, buttonSize, buttonTone } from '@/styles/ui.css';
-
-type Tone = keyof typeof buttonTone;
-type Size = keyof typeof buttonSize;
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  tone?: Tone;
-  size?: Size;
+  tone?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'icon';
   children: ReactNode;
 };
 
 export default function UiButton({
-  tone = 'primary',
-  size = 'md',
-  className,
+  tone: _tone = 'primary',
+  size: _size = 'md',
   children,
   type = 'button',
   ...rest
 }: Props) {
-  const classes = [buttonBase, buttonTone[tone], buttonSize[size], className].filter(Boolean).join(' ');
   return (
-    <button type={type} className={classes} {...rest}>
+    <button type={type} {...rest}>
       {children}
     </button>
   );

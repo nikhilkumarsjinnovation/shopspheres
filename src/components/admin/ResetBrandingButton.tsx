@@ -2,15 +2,13 @@
 
 import { useState } from 'react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
-import * as styles from '@/app/(admin)/admin.css';
 
 export default function ResetBrandingButton({ sellerId }: { sellerId: string }) {
   const [message, setMessage] = useState<string | null>(null);
   return (
-    <div className={styles.actionButtonGroup}>
+    <div>
       <button
         type="button"
-        className={styles.approveBtn}
         onClick={() => {
           void fetchWithCsrf('/api/v1/admin/branding-reset', {
             method: 'POST',
@@ -21,7 +19,7 @@ export default function ResetBrandingButton({ sellerId }: { sellerId: string }) 
       >
         Reset branding
       </button>
-      {message ? <span style={{ fontSize: '0.75rem', color: '#8a8a8a' }}>{message}</span> : null}
+      {message ? <span>{message}</span> : null}
     </div>
   );
 }

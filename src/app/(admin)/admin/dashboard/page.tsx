@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import AdminApprovalQueue, { type QueueProduct } from '@/components/AdminApprovalQueue';
 import { formatINR } from '@/lib/formatters';
 import { orderCode, parsePlatformStats } from '@/lib/platform-stats';
-import * as styles from '../../admin.css';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -28,19 +27,19 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.headerTitle}>Platform Health</h1>
-        <p className={styles.headerSubtitle}>
+      <div>
+        <h1>Platform Health</h1>
+        <p>
           Marketplace totals, the approval queue, and the latest orders. Private chats and payment details stay hidden.
         </p>
       </div>
 
       {statsError || !stats ? (
-        <div className={styles.emptyState}>
+        <div>
           Stats are unavailable. Apply migration 009, then reload. {statsError?.message ?? ''}
         </div>
       ) : (
-        <div className={styles.metricsGrid}>
+        <div>
           <Metric label="GMV" value={formatINR(stats.gmv)} note="Sum of order totals" />
           <Metric label="Orders" value={String(orderTotal)} note={statusLine(stats.orders_by_status)} />
           <Metric label="Active users" value={String(stats.users_active)} note={`${stats.users_customer} customers · ${stats.users_seller} sellers · ${stats.users_admin} admins`} />
@@ -52,24 +51,24 @@ export default async function AdminDashboardPage() {
 
       <AdminApprovalQueue initialPendingProducts={(pendingProductsData ?? []) as QueueProduct[]} />
 
-      <div className={styles.sectionTitle}><span>Recent orders</span></div>
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
+      <div><span>Recent orders</span></div>
+      <div>
+        <table>
           <thead>
             <tr>
-              <th className={styles.th}>Order</th>
-              <th className={styles.th}>Status</th>
-              <th className={styles.th}>Total</th>
-              <th className={styles.th}>Placed</th>
+              <th>Order</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Placed</th>
             </tr>
           </thead>
           <tbody>
             {(recentOrders ?? []).map((order) => (
-              <tr key={order.id} className={styles.tr}>
-                <td className={styles.td}><Link href={`/admin/orders/${order.id}`}>{orderCode(order.id)}</Link></td>
-                <td className={styles.td}>{order.status}</td>
-                <td className={styles.td}>{formatINR(order.total_amount)}</td>
-                <td className={styles.td}>{new Date(order.created_at).toLocaleString('en-IN')}</td>
+              <tr key={order.id}>
+                <td><Link href={`/admin/orders/${order.id}`}>{orderCode(order.id)}</Link></td>
+                <td>{order.status}</td>
+                <td>{formatINR(order.total_amount)}</td>
+                <td>{new Date(order.created_at).toLocaleString('en-IN')}</td>
               </tr>
             ))}
           </tbody>
@@ -81,10 +80,10 @@ export default async function AdminDashboardPage() {
 
 function Metric({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className={styles.metricCard}>
-      <div className={styles.metricLabel}>{label}</div>
-      <div className={styles.metricValue}>{value}</div>
-      <div className={styles.metricSubtext}>{note}</div>
+    <div>
+      <div>{label}</div>
+      <div>{value}</div>
+      <div>{note}</div>
     </div>
   );
 }

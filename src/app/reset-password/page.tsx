@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import styles from '../auth.module.css';
 
 type PasswordStrength = 'Weak' | 'Normal' | 'Strong';
 
@@ -107,23 +106,22 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Set New Password</h1>
-        <p className={styles.subtitle}>Enter your secure new password below</p>
+    <div>
+      <div>
+        <h1>Set New Password</h1>
+        <p>Enter your secure new password below</p>
 
-        {errorMessage && <div className={styles.errorAlert}>{errorMessage}</div>}
+        {errorMessage && <div>{errorMessage}</div>}
 
-        <form onSubmit={handleUpdatePassword} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="newPassword">
+        <form onSubmit={handleUpdatePassword}>
+          <div>
+            <label htmlFor="newPassword">
               New Password
             </label>
             <input
               id="newPassword"
               type="password"
               required
-              className={styles.input}
               placeholder="Min. 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -132,46 +130,26 @@ export default function ResetPasswordPage() {
             {/* Real-time Password Strength Meter */}
             {passwordAnalysis.strength && (
               <div>
-                <div className={styles.meterHeader}>
-                  <span className={styles.meterLabel}>Password Strength</span>
+                <div>
+                  <span>Password Strength</span>
                   <span
-                    className={`${styles.meterBadge} ${
-                      passwordAnalysis.strength === 'Weak'
-                        ? styles.badgeWeak
-                        : passwordAnalysis.strength === 'Normal'
-                        ? styles.badgeNormal
-                        : styles.badgeStrong
-                    }`}
                   >
                     {passwordAnalysis.strength}
                   </span>
                 </div>
 
-                <div className={styles.meterTrack}>
+                <div>
                   <div
-                    className={`${styles.meterFill} ${
-                      passwordAnalysis.strength === 'Weak'
-                        ? styles.meterFillWeak
-                        : passwordAnalysis.strength === 'Normal'
-                        ? styles.meterFillNormal
-                        : styles.meterFillStrong
-                    }`}
                   />
                 </div>
 
-                <div className={styles.checklist}>
+                <div>
                   <div
-                    className={`${styles.checklistItem} ${
-                      passwordAnalysis.hasMinLength ? styles.checklistItemValid : ''
-                    }`}
                   >
                     <span>{passwordAnalysis.hasMinLength ? '✓' : '○'}</span>
                     <span>At least 8 characters</span>
                   </div>
                   <div
-                    className={`${styles.checklistItem} ${
-                      passwordAnalysis.strength !== 'Weak' ? styles.checklistItemValid : ''
-                    }`}
                   >
                     <span>{passwordAnalysis.strength !== 'Weak' ? '✓' : '○'}</span>
                     <span>Contains mix of uppercase, lowercase, numbers, or symbols</span>
@@ -181,15 +159,14 @@ export default function ResetPasswordPage() {
             )}
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="confirmPassword">
+          <div>
+            <label htmlFor="confirmPassword">
               Confirm New Password
             </label>
             <input
               id="confirmPassword"
               type="password"
               required
-              className={styles.input}
               placeholder="Re-enter new password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -199,14 +176,13 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading || !passwordAnalysis.isValid}
-            className={styles.buttonPrimary}
           >
             {loading ? 'Updating Password...' : 'Save New Password'}
           </button>
         </form>
 
-        <p className={styles.footerText}>
-          <Link href="/login" className={styles.link}>
+        <p>
+          <Link href="/login">
             Cancel and return to login
           </Link>
         </p>

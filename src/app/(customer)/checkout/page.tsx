@@ -9,7 +9,6 @@ import { formatINR, INDIAN_STATES } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import UpiPaymentPanel from '@/components/UpiPaymentPanel';
 import PracticePaymentPanel from '@/components/PracticePaymentPanel';
-import * as styles from '../customer.css';
 
 interface SavedAddress {
   id: string;
@@ -414,68 +413,40 @@ export default function CheckoutPage() {
 
   if (successOrder) {
     return (
-      <div style={{ maxWidth: '640px', margin: '3rem auto', textAlign: 'center' }}>
-        <div className={styles.checkoutSection} style={{ border: '1.5px solid #2457ff' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🎉</div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#07101f', margin: '0 0 0.5rem 0' }}>
+      <div>
+        <div>
+          <div>🎉</div>
+          <h1>
             Order Confirmed & Placed!
           </h1>
-          <p style={{ color: '#525252', margin: '0 0 1.5rem 0', fontSize: '1rem', lineHeight: 1.5 }}>
+          <p>
             Thank you for shopping on <strong>ShopSphere India</strong>. Your local order has been verified and sent to our neighborhood fulfillment hub.
           </p>
 
           <div
-            style={{
-              backgroundColor: '#f2f2f2',
-              border: '1px solid #c5cedc',
-              borderRadius: 10,
-              padding: '1.25rem',
-              marginBottom: '1.5rem',
-              textAlign: 'left',
-              fontSize: '0.95rem',
-            }}
           >
-            <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#737373' }}>Order ID:</span>
-              <strong style={{ fontFamily: 'monospace', color: '#07101f' }}>{successOrder.id}</strong>
+            <div>
+              <span>Order ID:</span>
+              <strong>{successOrder.id}</strong>
             </div>
-            <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#737373' }}>Total Paid:</span>
-              <strong style={{ color: '#07101f', fontSize: '1.1rem' }}>{formatINR(successOrder.total)}</strong>
+            <div>
+              <span>Total Paid:</span>
+              <strong>{formatINR(successOrder.total)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#737373' }}>Estimated Doorstep Delivery:</span>
-              <strong style={{ color: '#07101f' }}>Tomorrow by 8:00 PM</strong>
+            <div>
+              <span>Estimated Doorstep Delivery:</span>
+              <strong>Tomorrow by 8:00 PM</strong>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <div>
             <Link
               href="/orders"
-              style={{
-                padding: '12px 24px',
-                borderRadius: 10,
-                backgroundColor: '#2457ff',
-                color: '#ffffff',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: '14px',
-              }}
             >
               Track Order
             </Link>
             <Link
               href="/explore"
-              style={{
-                padding: '12px 24px',
-                borderRadius: 10,
-                backgroundColor: '#ffffff',
-                color: '#07101f',
-                border: '1px solid #c5cedc',
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: '14px',
-              }}
             >
               Continue Shopping
             </Link>
@@ -487,49 +458,33 @@ export default function CheckoutPage() {
 
   return (
     <div>
-      <div className={styles.headerContainer}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <h1 className={styles.heading}>Secure Checkout</h1>
+      <div>
+        <div>
+          <h1>Secure Checkout</h1>
           <span
-            style={{
-              fontSize: '11px',
-              fontWeight: 700,
-              backgroundColor: '#f2f2f2',
-              color: '#07101f',
-              padding: '2px 8px',
-              borderRadius: 10,
-            }}
           >
             🇮🇳 100% Indian Marketplace
           </span>
         </div>
-        <p className={styles.subheading}>
+        <p>
           Review items, select your saved delivery address, choose Indian payment method, and confirm your order.
         </p>
       </div>
 
-      {errorMessage && <div className={styles.alertError}>{errorMessage}</div>}
+      {errorMessage && <div>{errorMessage}</div>}
 
-      <form onSubmit={handleSubmitOrder} className={styles.checkoutLayout}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <form onSubmit={handleSubmitOrder}>
+        <div>
           {/* STEP 1: DELIVERY ADDRESS SELECTION */}
-          <div className={styles.checkoutSection}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 className={styles.sectionTitle} style={{ margin: 0, border: 'none', padding: 0 }}>
+          <div>
+            <div>
+              <h2>
                 1. Select Delivery Address
               </h2>
               {savedAddresses.length > 0 && !isAddingNewAddress && (
                 <button
                   type="button"
                   onClick={() => setIsAddingNewAddress(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#07101f',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
                 >
                   + Add New Address
                 </button>
@@ -538,72 +493,43 @@ export default function CheckoutPage() {
 
             {/* List of Saved Addresses */}
             {!isAddingNewAddress && savedAddresses.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
                 {savedAddresses.map((addr) => {
                   const isSelected = selectedAddressId === addr.id;
                   return (
                     <label
                       key={addr.id}
-                      style={{
-                        display: 'flex',
-                        gap: '12px',
-                        padding: '14px 16px',
-                        borderRadius: 12,
-                        border: isSelected ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                        backgroundColor: isSelected ? '#dce6ff' : '#ffffff',
-                        cursor: 'pointer',
-                        alignItems: 'flex-start',
-                      }}
                     >
                       <input
                         type="radio"
                         name="savedAddress"
                         checked={isSelected}
                         onChange={() => setSelectedAddressId(addr.id)}
-                        style={{ marginTop: '4px', cursor: 'pointer', accentColor: '#2457ff' }}
                       />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                          <strong style={{ fontSize: '14px', color: '#07101f' }}>{addr.recipient_name}</strong>
+                      <div>
+                        <div>
+                          <strong>{addr.recipient_name}</strong>
                           <span
-                            style={{
-                              fontSize: '11px',
-                              fontWeight: 700,
-                              backgroundColor: '#e8edf4',
-                              color: '#5a6578',
-                              padding: '2px 8px',
-                              borderRadius: 999,
-                            }}
                           >
                             {addr.label || 'Home'}
                           </span>
                           {addr.is_default && (
                             <span
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: 800,
-                                letterSpacing: '0.06em',
-                                textTransform: 'uppercase',
-                                background: '#d6ff3a',
-                                color: '#07101f',
-                                padding: '2px 8px',
-                                borderRadius: 999,
-                              }}
                             >
                               Default
                             </span>
                           )}
                         </div>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#525252', lineHeight: 1.4 }}>
+                        <p>
                           {addr.address_line1}
                           {addr.address_line2 ? `, ${addr.address_line2}` : ''}
                           <br />
                           {addr.city}, {addr.state} — <strong>{addr.postal_code}</strong>
                         </p>
-                        <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#737373' }}>
+                        <p>
                           Phone number: <strong>+91 {addr.recipient_phone}</strong>
                         </p>
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <div>
                           <button
                             type="button"
                             onClick={(event) => {
@@ -619,17 +545,6 @@ export default function CheckoutPage() {
                               setAddressLabel((addr.label === 'Work' || addr.label === 'Other' ? addr.label : 'Home'));
                               setIsAddingNewAddress(true);
                             }}
-                            style={{
-                              height: 32,
-                              padding: '0 12px',
-                              borderRadius: 8,
-                              border: '1.5px solid #9aabbf',
-                              background: '#ffffff',
-                              color: '#07101f',
-                              fontSize: 12,
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                            }}
                           >
                             Edit
                           </button>
@@ -640,17 +555,6 @@ export default function CheckoutPage() {
                               void fetchWithCsrf(`/api/v1/addresses?id=${addr.id}`, { method: 'DELETE' }).then(() => {
                                 setSavedAddresses((current) => current.filter((item) => item.id !== addr.id));
                               });
-                            }}
-                            style={{
-                              height: 32,
-                              padding: '0 12px',
-                              borderRadius: 8,
-                              border: '1.5px solid #c41e3a',
-                              background: '#ffe0e6',
-                              color: '#c41e3a',
-                              fontSize: 12,
-                              fontWeight: 700,
-                              cursor: 'pointer',
                             }}
                           >
                             Delete
@@ -663,54 +567,32 @@ export default function CheckoutPage() {
               </div>
             ) : (
               /* Add New Address Form */
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
                 {savedAddresses.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setIsAddingNewAddress(false)}
-                    style={{
-                      alignSelf: 'flex-start',
-                      background: 'none',
-                      border: 'none',
-                      color: '#07101f',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      padding: 0,
-                      marginBottom: '8px',
-                    }}
                   >
                     ← Back to saved addresses
                   </button>
                 )}
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Full Name (First and Last name) *</label>
+                <div>
+                  <div>
+                    <label>Full Name (First and Last name) *</label>
                     <input
                       type="text"
                       required
-                      className={styles.input}
                       placeholder="e.g. Rahul Sharma"
                       value={recipientName}
                       onChange={(e) => setRecipientName(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>10-Digit Mobile Number *</label>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div>
+                    <label>10-Digit Mobile Number *</label>
+                    <div>
                       <span
-                        style={{
-                          padding: '0.625rem 0.75rem',
-                          backgroundColor: '#f2f2f2',
-                          border: '1px solid #c5cedc',
-                          borderRight: 'none',
-                          borderRadius: 10,
-                          fontSize: '13px',
-                          color: '#525252',
-                          fontWeight: 600,
-                        }}
                       >
                         +91
                       </span>
@@ -718,8 +600,6 @@ export default function CheckoutPage() {
                         type="tel"
                         required
                         maxLength={10}
-                        className={styles.input}
-                        style={{ borderRadius: 10 }}
                         placeholder="9876543210"
                         value={recipientPhone}
                         onChange={(e) => setRecipientPhone(e.target.value.replace(/\D/g, ''))}
@@ -728,35 +608,32 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Flat, House no., Building, Company, Apartment *</label>
+                <div>
+                  <label>Flat, House no., Building, Company, Apartment *</label>
                   <input
                     type="text"
                     required
-                    className={styles.input}
                     placeholder="e.g. Flat 402, Shanti Heights, Plot 14"
                     value={addressLine1}
                     onChange={(e) => setAddressLine1(e.target.value)}
                   />
                 </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Area, Street, Sector, Village</label>
+                <div>
+                  <div>
+                    <label>Area, Street, Sector, Village</label>
                     <input
                       type="text"
-                      className={styles.input}
                       placeholder="e.g. Bandra West, Linking Road"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Landmark</label>
+                  <div>
+                    <label>Landmark</label>
                     <input
                       type="text"
-                      className={styles.input}
                       placeholder="e.g. Near Lilavati Hospital"
                       value={landmark}
                       onChange={(e) => setLandmark(e.target.value)}
@@ -764,26 +641,23 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Town / City *</label>
+                <div>
+                  <div>
+                    <label>Town / City *</label>
                     <input
                       type="text"
                       required
-                      className={styles.input}
                       placeholder="e.g. Mumbai"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>State *</label>
+                  <div>
+                    <label>State *</label>
                     <select
                       value={state}
                       onChange={(e) => setState(e.target.value)}
-                      className={styles.input}
-                      style={{ backgroundColor: '#ffffff' }}
                     >
                       {INDIAN_STATES.map((st) => (
                         <option key={st} value={st}>
@@ -793,13 +667,12 @@ export default function CheckoutPage() {
                     </select>
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>PIN Code (6 digits) *</label>
+                  <div>
+                    <label>PIN Code (6 digits) *</label>
                     <input
                       type="text"
                       required
                       maxLength={6}
-                      className={styles.input}
                       placeholder="e.g. 400050"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ''))}
@@ -809,42 +682,22 @@ export default function CheckoutPage() {
 
                 {/* Save Address Checkbox */}
                 <div
-                  style={{
-                    backgroundColor: '#f2f2f2',
-                    padding: '12px 16px',
-                    borderRadius: 10,
-                    border: '1px solid #c5cedc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
                 >
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: '#07101f' }}>
+                  <label>
                     <input
                       type="checkbox"
                       checked={saveToAddressBook}
                       onChange={(e) => setSaveToAddressBook(e.target.checked)}
-                      style={{ cursor: 'pointer' }}
                     />
                     <span>Save this address to my account for future orders</span>
                   </label>
 
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                  <div>
                     {(['Home', 'Work', 'Other'] as const).map((lbl) => (
                       <button
                         key={lbl}
                         type="button"
                         onClick={() => setAddressLabel(lbl)}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: 10,
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          border: addressLabel === lbl ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                          backgroundColor: addressLabel === lbl ? '#2457ff' : '#ffffff',
-                          color: addressLabel === lbl ? '#ffffff' : '#525252',
-                        }}
                       >
                         {lbl}
                       </button>
@@ -852,25 +705,15 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '4px' }}>
+                <div>
                   <button
                     type="button"
                     onClick={handleSaveAddressExplicitly}
                     disabled={savingAddress}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: 10,
-                      backgroundColor: '#2457ff',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
                   >
                     {savingAddress ? 'Saving Address...' : '💾 Save Address to Account'}
                   </button>
-                  <span style={{ fontSize: '12px', color: '#737373' }}>
+                  <span>
                     Saves to your ShopSphere India address book immediately
                   </span>
                 </div>
@@ -879,21 +722,11 @@ export default function CheckoutPage() {
           </div>
 
           {/* STEP 2: INDIAN PAYMENT METHODS */}
-          <div className={styles.checkoutSection}>
-            <h2 className={styles.sectionTitle}>2. Payment Method (India)</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div>
+            <h2>2. Payment Method (India)</h2>
+            <div>
               {/* UPI */}
               <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  padding: '14px',
-                  borderRadius: 10,
-                  border: paymentMethod === 'upi' ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                  backgroundColor: paymentMethod === 'upi' ? '#dce6ff' : '#ffffff',
-                  cursor: 'pointer',
-                }}
               >
                 <input
                   type="radio"
@@ -901,16 +734,15 @@ export default function CheckoutPage() {
                   value="upi"
                   checked={paymentMethod === 'upi'}
                   onChange={() => { setPaymentMethod('upi'); setPaymentReady(true); }}
-                  style={{ marginTop: '3px', accentColor: '#2457ff' }}
                 />
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <strong style={{ fontSize: '14px', color: '#07101f' }}>UPI (Google Pay, PhonePe, Paytm, BHIM)</strong>
-                    <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#d6ff3a', color: '#07101f', padding: '1px 6px', borderRadius: 10 }}>
+                <div>
+                  <div>
+                    <strong>UPI (Google Pay, PhonePe, Paytm, BHIM)</strong>
+                    <span>
                       Fastest & Zero Fee
                     </span>
                   </div>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#737373' }}>
+                  <p>
                     Instant verification via any UPI App or VPA.
                   </p>
                   {paymentMethod === 'upi' && (
@@ -921,16 +753,6 @@ export default function CheckoutPage() {
 
               {false && (
               <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  padding: '14px',
-                  borderRadius: 10,
-                  border: paymentMethod === 'stripe' ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                  backgroundColor: paymentMethod === 'stripe' ? '#eef2ff' : '#ffffff',
-                  cursor: 'pointer',
-                }}
               >
                 <input
                   type="radio"
@@ -938,11 +760,10 @@ export default function CheckoutPage() {
                   value="stripe"
                   checked={paymentMethod === 'stripe'}
                   onChange={() => { setPaymentMethod('stripe'); setPaymentReady(true); }}
-                  style={{ marginTop: '3px', accentColor: '#2457ff' }}
                 />
                 <div>
-                  <strong style={{ fontSize: '14px', color: '#07101f' }}>Card via Stripe (test)</strong>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#737373' }}>
+                  <strong>Card via Stripe (test)</strong>
+                  <p>
                     Opens Stripe test checkout. Use card 4242 4242 4242 4242. No real charge.
                   </p>
                 </div>
@@ -951,16 +772,6 @@ export default function CheckoutPage() {
 
               {/* Cash on Delivery */}
               <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  padding: '14px',
-                  borderRadius: 10,
-                  border: paymentMethod === 'cod' ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                  backgroundColor: paymentMethod === 'cod' ? '#dce6ff' : '#ffffff',
-                  cursor: 'pointer',
-                }}
               >
                 <input
                   type="radio"
@@ -968,11 +779,10 @@ export default function CheckoutPage() {
                   value="cod"
                   checked={paymentMethod === 'cod'}
                   onChange={() => { setPaymentMethod('cod'); setPaymentReady(true); }}
-                  style={{ marginTop: '3px', accentColor: '#2457ff' }}
                 />
                 <div>
-                  <strong style={{ fontSize: '14px', color: '#07101f' }}>Cash on Delivery / Pay on Delivery (Cash or QR)</strong>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#737373' }}>
+                  <strong>Cash on Delivery / Pay on Delivery (Cash or QR)</strong>
+                  <p>
                     Pay with Cash or scan delivery partner&apos;s UPI QR code upon arrival at your doorstep.
                   </p>
                 </div>
@@ -980,16 +790,6 @@ export default function CheckoutPage() {
 
               {/* Debit / Credit Cards */}
               <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  padding: '14px',
-                  borderRadius: 10,
-                  border: paymentMethod === 'card' ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                  backgroundColor: paymentMethod === 'card' ? '#dce6ff' : '#ffffff',
-                  cursor: 'pointer',
-                }}
               >
                 <input
                   type="radio"
@@ -997,11 +797,10 @@ export default function CheckoutPage() {
                   value="card"
                   checked={paymentMethod === 'card'}
                   onChange={() => { setPaymentMethod('card'); setPaymentReady(false); }}
-                  style={{ marginTop: '3px', accentColor: '#2457ff' }}
                 />
-                <div style={{ flex: 1 }}>
-                  <strong style={{ fontSize: '14px', color: '#07101f' }}>Credit or Debit Card (RuPay, Visa, MasterCard)</strong>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#737373' }}>
+                <div>
+                  <strong>Credit or Debit Card (RuPay, Visa, MasterCard)</strong>
+                  <p>
                     Enter practice card details, then the OTP shown on this page.
                   </p>
                   {paymentMethod === 'card' ? (
@@ -1012,16 +811,6 @@ export default function CheckoutPage() {
 
               {/* Net Banking */}
               <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  padding: '14px',
-                  borderRadius: 10,
-                  border: paymentMethod === 'netbanking' ? '1.5px solid #2457ff' : '1px solid #c5cedc',
-                  backgroundColor: paymentMethod === 'netbanking' ? '#dce6ff' : '#ffffff',
-                  cursor: 'pointer',
-                }}
               >
                 <input
                   type="radio"
@@ -1029,11 +818,10 @@ export default function CheckoutPage() {
                   value="netbanking"
                   checked={paymentMethod === 'netbanking'}
                   onChange={() => { setPaymentMethod('netbanking'); setPaymentReady(false); }}
-                  style={{ marginTop: '3px', accentColor: '#2457ff' }}
                 />
-                <div style={{ flex: 1 }}>
-                  <strong style={{ fontSize: '14px', color: '#07101f' }}>Net Banking</strong>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#737373' }}>
+                <div>
+                  <strong>Net Banking</strong>
+                  <p>
                     Choose a bank, enter a practice user id, then the OTP shown on this page.
                   </p>
                   {paymentMethod === 'netbanking' ? (
@@ -1045,47 +833,43 @@ export default function CheckoutPage() {
           </div>
 
           {/* STEP 3: GIFT FOR FRIEND (OPTIONAL) */}
-          <div className={styles.giftToggleContainer}>
-            <label className={styles.giftCheckboxLabel}>
+          <div>
+            <label>
               <input
                 type="checkbox"
                 checked={isGift}
                 onChange={(e) => setIsGift(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
               />
               <span>🎁 Send as a Surprise Gift for a Friend / Loved One</span>
             </label>
 
             {isGift && (
-              <div className={styles.giftFieldsContainer}>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Recipient Email Address</label>
+              <div>
+                <div>
+                  <div>
+                    <label>Recipient Email Address</label>
                     <input
                       type="email"
-                      className={styles.input}
                       placeholder="friend@example.com"
                       value={giftRecipientEmail}
                       onChange={(e) => setGiftRecipientEmail(e.target.value)}
                     />
                   </div>
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label}>Surprise Reveal Date</label>
+                  <div>
+                    <label>Surprise Reveal Date</label>
                     <input
                       type="date"
-                      className={styles.input}
                       value={giftRevealDate}
                       onChange={(e) => setGiftRevealDate(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Personal Gift Note / Greetings</label>
+                <div>
+                  <label>Personal Gift Note / Greetings</label>
                   <textarea
                     rows={2}
-                    className={styles.input}
                     placeholder="Wishing you a very Happy Birthday! Enjoy the gift!"
                     value={giftMessage}
                     onChange={(e) => setGiftMessage(e.target.value)}
@@ -1098,45 +882,36 @@ export default function CheckoutPage() {
 
         {/* ORDER SUMMARY (INR) */}
         <div>
-          <div className={styles.summaryCard} style={{ position: 'relative' }}>
-            <h2 className={styles.sectionTitle} style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 6 }}>
+          <div>
+            <h2>
               Review items before payment
             </h2>
-            <p style={{ fontSize: 13, color: '#5a6578', margin: '0 0 16px', paddingLeft: 10, borderLeft: '3px solid #d6ff3a' }}>
+            <p>
               Change quantity or remove a product. The amount below updates before you pay.
             </p>
 
-            <div className={styles.cartItemList}>
+            <div>
               {cart.map((item) => (
-                <div key={item.id} className={styles.cartRow}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                <div key={item.id}>
+                  <div>
                     <div
-                      style={{
-                        fontWeight: 700,
-                        color: '#07101f',
-                        fontSize: 13,
-                        lineHeight: 1.35,
-                        fontFamily: 'var(--font-display), sans-serif',
-                      }}
                     >
                       {item.title}
                     </div>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
-                      <div className={styles.qtyControl}>
+                    <div>
+                      <div>
                         <button
                           type="button"
-                          className={styles.qtyButton}
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           aria-label="Decrease quantity"
                         >
                           −
                         </button>
-                        <span style={{ minWidth: 28, textAlign: 'center', fontWeight: 700, fontSize: 13 }}>
+                        <span>
                           {item.quantity}
                         </span>
                         <button
                           type="button"
-                          className={styles.qtyButton}
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           aria-label="Increase quantity"
                         >
@@ -1146,30 +921,12 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.id)}
-                        style={{
-                          height: 36,
-                          padding: '0 12px',
-                          borderRadius: 8,
-                          border: '1.5px solid #c41e3a',
-                          background: '#ffe0e6',
-                          color: '#c41e3a',
-                          fontSize: 12,
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                        }}
                       >
                         Remove
                       </button>
                     </div>
                   </div>
                   <strong
-                    style={{
-                      fontSize: 14,
-                      color: '#2457ff',
-                      fontWeight: 800,
-                      whiteSpace: 'nowrap',
-                      paddingTop: 2,
-                    }}
                   >
                     {formatINR(item.price * item.quantity)}
                   </strong>
@@ -1179,30 +936,12 @@ export default function CheckoutPage() {
 
             {/* Behavioral Offers & Coupons Section */}
             <div
-              style={{
-                background:
-                  'linear-gradient(135deg, #ffffff 0%, #dce6ff 70%, #f3ffc4 100%)',
-                border: '1px solid #c5cedc',
-                borderRadius: 14,
-                padding: 14,
-                marginBottom: '1rem',
-              }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 8 }}>
-                <strong style={{ fontSize: 14, color: '#07101f', fontFamily: 'var(--font-display), sans-serif' }}>
+              <div>
+                <strong>
                   Apply behavioral coupons
                 </strong>
                 <span
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 800,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    backgroundColor: '#d6ff3a',
-                    color: '#07101f',
-                    padding: '4px 8px',
-                    borderRadius: 999,
-                  }}
                 >
                   AI matched
                 </span>
@@ -1210,15 +949,6 @@ export default function CheckoutPage() {
 
               {offerFeedback && (
                 <div
-                  style={{
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    marginBottom: 8,
-                    fontSize: 12,
-                    backgroundColor: offerFeedback.type === 'success' ? '#d8f5e8' : '#ffe0e6',
-                    color: offerFeedback.type === 'success' ? '#0f7a4c' : '#c41e3a',
-                    border: `1px solid ${offerFeedback.type === 'success' ? '#0f7a4c' : '#c41e3a'}`,
-                  }}
                 >
                   {offerFeedback.message}
                 </div>
@@ -1226,121 +956,58 @@ export default function CheckoutPage() {
 
               {appliedOffer ? (
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    backgroundColor: '#ffffff',
-                    border: '1.5px solid #2457ff',
-                    borderRadius: 10,
-                    padding: '10px 12px',
-                    gap: 8,
-                  }}
                 >
                   <div>
-                    <span style={{ fontSize: 11, fontWeight: 800, color: '#2457ff', letterSpacing: '0.04em' }}>
+                    <span>
                       CODE APPLIED · {appliedOffer.code}
                     </span>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#07101f', marginTop: 2 }}>
+                    <div>
                       {appliedOffer.title} (−{formatINR(appliedOffer.discountAmount)})
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleRemoveCoupon}
-                    style={{
-                      background: '#ffe0e6',
-                      border: '1.5px solid #c41e3a',
-                      borderRadius: 8,
-                      color: '#c41e3a',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      padding: '6px 10px',
-                    }}
                   >
                     Remove
                   </button>
                 </div>
               ) : (
                 <>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                  <div>
                     <input
                       type="text"
                       placeholder="Enter coupon code"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                      style={{
-                        flex: 1,
-                        padding: '9px 12px',
-                        fontSize: 12,
-                        border: '1.5px solid #9aabbf',
-                        borderRadius: 8,
-                        textTransform: 'uppercase',
-                        background: '#ffffff',
-                        color: '#07101f',
-                      }}
                     />
                     <button
                       type="button"
                       onClick={() => handleApplyCoupon(couponInput)}
-                      style={{
-                        padding: '9px 14px',
-                        backgroundColor: '#2457ff',
-                        color: '#ffffff',
-                        border: '1.5px solid #2457ff',
-                        borderRadius: 8,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                      }}
                     >
                       Apply
                     </button>
                   </div>
 
                   {offers.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <span style={{ fontSize: 11, color: '#5a6578', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    <div>
+                      <span>
                         Available for your cart
                       </span>
                       {offers.slice(0, 3).map((off: any, idx: number) => (
                         <div
                           key={off.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            backgroundColor: '#ffffff',
-                            padding: '10px 12px',
-                            borderRadius: 10,
-                            border: '1px solid #c5cedc',
-                            fontSize: 12,
-                            gap: 8,
-                            transform: idx === 1 ? 'translateX(8px)' : undefined,
-                          }}
                         >
-                          <div style={{ minWidth: 0 }}>
-                            <strong style={{ color: '#2457ff' }}>{off.code}</strong>
-                            <span style={{ color: '#5a6578' }}> — {off.title}</span>
-                            <div style={{ color: '#7a8699', fontSize: 11, marginTop: 2 }}>
+                          <div>
+                            <strong>{off.code}</strong>
+                            <span> — {off.title}</span>
+                            <div>
                               Min cart: {formatINR(off.minOrderAmount)}
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleApplyCoupon(off.code)}
-                            style={{
-                              padding: '6px 10px',
-                              backgroundColor: '#07101f',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: 8,
-                              fontSize: 11,
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              flexShrink: 0,
-                            }}
                           >
                             Apply
                           </button>
@@ -1352,44 +1019,43 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            <div className={styles.summaryItem}>
+            <div>
               <span>Items Subtotal</span>
-              <span style={{ color: '#07101f', fontWeight: 600 }}>{formatINR(totalAmount)}</span>
+              <span>{formatINR(totalAmount)}</span>
             </div>
 
             {appliedOffer && (
-              <div className={styles.summaryItem} style={{ color: '#0f7a4c', fontWeight: 700 }}>
+              <div>
                 <span>Coupon ({appliedOffer.code})</span>
                 <span>−{formatINR(appliedOffer.discountAmount)}</span>
               </div>
             )}
 
-            <div className={styles.summaryItem}>
+            <div>
               <span>Delivery</span>
-              <span style={{ color: deliveryFee === 0 ? '#0f7a4c' : '#07101f', fontWeight: deliveryFee === 0 ? 700 : 600 }}>
+              <span>
                 {deliveryFee === 0 ? 'FREE (above ₹499)' : formatINR(deliveryFee)}
               </span>
             </div>
 
-            <div className={styles.summaryItem}>
+            <div>
               <span>Eco packaging & handling</span>
-              <span style={{ color: '#07101f', fontWeight: 600 }}>{formatINR(handlingFee)}</span>
+              <span>{formatINR(handlingFee)}</span>
             </div>
 
-            <div className={styles.summaryTotal}>
+            <div>
               <span>Total payable</span>
-              <span style={{ color: '#2457ff' }}>{formatINR(finalTotalINR)}</span>
+              <span>{formatINR(finalTotalINR)}</span>
             </div>
 
             <button
               type="submit"
               disabled={loading || cart.length === 0 || ((paymentMethod === 'card' || paymentMethod === 'netbanking') && !paymentReady)}
-              className={styles.buttonCheckout}
             >
               {loading ? 'Processing order…' : `Place order · ${formatINR(finalTotalINR)}`}
             </button>
 
-            <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: 11, color: '#5a6578' }}>
+            <div>
               256-bit SSL · Genuine products · 7-day returns
             </div>
           </div>

@@ -5,7 +5,6 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { buildShopHealth } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
-import layoutStyles from '../seller.module.css';
 
 export default async function SellerDashboardPage() {
   const supabase = await createClient();
@@ -45,54 +44,54 @@ export default async function SellerDashboardPage() {
 
   return (
     <>
-      <header className={layoutStyles.topBar}>
+      <header>
         <div>
-          <h1 className={layoutStyles.pageHeading}>{shop?.name ?? 'Your shop'}</h1>
-          <p className={layoutStyles.muted} style={{ marginTop: '0.25rem' }}>
+          <h1>{shop?.name ?? 'Your shop'}</h1>
+          <p>
             {editsLeft} branding edit{editsLeft === 1 ? '' : 's'} left
             {shop ? <> · <Link href={`/shops/${shop.id}`}>Public shop</Link></> : null}
           </p>
         </div>
-        <Link href="/seller/add-product" className={layoutStyles.buttonPrimary}>Add product</Link>
+        <Link href="/seller/add-product">Add product</Link>
       </header>
-      <div className={layoutStyles.pageBody}>
-        {error ? <p className={layoutStyles.muted}>{error.message}</p> : null}
-        <div className={layoutStyles.metricsGrid}>
-          <div className={layoutStyles.metricCard}>
-            <p className={layoutStyles.metricLabel}>Live</p>
-            <p className={layoutStyles.metricValue}>{health.live}</p>
+      <div>
+        {error ? <p>{error.message}</p> : null}
+        <div>
+          <div>
+            <p>Live</p>
+            <p>{health.live}</p>
           </div>
-          <div className={layoutStyles.metricCard}>
-            <p className={layoutStyles.metricLabel}>Pending</p>
-            <p className={layoutStyles.metricValue}>{health.pending}</p>
+          <div>
+            <p>Pending</p>
+            <p>{health.pending}</p>
           </div>
-          <div className={layoutStyles.metricCard}>
-            <p className={layoutStyles.metricLabel}>Rejected</p>
-            <p className={layoutStyles.metricValue}>{health.rejected}</p>
+          <div>
+            <p>Rejected</p>
+            <p>{health.rejected}</p>
           </div>
-          <div className={layoutStyles.metricCard}>
-            <p className={layoutStyles.metricLabel}>Low stock</p>
-            <p className={layoutStyles.metricValue}>{health.lowStock}</p>
+          <div>
+            <p>Low stock</p>
+            <p>{health.lowStock}</p>
           </div>
-          <div className={layoutStyles.metricCard}>
-            <p className={layoutStyles.metricLabel}>Orders</p>
-            <p className={layoutStyles.metricValue}>{health.orders}</p>
+          <div>
+            <p>Orders</p>
+            <p>{health.orders}</p>
           </div>
-          <div className={layoutStyles.metricCard}>
-            <p className={layoutStyles.metricLabel}>Revenue</p>
-            <p className={layoutStyles.metricValue}>{formatINR(health.revenue)}</p>
+          <div>
+            <p>Revenue</p>
+            <p>{formatINR(health.revenue)}</p>
           </div>
         </div>
-        <section className={layoutStyles.panel}>
-          <h2 className={layoutStyles.panelTitle}>Category mini-shops</h2>
+        <section>
+          <h2>Category mini-shops</h2>
           {health.categories.length === 0 ? (
-            <p className={layoutStyles.muted}>No products yet. Add one to open a category mini-shop.</p>
+            <p>No products yet. Add one to open a category mini-shop.</p>
           ) : (
-            <ul className={layoutStyles.miniShopList}>
+            <ul>
               {health.categories.map((row) => (
-                <li key={row.category} className={layoutStyles.miniShopItem}>
+                <li key={row.category}>
                   <Link href={`/seller/inventory/${encodeURIComponent(row.category)}`}>{row.category}</Link>
-                  <span className={layoutStyles.muted}>
+                  <span>
                     {row.products} products · live {row.live} · pending {row.pending} · rejected {row.rejected}
                     · sold {row.unitsSold} · {formatINR(row.revenue)}
                   </span>

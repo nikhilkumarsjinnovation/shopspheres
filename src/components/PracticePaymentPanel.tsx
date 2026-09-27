@@ -36,8 +36,8 @@ export default function PracticePaymentPanel({
   }, [verified, onReady]);
 
   return (
-    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <p style={{ margin: 0, fontSize: '12px', color: '#525252' }}>
+    <div>
+      <p>
         Practice payment for {amountLabel}. Nothing is charged.
       </p>
       {mode === 'card' ? (
@@ -96,7 +96,7 @@ export default function PracticePaymentPanel({
       </button>
       {otpSent ? (
         <div>
-          <p style={{ margin: '0 0 6px', fontSize: '13px' }}>
+          <p>
             Practice OTP for this {mode === 'card' ? `${network} card` : bank} payment is {PRACTICE_OTP}. Enter it to continue.
           </p>
           <label>

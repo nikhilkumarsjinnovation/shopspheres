@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SignOutButton from '@/components/SignOutButton';
-import styles from '@/app/seller/seller.module.css';
 
 interface SellerSidebarProps {
   email?: string;
@@ -21,22 +20,21 @@ export default function SellerSidebar({ email }: SellerSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.brand}>
-        <h2 className={styles.brandTitle}>ShopSphere</h2>
-        <span className={styles.brandBadge}>Atelier</span>
+    <aside>
+      <div>
+        <h2>ShopSphere</h2>
+        <span>Atelier</span>
       </div>
 
-      <nav className={styles.nav} aria-label="Seller">
+      <nav aria-label="Seller">
         {links.map((link) => {
           const active = link.match(pathname);
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
             >
-              <span style={{ fontSize: '0.6rem', letterSpacing: '0.08em', opacity: 0.55, minWidth: 18 }}>
+              <span>
                 {link.index}
               </span>
               {link.label}
@@ -45,9 +43,9 @@ export default function SellerSidebar({ email }: SellerSidebarProps) {
         })}
       </nav>
 
-      <div className={styles.sidebarFooter}>
+      <div>
         {email ? (
-          <div className={styles.userEmail} title={email}>
+          <div title={email}>
             {email}
           </div>
         ) : null}

@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { formatINR } from '@/lib/formatters';
 import { orderCode, shippingCityAndPin } from '@/lib/platform-stats';
-import * as styles from '../../../admin.css';
 
 export default async function AdminOrderDetailPage({
   params,
@@ -18,7 +17,7 @@ export default async function AdminOrderDetailPage({
     .eq('id', id)
     .maybeSingle();
   if (error) {
-    return <div className={styles.emptyState}>{error.message}</div>;
+    return <div>{error.message}</div>;
   }
   if (!order) notFound();
 
@@ -31,19 +30,19 @@ export default async function AdminOrderDetailPage({
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.headerTitle}>{orderCode(order.id)}</h1>
-        <p className={styles.headerSubtitle}>{order.status} · {formatINR(order.total_amount)} · {place.city} {place.pin}</p>
+      <div>
+        <h1>{orderCode(order.id)}</h1>
+        <p>{order.status} · {formatINR(order.total_amount)} · {place.city} {place.pin}</p>
       </div>
       <p><Link href="/admin/orders">Back to orders</Link></p>
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
+      <div>
+        <table>
           <thead>
             <tr>
-              <th className={styles.th}>Item</th>
-              <th className={styles.th}>Qty</th>
-              <th className={styles.th}>Price</th>
-              <th className={styles.th}>Shop</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Shop</th>
             </tr>
           </thead>
           <tbody>
@@ -51,11 +50,11 @@ export default async function AdminOrderDetailPage({
               const shop = shopBySeller.get(item.seller_id);
               const title = item.product && !Array.isArray(item.product) ? item.product.title : 'Product';
               return (
-                <tr key={item.id} className={styles.tr}>
-                  <td className={styles.td}>{title}</td>
-                  <td className={styles.td}>{item.quantity}</td>
-                  <td className={styles.td}>{formatINR(item.unit_price)}</td>
-                  <td className={styles.td}>{shop ? `${shop.name}, ${shop.city}` : '—'}</td>
+                <tr key={item.id}>
+                  <td>{title}</td>
+                  <td>{item.quantity}</td>
+                  <td>{formatINR(item.unit_price)}</td>
+                  <td>{shop ? `${shop.name}, ${shop.city}` : '—'}</td>
                 </tr>
               );
             })}

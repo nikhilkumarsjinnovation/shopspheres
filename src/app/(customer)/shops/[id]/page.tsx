@@ -3,7 +3,6 @@ import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import ProductCard from '@/components/ProductCard';
-import * as styles from '../../customer.css';
 
 export default async function ShopDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,16 +19,16 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <p style={{ marginBottom: '1rem' }}><Link className={styles.quietLink} href="/shops">All shops</Link></p>
-      <div className={styles.headerContainer}>
-        <h1 className={styles.heading}>{shop.name}</h1>
-        <p className={styles.subheading}>{shop.city}, {shop.state}</p>
-        {shop.description ? <p className={styles.listMeta}>{shop.description}</p> : null}
+      <p><Link href="/shops">All shops</Link></p>
+      <div>
+        <h1>{shop.name}</h1>
+        <p>{shop.city}, {shop.state}</p>
+        {shop.description ? <p>{shop.description}</p> : null}
       </div>
       {(products ?? []).length === 0 ? (
-        <div className={styles.emptyState}>This shop has no approved products yet.</div>
+        <div>This shop has no approved products yet.</div>
       ) : (
-        <div className={styles.productGrid}>
+        <div>
           {(products ?? []).map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

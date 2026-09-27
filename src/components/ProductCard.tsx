@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { ImageOff, Minus, Plus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
-import * as styles from '@/app/(customer)/customer.css';
-import { badge, badgeTone } from '@/styles/ui.css';
 
 interface ProductCardProps {
   product: {
@@ -59,74 +57,72 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <article className={styles.productCard}>
+    <article>
       <Link
         href={`/product/${product.id}`}
-        style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', flex: 1 }}
       >
-        <div className={styles.cardImageContainer}>
+        <div>
           {firstImage && !imageError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={firstImage}
               alt=""
-              className={styles.cardImage}
               onError={() => setImageError(true)}
             />
           ) : (
-            <div className={styles.cardPlaceholderImage}>
+            <div>
               <ImageOff size={20} strokeWidth={1.5} aria-hidden />
               No image
             </div>
           )}
           {discountPercent !== null ? (
-            <span className={`${badge} ${badgeTone.accent}`} style={{ position: 'absolute', top: 0, left: 0 }}>
+            <span>
               −{discountPercent}%
             </span>
           ) : null}
           {inCart ? (
-            <span className={`${badge} ${badgeTone.neutral}`} style={{ position: 'absolute', top: 0, right: 0 }}>
+            <span>
               {inCart.quantity} in bag
             </span>
           ) : null}
         </div>
 
-        <div className={styles.cardBody}>
-          <span className={styles.cardCategory}>{product.category}</span>
-          <h3 className={styles.cardTitle}>{product.title}</h3>
+        <div>
+          <span>{product.category}</span>
+          <h3>{product.title}</h3>
           {rating > 0 ? (
-            <p className={styles.listMeta} style={{ letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+            <p>
               {rating.toFixed(1)} · {product.review_count || 0} reviews
             </p>
           ) : null}
           {!inCart && stock > 0 && stock <= 5 ? (
-            <p className={styles.listMeta} style={{ letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+            <p>
               Only {stock} left
             </p>
           ) : null}
 
-          <div className={styles.cardFooter}>
+          <div>
             <div>
-              <span className={styles.cardPrice}>{formatINR(product.price)}</span>
+              <span>{formatINR(product.price)}</span>
               {product.compare_at_price && product.compare_at_price > product.price ? (
-                <span style={{ display: 'block', fontSize: '0.7rem', color: '#737373', textDecoration: 'line-through' }}>
+                <span>
                   {formatINR(product.compare_at_price)}
                 </span>
               ) : null}
             </div>
 
             {inCart ? (
-              <div className={styles.qtyControl} onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}>
-                <button type="button" className={styles.qtyButton} aria-label="Decrease" onClick={() => updateQuantity(product.id, inCart.quantity - 1)}>
+              <div onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}>
+                <button type="button" aria-label="Decrease" onClick={() => updateQuantity(product.id, inCart.quantity - 1)}>
                   <Minus size={14} />
                 </button>
-                <span style={{ minWidth: 20, textAlign: 'center', fontWeight: 600, fontSize: '0.8rem' }}>{inCart.quantity}</span>
-                <button type="button" className={styles.qtyButton} aria-label="Increase" onClick={() => updateQuantity(product.id, inCart.quantity + 1)}>
+                <span>{inCart.quantity}</span>
+                <button type="button" aria-label="Increase" onClick={() => updateQuantity(product.id, inCart.quantity + 1)}>
                   <Plus size={14} />
                 </button>
               </div>
             ) : (
-              <button type="button" onClick={handleAdd} disabled={isOutOfStock} className={styles.buttonAddToCart}>
+              <button type="button" onClick={handleAdd} disabled={isOutOfStock}>
                 {isOutOfStock ? 'Sold out' : added ? 'Added' : 'Add'}
               </button>
             )}

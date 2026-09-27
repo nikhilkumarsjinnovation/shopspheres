@@ -7,7 +7,6 @@ import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import AudioDescriptionPlayer from '@/components/accessibility/AudioDescriptionPlayer';
-import * as styles from '@/app/(customer)/customer.css';
 
 export interface ProductDetailProps {
   product: {
@@ -234,21 +233,21 @@ export default function ProductDetailClient({
     .slice(0, 5);
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 0, fontFamily: 'var(--font-body), sans-serif' }}>
-      <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5a6578', padding: '0 0 20px', borderBottom: '1px solid #07101f', marginBottom: 0 }}>
-        <Link href="/explore" style={{ color: '#5a6578', textDecoration: 'none' }}>Explore</Link>
+    <div>
+      <nav aria-label="Breadcrumb">
+        <Link href="/explore">Explore</Link>
         <span>/</span>
         <span>{product.category}</span>
         {product.sub_category ? (<><span>/</span><span>{product.sub_category}</span></>) : null}
         <span>/</span>
-        <span style={{ color: '#07101f', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 }}>{product.title}</span>
+        <span>{product.title}</span>
       </nav>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 0.85fr)', gap: 16, alignItems: 'start' }}>
-        <div style={{ border: '1px solid #c5cedc', borderRadius: 16, background: '#e8edf4', overflow: 'hidden', boxShadow: '0 4px 16px rgba(7,16,31,0.08)' }}>
-          <div style={{ width: '100%', aspectRatio: '4 / 5', background: '#e8edf4', overflow: 'hidden', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div>
+        <div>
+          <div>
             {discountPercent !== null ? (
-              <span style={{ position: 'absolute', top: 0, left: 0, background: '#d6ff3a', color: '#07101f', fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 12px', borderRadius: '0 0 8px 0', zIndex: 2 }}>
+              <span>
                 −{discountPercent}%
               </span>
             ) : null}
@@ -256,73 +255,71 @@ export default function ProductDetailClient({
             <img
               src={images[activeImageIndex] || images[0]}
               alt={product.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'none', transition: 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)' }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.03)'; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)'; }}
             />
           </div>
           {images.length > 1 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(images.length, 6)}, 1fr)`, borderTop: '1px solid #07101f' }}>
+            <div>
               {images.map((imgUrl, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setActiveImageIndex(idx)}
-                  style={{ height: 72, border: 'none', borderRight: idx < images.length - 1 ? '1px solid #07101f' : 'none', padding: 0, background: activeImageIndex === idx ? '#2457ff' : '#ffffff', cursor: 'pointer', overflow: 'hidden' }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: activeImageIndex === idx ? 0.55 : 1 }} />
+                  <img src={imgUrl} alt="" />
                 </button>
               ))}
             </div>
           ) : null}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', background: '#ffffff', border: '1px solid #c5cedc', borderRadius: 16, boxShadow: '0 4px 16px rgba(7,16,31,0.08)', transform: 'translateY(12px)' }}>
-          <div style={{ padding: '28px 28px 20px', borderBottom: '1px solid #07101f', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#07101f', border: '1px solid #07101f', padding: '4px 8px' }}>
+        <div>
+          <div>
+            <div>
+              <span>
                 {merchant?.name ? merchant.name : product.category}
               </span>
               {merchant?.is_verified ? (
-                <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5a6578' }}>Verified</span>
+                <span>Verified</span>
               ) : null}
             </div>
-            {sharerName ? <p style={{ margin: 0, fontSize: 12, color: '#5a6578' }}>Sent by {sharerName}</p> : null}
-            <h1 style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: 'clamp(1.6rem, 3vw, 2.25rem)', fontWeight: 700, letterSpacing: '-0.05em', color: '#07101f', margin: 0, lineHeight: 0.95 }}>
+            {sharerName ? <p>Sent by {sharerName}</p> : null}
+            <h1>
               {product.title}
             </h1>
             {false && <AudioDescriptionPlayer productId={product.id} />}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#5a6578' }}>
-              <span style={{ color: '#07101f', fontWeight: 700 }}>{Number(product.average_rating || 5.0).toFixed(1)} / 5</span>
+            <div>
+              <span>{Number(product.average_rating || 5.0).toFixed(1)} / 5</span>
               <span>{reviews.length || product.review_count || 0} reviews</span>
             </div>
           </div>
 
-          <div style={{ padding: '22px 28px', borderBottom: '1px solid #07101f', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-              <span style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '2rem', fontWeight: 700, letterSpacing: '-0.04em', color: '#07101f' }}>{formatINR(currentPrice)}</span>
+          <div>
+            <div>
+              <span>{formatINR(currentPrice)}</span>
               {product.compare_at_price && product.compare_at_price > currentPrice ? (
-                <span style={{ fontSize: 13, color: '#7a8699', textDecoration: 'line-through' }}>{formatINR(product.compare_at_price)}</span>
+                <span>{formatINR(product.compare_at_price)}</span>
               ) : null}
             </div>
-            <p style={{ margin: 0, fontSize: 12, color: '#5a6578' }}>Inclusive of marketplace taxes. Free delivery over ₹499.</p>
+            <p>Inclusive of marketplace taxes. Free delivery over ₹499.</p>
           </div>
 
-          <div style={{ padding: '18px 28px', borderBottom: '1px solid #07101f', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0 }}>
+          <div>
             {['AI offer at checkout', 'UPI cashback ₹50', 'Free delivery'].map((label, i) => (
-              <div key={label} style={{ padding: '10px 12px', borderRight: i < 2 ? '1px solid #e6e6e6' : 'none', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#5a6578' }}>{label}</div>
+              <div key={label}>{label}</div>
             ))}
           </div>
 
           {variants.length > 0 ? (
-            <div style={{ padding: '18px 28px', borderBottom: '1px solid #07101f', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5a6578' }}>Edition</span>
-              <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap', border: '1px solid #07101f' }}>
+            <div>
+              <span>Edition</span>
+              <div>
                 {variants.map((v, i) => {
                   const isSelected = v.id === selectedVariantId;
                   return (
-                    <button key={v.id} type="button" onClick={() => setSelectedVariantId(v.id)} style={{ padding: '10px 14px', border: 'none', borderRight: i < variants.length - 1 ? '1px solid #07101f' : 'none', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', background: isSelected ? '#2457ff' : '#ffffff', color: isSelected ? '#ffffff' : '#07101f', cursor: 'pointer' }}>
+                    <button key={v.id} type="button" onClick={() => setSelectedVariantId(v.id)}>
                       {v.title}{v.price ? ` · ${formatINR(v.price)}` : ''}
                     </button>
                   );
@@ -331,33 +328,33 @@ export default function ProductDetailClient({
             </div>
           ) : null}
 
-          <div style={{ padding: '22px 28px', borderBottom: '1px solid #07101f', display: 'flex', flexDirection: 'column', gap: 14, marginTop: 'auto' }}>
+          <div>
             {stock > 0 ? (
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#07101f' }}>
+              <span>
                 {stock <= 5 ? `Only ${stock} left` : 'In stock'}
               </span>
             ) : (
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5a6578' }}>Unavailable</span>
+              <span>Unavailable</span>
             )}
             {stock > 0 ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <label htmlFor="qty-select" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5a6578' }}>Qty</label>
-                <select id="qty-select" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #07101f', fontSize: 13, background: '#ffffff' }}>
+              <div>
+                <label htmlFor="qty-select">Qty</label>
+                <select id="qty-select" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}>
                   {Array.from({ length: Math.min(stock, 10) }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>{n}</option>
                   ))}
                 </select>
               </div>
             ) : null}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, border: '1px solid #07101f' }}>
-              <button type="button" onClick={handleAddToCart} disabled={isOutOfStock} style={{ padding: '16px', border: 'none', borderRight: '1px solid #07101f', background: '#ffffff', color: '#07101f', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: isOutOfStock ? 'not-allowed' : 'pointer', opacity: isOutOfStock ? 0.4 : 1 }}>
+            <div>
+              <button type="button" onClick={handleAddToCart} disabled={isOutOfStock}>
                 {addedNotice ? 'Added' : 'Add to bag'}
               </button>
-              <button type="button" onClick={handleBuyNow} disabled={isOutOfStock} style={{ padding: '16px', border: '1.5px solid #2457ff', borderRadius: 8, background: '#2457ff', color: '#ffffff', fontSize: 12, fontWeight: 700, cursor: isOutOfStock ? 'not-allowed' : 'pointer', opacity: isOutOfStock ? 0.4 : 1 }}>
+              <button type="button" onClick={handleBuyNow} disabled={isOutOfStock}>
                 Buy now
               </button>
             </div>
-            <div style={{ fontSize: 11, color: '#5a6578', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', letterSpacing: '0.04em' }}>
+            <div>
               <span>Ships · ShopSphere</span>
               <span>Sold · {merchant?.name || 'Merchant'}</span>
               <span>Returns · 30 days</span>
@@ -367,21 +364,21 @@ export default function ProductDetailClient({
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 16, marginTop: 16 }}>
-        <div style={{ padding: '28px', border: '1px solid #c5cedc', borderRadius: 16, background: '#ffffff', boxShadow: '0 4px 16px rgba(7,16,31,0.06)' }}>
-          <h3 style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 14px', color: '#07101f' }}>About</h3>
-          <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: 13, color: '#5a6578', lineHeight: 1.65 }}>
+      <div>
+        <div>
+          <h3>About</h3>
+          <ul>
             {descriptionBullets.length > 0 ? descriptionBullets.map((bullet, idx) => <li key={idx}>{bullet}</li>) : <li>{product.description}</li>}
           </ul>
         </div>
-        <div style={{ padding: '28px', border: '1px solid #c5cedc', borderRadius: 16, background: '#ffffff', boxShadow: '0 4px 16px rgba(7,16,31,0.06)', transform: 'translateY(16px)' }}>
-          <h3 style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 14px', color: '#07101f' }}>Specifications</h3>
-          <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse', border: '1px solid #07101f' }}>
+        <div>
+          <h3>Specifications</h3>
+          <table>
             <tbody>
               {specList.map((spec, idx) => (
-                <tr key={idx} style={{ background: idx % 2 === 0 ? '#e8edf4' : '#ffffff', borderBottom: '1px solid #e6e6e6' }}>
-                  <td style={{ padding: '10px 12px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 10, color: '#5a6578', width: '40%' }}>{spec.label}</td>
-                  <td style={{ padding: '10px 12px', color: '#07101f' }}>{spec.value}</td>
+                <tr key={idx}>
+                  <td>{spec.label}</td>
+                  <td>{spec.value}</td>
                 </tr>
               ))}
             </tbody>
@@ -389,70 +386,70 @@ export default function ProductDetailClient({
         </div>
       </div>
 
-      <div style={{ border: '1px solid #c5cedc', borderRadius: 16, marginTop: 16, padding: '28px', background: '#ffffff', display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+      <div>
+        <div>
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.04em', textTransform: 'uppercase', color: '#07101f', margin: '0 0 6px' }}>Reviews</h2>
-            <p style={{ margin: 0, fontSize: 12, color: '#5a6578', letterSpacing: '0.04em' }}>Verified buyer notes.</p>
+            <h2>Reviews</h2>
+            <p>Verified buyer notes.</p>
           </div>
-          <button type="button" onClick={() => setShowReviewForm(!showReviewForm)} style={{ padding: '12px 18px', borderRadius: 8, background: '#2457ff', color: '#ffffff', border: '1.5px solid #2457ff', fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer' }}>
+          <button type="button" onClick={() => setShowReviewForm(!showReviewForm)}>
             {showReviewForm ? 'Cancel' : 'Write review'}
           </button>
         </div>
 
         {reviewMessage ? (
-          <div style={{ padding: '12px 14px', background: '#e8edf4', border: '1px solid #07101f', borderLeftWidth: 4, color: '#07101f', fontSize: 13, fontWeight: 600 }}>{reviewMessage}</div>
+          <div>{reviewMessage}</div>
         ) : null}
 
         {showReviewForm ? (
-          <form onSubmit={handleSubmitReview} style={{ background: '#ffffff', padding: '20px', borderRadius: 8, border: '1px solid #07101f', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display), sans-serif', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.03em', textTransform: 'uppercase', color: '#07101f' }}>Your review</h3>
+          <form onSubmit={handleSubmitReview}>
+            <h3>Your review</h3>
             <div>
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5a6578', marginBottom: 6 }}>Rating</label>
-              <div style={{ display: 'flex', gap: 4 }}>
+              <label>Rating</label>
+              <div>
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <button key={star} type="button" onClick={() => setReviewRating(star)} style={{ background: 'none', border: '1px solid #07101f', width: 36, height: 36, cursor: 'pointer', fontSize: 16, color: star <= reviewRating ? '#07101f' : '#cccccc' }}>★</button>
+                  <button key={star} type="button" onClick={() => setReviewRating(star)}>★</button>
                 ))}
               </div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5a6578', marginBottom: 6 }}>Headline</label>
-              <input type="text" placeholder="Most important detail" value={reviewTitle} onChange={(e) => setReviewTitle(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 8, border: '1px solid #07101f', fontSize: 13 }} />
+              <label>Headline</label>
+              <input type="text" placeholder="Most important detail" value={reviewTitle} onChange={(e) => setReviewTitle(e.target.value)} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5a6578', marginBottom: 6 }}>Review</label>
-              <textarea rows={4} required placeholder="What stood out?" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 8, border: '1px solid #07101f', fontSize: 13, fontFamily: 'inherit' }} />
+              <label>Review</label>
+              <textarea rows={4} required placeholder="What stood out?" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} />
             </div>
-            <button type="submit" disabled={submittingReview} style={{ alignSelf: 'flex-start', padding: '12px 20px', borderRadius: 8, background: '#2457ff', color: '#ffffff', border: '1.5px solid #2457ff', fontWeight: 700, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: submittingReview ? 'not-allowed' : 'pointer' }}>
+            <button type="submit" disabled={submittingReview}>
               {submittingReview ? 'Submitting…' : 'Submit'}
             </button>
           </form>
         ) : null}
 
         {reviews.length === 0 ? (
-          <div className={styles.emptyState} style={{ padding: '2rem' }}>
-            <p style={{ margin: 0 }}>No reviews yet.</p>
+          <div>
+            <p>No reviews yet.</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: '1px solid #07101f' }}>
+          <div>
             {reviews.map((r, i) => (
-              <div key={r.id} style={{ background: '#ffffff', padding: '18px 20px', borderRadius: 8, borderBottom: i < reviews.length - 1 ? '1px solid #e6e6e6' : 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#07101f' }}>{r.rating}/5</span>
-                  {r.title ? <strong style={{ fontSize: 13, color: '#07101f' }}>{r.title}</strong> : null}
+              <div key={r.id}>
+                <div>
+                  <span>{r.rating}/5</span>
+                  {r.title ? <strong>{r.title}</strong> : null}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#5a6578', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                <div>
                   <span>{r.user_name || r.user_email || 'Customer'}</span>
                   <span>·</span>
                   <span>{new Date(r.created_at).toLocaleDateString()}</span>
-                  {r.is_verified_purchase ? (<><span>·</span><span style={{ color: '#07101f', fontWeight: 700 }}>Verified</span></>) : null}
+                  {r.is_verified_purchase ? (<><span>·</span><span>Verified</span></>) : null}
                 </div>
-                <p style={{ margin: '4px 0', fontSize: 13, color: '#5a6578', lineHeight: 1.55 }}>{r.body}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                  <button type="button" onClick={() => handleHelpfulVote(r.id)} disabled={votedReviews.has(r.id)} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #07101f', background: votedReviews.has(r.id) ? '#e8edf4' : '#ffffff', color: '#07101f', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: votedReviews.has(r.id) ? 'default' : 'pointer' }}>
+                <p>{r.body}</p>
+                <div>
+                  <button type="button" onClick={() => handleHelpfulVote(r.id)} disabled={votedReviews.has(r.id)}>
                     Helpful ({r.helpful_votes || 0})
                   </button>
-                  {votedReviews.has(r.id) ? <span style={{ fontSize: 11, color: '#5a6578' }}>Thanks</span> : null}
+                  {votedReviews.has(r.id) ? <span>Thanks</span> : null}
                 </div>
               </div>
             ))}

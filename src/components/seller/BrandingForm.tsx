@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
-import layoutStyles from '@/app/seller/seller.module.css';
 
 export default function BrandingForm({
   shop,
@@ -38,8 +37,8 @@ export default function BrandingForm({
   };
 
   return (
-    <form className={layoutStyles.formStack} onSubmit={(event) => { void save(event); }}>
-      <p className={locked ? layoutStyles.muted : layoutStyles.statusNote}>
+    <form onSubmit={(event) => { void save(event); }}>
+      <p>
         {locked
           ? 'You have used both branding updates. Contact an admin to change this again.'
           : `${2 - used} branding save${2 - used === 1 ? '' : 's'} left.`}
@@ -48,8 +47,8 @@ export default function BrandingForm({
       <label>Description <textarea value={description} onChange={(event) => setDescription(event.target.value)} disabled={locked} /></label>
       <label>Logo URL <input value={logoUrl} onChange={(event) => setLogoUrl(event.target.value)} disabled={locked} /></label>
       <label>Banner URL <input value={bannerUrl} onChange={(event) => setBannerUrl(event.target.value)} disabled={locked} /></label>
-      <button type="submit" className={layoutStyles.buttonPrimary} disabled={locked}>Save branding</button>
-      {message ? <p role="status" className={layoutStyles.muted}>{message}</p> : null}
+      <button type="submit" disabled={locked}>Save branding</button>
+      {message ? <p role="status">{message}</p> : null}
     </form>
   );
 }

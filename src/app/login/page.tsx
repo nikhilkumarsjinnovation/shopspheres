@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { getRoleDashboardUrl } from '@/lib/auth/roles';
 import type { UserRole } from '@/types/database.types';
-import styles from '../auth.module.css';
 
 function LoginForm() {
   const router = useRouter();
@@ -116,34 +115,31 @@ function LoginForm() {
   };
 
   return (
-    <div className={styles.card}>
-      <h1 className={styles.title}>Welcome Back</h1>
-      <p className={styles.subtitle}>Sign in to your ShopSphere account</p>
+    <div>
+      <h1>Welcome Back</h1>
+      <p>Sign in to your ShopSphere account</p>
 
-      {successMessage && <div className={styles.successAlert}>{successMessage}</div>}
-      {errorMessage && <div className={styles.errorAlert}>{errorMessage}</div>}
+      {successMessage && <div>{successMessage}</div>}
+      {errorMessage && <div>{errorMessage}</div>}
 
-      <form onSubmit={handleEmailLogin} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="email">Email Address</label>
+      <form onSubmit={handleEmailLogin}>
+        <div>
+          <label htmlFor="email">Email Address</label>
           <input
             id="email"
             type="email"
             required
-            className={styles.input}
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <div className={styles.formGroup}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label className={styles.label} htmlFor="password">Password</label>
+        <div>
+          <div>
+            <label htmlFor="password">Password</label>
             <Link
               href="/forgot-password"
-              className={styles.link}
-              style={{ fontSize: '0.8rem' }}
             >
               Forgot password?
             </Link>
@@ -152,7 +148,6 @@ function LoginForm() {
             id="password"
             type="password"
             required
-            className={styles.input}
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -162,19 +157,17 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className={styles.buttonPrimary}
         >
           {loading ? 'Signing In...' : 'Log In'}
         </button>
       </form>
 
-      <div className={styles.divider}>Or</div>
+      <div>Or</div>
 
       <button
         type="button"
         onClick={handleGoogleLogin}
         disabled={loading}
-        className={styles.buttonGoogle}
       >
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path
@@ -197,9 +190,9 @@ function LoginForm() {
         Continue with Google
       </button>
 
-      <p className={styles.footerText}>
+      <p>
         Don&apos;t have an account?{' '}
-        <Link href="/signup" className={styles.link}>
+        <Link href="/signup">
           Sign up
         </Link>
       </p>
@@ -209,8 +202,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className={styles.container}>
-      <Suspense fallback={<div className={styles.card}><p>Loading sign in...</p></div>}>
+    <div>
+      <Suspense fallback={<div><p>Loading sign in...</p></div>}>
         <LoginForm />
       </Suspense>
     </div>

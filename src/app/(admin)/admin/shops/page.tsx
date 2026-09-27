@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import ResetBrandingButton from '@/components/admin/ResetBrandingButton';
-import * as styles from '../../admin.css';
 
 export default async function AdminShopsPage() {
   const supabase = await createClient();
@@ -17,36 +16,36 @@ export default async function AdminShopsPage() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.headerTitle}>Shops</h1>
-        <p className={styles.headerSubtitle}>Shop name, city, catalog size, and branding edits. Street addresses stay on the seller&apos;s own page.</p>
+      <div>
+        <h1>Shops</h1>
+        <p>Shop name, city, catalog size, and branding edits. Street addresses stay on the seller&apos;s own page.</p>
       </div>
-      {error ? <div className={styles.emptyState}>{error.message}</div> : null}
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
+      {error ? <div>{error.message}</div> : null}
+      <div>
+        <table>
           <thead>
             <tr>
-              <th className={styles.th}>Shop</th>
-              <th className={styles.th}>City</th>
-              <th className={styles.th}>Products</th>
-              <th className={styles.th}>Branding edits used</th>
-              <th className={styles.th}>Reset</th>
+              <th>Shop</th>
+              <th>City</th>
+              <th>Products</th>
+              <th>Branding edits used</th>
+              <th>Reset</th>
             </tr>
           </thead>
           <tbody>
             {(shops ?? []).map((shop) => (
-              <tr key={shop.id} className={styles.tr}>
-                <td className={styles.td}>{shop.name}</td>
-                <td className={styles.td}>{shop.city}</td>
-                <td className={styles.td}>{counts.get(shop.id) ?? 0}</td>
-                <td className={styles.td}>{shop.branding_edits_used} / 2</td>
-                <td className={styles.td}><ResetBrandingButton sellerId={shop.seller_id} /></td>
+              <tr key={shop.id}>
+                <td>{shop.name}</td>
+                <td>{shop.city}</td>
+                <td>{counts.get(shop.id) ?? 0}</td>
+                <td>{shop.branding_edits_used} / 2</td>
+                <td><ResetBrandingButton sellerId={shop.seller_id} /></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {(shops ?? []).length === 0 ? <div className={styles.emptyState}>No shops yet.</div> : null}
+      {(shops ?? []).length === 0 ? <div>No shops yet.</div> : null}
     </div>
   );
 }

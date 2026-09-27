@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
-import layoutStyles from '../seller.module.css';
 
 export default async function ShopDetailsPage() {
   const supabase = await createClient();
@@ -15,18 +14,18 @@ export default async function ShopDetailsPage() {
     .maybeSingle();
   if (!shop) {
     return (
-      <div className={layoutStyles.pageBody}>
-        <div className={layoutStyles.panel}><p className={layoutStyles.muted}>Your shop is not ready yet. Refresh this page.</p></div>
+      <div>
+        <div><p>Your shop is not ready yet. Refresh this page.</p></div>
       </div>
     );
   }
   return (
     <>
-      <header className={layoutStyles.topBar}>
-        <h1 className={layoutStyles.pageHeading}>Shop details</h1>
+      <header>
+        <h1>Shop details</h1>
       </header>
-      <div className={layoutStyles.pageBody}>
-        <div className={layoutStyles.panel}>
+      <div>
+        <div>
           <ShopDetailsForm shop={shop} />
         </div>
       </div>
