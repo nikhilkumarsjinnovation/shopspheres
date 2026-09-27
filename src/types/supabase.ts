@@ -334,6 +334,8 @@ export type Database = {
           status: Database["public"]["Enums"]["order_status"]
           total_amount: number
           updated_at: string
+          placed_by: string | null
+          agent_cancellation_deadline: string | null
         }
         Insert: {
           created_at?: string
@@ -347,6 +349,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           total_amount: number
           updated_at?: string
+          placed_by?: string | null
+          agent_cancellation_deadline?: string | null
         }
         Update: {
           created_at?: string
@@ -360,6 +364,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string
+          placed_by?: string | null
+          agent_cancellation_deadline?: string | null
         }
         Relationships: [
           {

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
 import { createOrder, type CreateOrderInput } from '@/services/order-service';
+import { refundWallet } from '@/services/wallet-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -125,18 +126,79 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ ok: true, status: 'confirmed' });
   }
   if (!orderId) return NextResponse.json({ error: 'orderId is required.' }, { status: 400 });
-  const { data: existing } = await supabase.from('orders').select('status').eq('id', orderId).eq('customer_id', session.user.id).maybeSingle();
-  if (!existing) return NextResponse.json({ error: 'Order was not found.' }, { status: 404 });
-  if (existing.status === 'delivered' || existing.status === 'cancelled' || existing.status === 'shipped' || existing.status === 'out_for_delivery') {
-    return NextResponse.json({ error: 'This order can no longer be cancelled.' }, { status: 400 });
+
+  let { data: existing, error: orderLookupErr } = await supabase
+    .from('orders')
+    .select('id, status, total_amount, placed_by, shipping_address')
+    .eq('id', orderId)
+    .eq('customer_id', session.user.id)
+    .maybeSingle();
+
+  if (orderLookupErr && orderLookupErr.message.includes('placed_by')) {
+    const fallback = await supabase
+      .from('orders')
+      .select('id, status, total_amount, shipping_address')
+      .eq('id', orderId)
+      .eq('customer_id', session.user.id)
+      .maybeSingle();
+    existing = fallback.data as any;
   }
+
+  if (!existing) return NextResponse.json({ error: 'Order was not found.' }, { status: 404 });
+
+  const isAgentOrder =
+    (existing as any).placed_by === 'agent' ||
+    Boolean(((existing as any).shipping_address as any)?._metadata?.placed_by === 'agent');
+
+  // Relaxed policy: Agent orders can be cancelled through 'packed' status (prior to physical dispatch/shipped/delivered)
+  // Standard customer orders can only be cancelled while 'pending' or 'confirmed'
+  const nonCancellableStatuses = isAgentOrder
+    ? ['delivered', 'cancelled', 'shipped', 'out_for_delivery']
+    : ['delivered', 'cancelled', 'shipped', 'out_for_delivery', 'processing', 'packed'];
+
+  if (nonCancellableStatuses.includes(existing.status)) {
+    return NextResponse.json(
+      {
+        error: isAgentOrder
+          ? 'This agent order has already been handed to courier dispatch and cannot be cancelled online.'
+          : 'Standard orders can only be cancelled before merchant packing. Contact support for assistance.',
+      },
+      { status: 400 }
+    );
+  }
+
+  // Automated 100% Wallet refund for agent purchases
+  let refundMsg = '';
+  if (isAgentOrder && Number(existing.total_amount) > 0) {
+    try {
+      await refundWallet(
+        session.user.id,
+        Number(existing.total_amount),
+        orderId,
+        'Automated 100% refund for cancelled agent purchase'
+      );
+      refundMsg = ` ₹${Number(existing.total_amount).toLocaleString('en-IN')} refunded to your in-app wallet.`;
+    } catch {
+      // Log and proceed
+    }
+  }
+
   const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId).eq('customer_id', session.user.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
   await supabase.from('order_tracking_events').insert({
     order_id: orderId,
     status: 'cancelled',
-    title: 'Cancelled by you',
-    description: 'You cancelled this order before it shipped.',
+    title: isAgentOrder ? 'Agent Order Cancelled' : 'Cancelled by you',
+    description: isAgentOrder
+      ? `Cancelled under relaxed AI Agent policy.${refundMsg}`
+      : 'You cancelled this order before it shipped.',
   });
-  return NextResponse.json({ ok: true });
+
+  return NextResponse.json({
+    ok: true,
+    isAgentOrder,
+    refundMsg,
+    message: `Order cancelled successfully.${refundMsg}`,
+  });
 }

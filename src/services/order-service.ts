@@ -30,6 +30,7 @@ export interface CreateOrderInput {
   giftRecipientEmail?: string | null;
   giftRevealDate?: string | null;
   confirmNow?: boolean;
+  placedBy?: 'customer' | 'agent';
 }
 
 export interface OrderTotals {
@@ -146,22 +147,43 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
 
   const totals = calculateTotals(subtotal, input.appliedOffer?.discountAmount ?? 0);
 
-  const { data: newOrder, error: orderErr } = await supabase
+  const orderRecord: Record<string, any> = {
+    customer_id: userId,
+    total_amount: totals.total,
+    status: 'pending',
+    is_gift: Boolean(input.isGift),
+    recipient_email: input.isGift && input.giftRecipientEmail ? input.giftRecipientEmail.trim() : null,
+    gift_reveal_date: input.isGift && input.giftRevealDate ? new Date(input.giftRevealDate).toISOString() : null,
+    shipping_address: {
+      ...input.shippingAddress,
+      _metadata: { placed_by: input.placedBy || 'customer' },
+    },
+    placed_by: input.placedBy || 'customer',
+  };
+
+  let newOrder: any = null;
+  const { data: ord, error: orderErr } = await supabase
     .from('orders')
-    .insert({
-      customer_id: userId,
-      total_amount: totals.total,
-      status: 'pending',
-      is_gift: Boolean(input.isGift),
-      recipient_email: input.isGift && input.giftRecipientEmail ? input.giftRecipientEmail.trim() : null,
-      gift_reveal_date: input.isGift && input.giftRevealDate ? new Date(input.giftRevealDate).toISOString() : null,
-      shipping_address: input.shippingAddress,
-    })
+    .insert(orderRecord)
     .select('id, total_amount, created_at')
     .single();
 
-  if (orderErr || !newOrder) {
+  if (orderErr && orderErr.message.includes('placed_by')) {
+    // If column doesn't exist yet on remote table, insert without placed_by and rely on shipping_address._metadata
+    delete orderRecord.placed_by;
+    const retry = await supabase
+      .from('orders')
+      .insert(orderRecord)
+      .select('id, total_amount, created_at')
+      .single();
+    if (retry.error || !retry.data) {
+      throw new Error(`Failed to initialize order: ${retry.error?.message ?? 'unknown error'}`);
+    }
+    newOrder = retry.data;
+  } else if (orderErr || !ord) {
     throw new Error(`Failed to initialize order: ${orderErr?.message ?? 'unknown error'}`);
+  } else {
+    newOrder = ord;
   }
 
   const { error: itemsErr } = await supabase.from('order_items').insert(

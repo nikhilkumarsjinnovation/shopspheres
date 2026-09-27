@@ -168,6 +168,8 @@ export async function POST(request: NextRequest) {
         ? 'NOTE: User has simplified mode enabled. Keep your reply direct, clear, using bullet points and simple language.'
         : undefined,
       apiKey,
+      userId,
+      history: priorTurns,
     });
 
     let feedMutated = false;
@@ -227,6 +229,9 @@ export async function POST(request: NextRequest) {
       recommendedProducts: recommendedProductDetails,
       feedUpdated: feedMutated,
       intents: validatedOutput.extractedIntents,
+      clientActions: validatedOutput.clientActions || [],
+      actionCards: validatedOutput.actionCards || [],
+      toolExecutions: validatedOutput.toolExecutions || [],
       sessionId,
     });
   } catch (err: unknown) {

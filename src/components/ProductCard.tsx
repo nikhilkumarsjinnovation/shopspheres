@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ImageOff, Minus, Plus, ChevronDown, ChevronUp, Check, Sparkles, Layers } from 'lucide-react';
+import { ImageOff, Minus, Plus, ChevronDown, ChevronUp, Check, Sparkles, Layers, Heart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
+import { fetchWithCsrf } from '@/lib/csrf-client';
 
 interface ProductCardProps {
   product: {
@@ -41,6 +42,43 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [added, setAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [selectedQty, setSelectedQty] = useState(1);
+  const [isFav, setIsFav] = useState(false);
+
+  // Synchronize favorites state from AI Super Agent actions
+  useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const handleFavSync = (e: Event) => {
+        const detail = (e as CustomEvent).detail;
+        if (detail && detail.productId === product.id) {
+          setIsFav(Boolean(detail.isFavorite));
+        }
+      };
+      window.addEventListener('shopsphere:favorites-update', handleFavSync);
+      return () => window.removeEventListener('shopsphere:favorites-update', handleFavSync);
+    }
+  }, [product.id]);
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = !isFav;
+    setIsFav(next);
+    try {
+      if (next) {
+        await fetchWithCsrf('/api/v1/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: product.id }),
+        });
+      } else {
+        await fetchWithCsrf(`/api/v1/favorites?productId=${product.id}`, {
+          method: 'DELETE',
+        });
+      }
+    } catch {
+      // Ignore
+    }
+  };
 
   // Derive intelligent variant options based on category and product attributes
   const { variants, colorOptions, specs } = useMemo(() => {
@@ -222,6 +260,35 @@ export default function ProductCard({ product }: ProductCardProps) {
             ✓ {inCart.quantity} in Bag
           </span>
         )}
+
+        {/* Wishlist Favorite Heart Button */}
+        <button
+          type="button"
+          onClick={toggleFavorite}
+          title={isFav ? "Remove from wishlist" : "Save to wishlist"}
+          aria-label="Toggle wishlist favorite"
+          style={{
+            position: 'absolute',
+            top: '0.65rem',
+            right: '0.65rem',
+            zIndex: 5,
+            width: '32px',
+            height: '32px',
+            borderRadius: 'var(--radius-full)',
+            background: 'rgba(255, 255, 255, 0.88)',
+            backdropFilter: 'blur(6px)',
+            border: '1px solid var(--border-subtle)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: isFav ? 'var(--danger)' : 'var(--fg-muted)',
+            transition: 'transform var(--transition-fast), color var(--transition-fast)',
+            boxShadow: 'var(--shadow-xs)',
+          }}
+        >
+          <Heart size={16} fill={isFav ? 'currentColor' : 'none'} strokeWidth={isFav ? 2.5 : 1.75} />
+        </button>
       </Link>
 
       {/* 2. Compact Body & Meta */}
