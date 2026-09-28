@@ -48,8 +48,13 @@ export default function CheckoutPage() {
   const [addressLabel, setAddressLabel] = useState<'Home' | 'Work' | 'Other'>('Home');
 
   // Payment Method State
-  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod' | 'card' | 'netbanking' | 'stripe'>('upi');
+  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'wallet' | 'cod' | 'card' | 'netbanking' | 'stripe'>('wallet');
   const [paymentReady, setPaymentReady] = useState(true);
+
+  // In-App Wallet State
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [toppingUp, setToppingUp] = useState(false);
 
   // Gift for Friend Feature State
   const [isGift, setIsGift] = useState(false);
@@ -109,6 +114,51 @@ export default function CheckoutPage() {
   useEffect(() => {
     fetchAddresses();
   }, [fetchAddresses]);
+
+  // Fetch in-app wallet balance
+  const fetchWallet = useCallback(async () => {
+    try {
+      setLoadingWallet(true);
+      const res = await fetchWithCsrf('/api/v1/wallet');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.wallet) {
+          setWalletBalance(Number(data.wallet.balance));
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load wallet:', err);
+    } finally {
+      setLoadingWallet(false);
+    }
+  }, []);
+
+  const handleQuickTopup = async (amt: number) => {
+    try {
+      setToppingUp(true);
+      const res = await fetchWithCsrf('/api/v1/wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amt, description: 'Quick Checkout Top-Up' }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWalletBalance(Number(data.new_balance));
+        setPaymentReady(true);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('shopsphere:wallet-update', { detail: { balance: data.new_balance } }));
+        }
+      }
+    } catch (err) {
+      console.warn('Topup failed:', err);
+    } finally {
+      setToppingUp(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWallet();
+  }, [fetchWallet]);
 
   // Delivery calculations in INR
   const deliveryFee = totalAmount >= 499 ? 0 : 40;
@@ -282,6 +332,14 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (paymentMethod === 'wallet' && walletBalance !== null && walletBalance < finalTotalINR) {
+      setErrorMessage(
+        `Insufficient in-app wallet balance. Available: ${formatINR(walletBalance)}, Required: ${formatINR(finalTotalINR)}. Please top up your wallet or choose another payment method.`
+      );
+      setLoading(false);
+      return;
+    }
+
     try {
       const {
         data: { user },
@@ -401,6 +459,14 @@ export default function CheckoutPage() {
       }
 
       // Step 2: Clear Cart and Show Success Confirmation
+      if (paymentMethod === 'wallet' && walletBalance !== null) {
+        const newBal = Math.max(0, walletBalance - finalTotalINR);
+        setWalletBalance(newBal);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('shopsphere:wallet-update', { detail: { balance: newBal } }));
+        }
+      }
+
       clearCart();
       setSuccessOrder({ id: data.order.id, total: Number(data.order.total) });
       setLoading(false);
@@ -771,6 +837,111 @@ export default function CheckoutPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* ShopSphere In-App Wallet */}
+              <label
+                style={{
+                  display: 'block',
+                  border: `2px solid ${paymentMethod === 'wallet' ? 'var(--accent-electric)' : 'var(--border-subtle)'}`,
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  background: paymentMethod === 'wallet' ? 'linear-gradient(135deg, rgba(79, 70, 229, 0.05), var(--bg-surface))' : 'var(--bg-canvas)',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="wallet"
+                    checked={paymentMethod === 'wallet'}
+                    onChange={() => {
+                      setPaymentMethod('wallet');
+                      setPaymentReady(walletBalance !== null && walletBalance >= finalTotalINR);
+                    }}
+                    style={{ accentColor: 'var(--accent-electric)' }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <span style={{ fontSize: '1.1rem' }}>💳</span>
+                        <strong style={{ fontSize: '0.95rem', color: 'var(--fg-primary)' }}>ShopSphere In-App Wallet</strong>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span
+                          style={{
+                            padding: '0.15rem 0.55rem',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            background: walletBalance !== null && walletBalance >= finalTotalINR ? 'var(--success-bg)' : 'var(--warning-bg)',
+                            color: walletBalance !== null && walletBalance >= finalTotalINR ? 'var(--success)' : 'var(--warning)',
+                            border: `1px solid ${walletBalance !== null && walletBalance >= finalTotalINR ? 'var(--success-border)' : 'var(--warning-border)'}`,
+                          }}
+                        >
+                          {loadingWallet ? 'Checking…' : `Available: ${formatINR(walletBalance ?? 0)}`}
+                        </span>
+                        <span className="section-badge" style={{ fontSize: '0.68rem', padding: '0.15rem 0.5rem' }}>
+                          1-Tap Instant
+                        </span>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                      Instant one-tap debit · Zero gateway fee · Automated 100% refund on order cancellation
+                    </p>
+                  </div>
+                </div>
+
+                {paymentMethod === 'wallet' && (
+                  <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px dashed var(--border-subtle)' }}>
+                    {walletBalance !== null && walletBalance < finalTotalINR ? (
+                      <div>
+                        <div style={{ fontSize: '0.825rem', color: 'var(--warning)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span>⚠️</span>
+                          <span>
+                            Shortfall of <strong>{formatINR(finalTotalINR - walletBalance)}</strong>. Top up your wallet to complete purchase.
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            className="btn-card-add"
+                            disabled={toppingUp}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              void handleQuickTopup(Math.ceil((finalTotalINR - walletBalance) / 100) * 100);
+                            }}
+                            style={{ padding: '0.4rem 0.85rem', fontSize: '0.78rem' }}
+                          >
+                            {toppingUp ? 'Adding Funds…' : `+ Add ${formatINR(Math.ceil((finalTotalINR - walletBalance) / 100) * 100)} (Exact Shortfall)`}
+                          </button>
+                          {[500, 1000, 2000].map((amt) => (
+                            <button
+                              key={amt}
+                              type="button"
+                              className="variant-option-chip"
+                              disabled={toppingUp}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                void handleQuickTopup(amt);
+                              }}
+                              style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                            >
+                              +₹{amt.toLocaleString('en-IN')}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.825rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span>✅</span>
+                        <span>Wallet balance is sufficient! Click &ldquo;Place Order&rdquo; for instant 1-tap fulfillment.</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </label>
+
               {/* UPI */}
               <label
                 style={{

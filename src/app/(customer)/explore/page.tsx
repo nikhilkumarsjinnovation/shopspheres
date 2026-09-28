@@ -39,7 +39,7 @@ export default async function ExplorePage() {
 
   return (
     <div className="animate-slide-up">
-      <div className="section-header" style={{ marginBottom: '1.75rem' }}>
+      <div className="section-header explore-page-head" style={{ marginBottom: '1.5rem' }}>
         <div>
           <h1 className="section-title" style={{ fontSize: '2rem', letterSpacing: '-0.03em' }}>
             Explore Marketplace
@@ -48,6 +48,9 @@ export default async function ExplorePage() {
             Curated products from verified shops across India · Free Express Delivery · Zero Hidden Fees
           </p>
         </div>
+        <span className="section-badge explore-count-badge" aria-label={`${productList.length} products live`}>
+          {productList.length} live products
+        </span>
       </div>
 
       {error && (

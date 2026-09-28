@@ -1,6 +1,7 @@
 import { createClient as createUserClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { queueNotification } from '@/services/notification-service';
+import { getWallet, debitWallet } from '@/services/wallet-service';
 
 export interface OrderItemInput {
   id: string;
@@ -147,6 +148,15 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
 
   const totals = calculateTotals(subtotal, input.appliedOffer?.discountAmount ?? 0);
 
+  if (input.paymentMethod === 'wallet') {
+    const wallet = await getWallet(userId);
+    if (wallet.balance < totals.total) {
+      throw new Error(
+        `Insufficient in-app wallet balance. Available: ₹${wallet.balance.toLocaleString('en-IN')}, Required: ₹${totals.total.toLocaleString('en-IN')}. Please top up your wallet to proceed.`
+      );
+    }
+  }
+
   const orderRecord: Record<string, any> = {
     customer_id: userId,
     total_amount: totals.total,
@@ -204,13 +214,34 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
   await supabase.from('order_tracking_events').insert({
     order_id: newOrder.id,
     status: 'pending',
-    title: 'Order Confirmed',
-    description: `Order successfully placed via ${input.paymentMethod.toUpperCase()}. Local fulfillment initiated.`,
+    title: input.paymentMethod === 'wallet' ? 'Paid via In-App Wallet' : 'Order Confirmed',
+    description: input.paymentMethod === 'wallet'
+      ? `Order successfully placed and paid in full via ShopSphere In-App Wallet (₹${totals.total.toLocaleString('en-IN')}).`
+      : `Order successfully placed via ${input.paymentMethod.toUpperCase()}. Local fulfillment initiated.`,
     location: `${input.shippingAddress.city}, ${input.shippingAddress.state}`,
   });
 
   const stockReserved = await reserveStock(validatedItems);
-  const paymentConfirmed = input.confirmNow === false ? false : await confirmPayment(newOrder.id, userId);
+  let paymentConfirmed = false;
+
+  if (input.paymentMethod === 'wallet') {
+    if (input.confirmNow !== false) {
+      const debitRes = await debitWallet(
+        userId,
+        totals.total,
+        newOrder.id,
+        `Payment for order SS-${newOrder.id.slice(0, 8).toUpperCase()}`
+      );
+      if (!debitRes.success) {
+        await supabase.from('order_items').delete().eq('order_id', newOrder.id);
+        await supabase.from('orders').delete().eq('id', newOrder.id);
+        throw new Error(debitRes.error || 'Failed to debit in-app wallet.');
+      }
+      paymentConfirmed = await confirmPayment(newOrder.id, userId);
+    }
+  } else {
+    paymentConfirmed = input.confirmNow === false ? false : await confirmPayment(newOrder.id, userId);
+  }
 
   await queueNotification({
     channel: 'email',
