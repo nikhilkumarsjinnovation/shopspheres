@@ -34,10 +34,12 @@
 | **Gift a Friend — Complete Workflow** | [`src/app/api/gifts/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/gifts/route.ts) & [`src/components/gifting/GiftFlow.tsx`](file:///home/batman/Pictures/shopsphere/src/components/gifting/GiftFlow.tsx) | [`src/app/api/gifts/[id]/reveal/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/gifts/[id]/reveal/route.ts), `gifts`, `gift_notifications`, `group_gifts` |
 | **Blind Accessibility — Audio Descriptions & Voice Nav** | [`src/app/api/accessibility/audio-description/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/accessibility/audio-description/route.ts) & [`src/components/accessibility/VoiceCommandBar.tsx`](file:///home/batman/Pictures/shopsphere/src/components/accessibility/VoiceCommandBar.tsx) | [`src/components/accessibility/AudioDescriptionPlayer.tsx`](file:///home/batman/Pictures/shopsphere/src/components/accessibility/AudioDescriptionPlayer.tsx), `audio_descriptions`, `accessibility_usage_metrics` |
 | **Customer Super Agent & Autonomous Shopping (13 Tools)** | [`src/services/ai-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/ai-service.ts), [`src/services/agent-executor.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-executor.ts) & [`src/services/agent-tools.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-tools.ts) | [`src/components/PersonalAiAssistant.tsx`](file:///home/batman/Pictures/shopsphere/src/components/PersonalAiAssistant.tsx), [`src/app/api/v1/ai/chat/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/ai/chat/route.ts), [`AGENT_ARCHITECTURE.md`](file:///home/batman/Pictures/shopsphere/AGENT_ARCHITECTURE.md) |
+| **Agent Tasks Mission Control & Dedicated Workspace** | [`src/app/(customer)/agent/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/agent/page.tsx) & [`src/components/CustomerNavbar.tsx`](file:///home/batman/Pictures/shopsphere/src/components/CustomerNavbar.tsx) | [`src/styles/globals.css`](file:///home/batman/Pictures/shopsphere/src/styles/globals.css), [`src/middleware.ts`](file:///home/batman/Pictures/shopsphere/src/middleware.ts) |
+| **Agent Behavioral Memory & User Tracking Layer** | [`src/services/agent-memory-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-memory-service.ts) & [`src/app/api/v1/ai/agent-profile/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/ai/agent-profile/route.ts) | `user_behavior_events`, `ai_agent_memory`, `user_features`, `user_wallets` |
 | **In-App Digital Wallet & 1-Tap Checkout** | [`src/services/wallet-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/wallet-service.ts), [`src/app/api/v1/wallet/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/wallet/route.ts) & [`src/app/api/v1/wallet/pay/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/wallet/pay/route.ts) | [`src/app/(customer)/checkout/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/checkout/page.tsx), `user_wallets`, `wallet_transactions` |
 | **Product Favorites & Wishlist Management** | [`src/services/favorites-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/favorites-service.ts) & [`src/app/api/v1/favorites/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/favorites/route.ts) | [`src/components/ProductCard.tsx`](file:///home/batman/Pictures/shopsphere/src/components/ProductCard.tsx), `user_favorites` |
 | **Agent Orders, Tagging (`🤖 Agent Purchase`) & Relaxed Cancellation** | [`src/services/order-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/order-service.ts) & [`src/app/(customer)/orders/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/orders/page.tsx) | `orders.placed_by`, `order_tracking_events`, [`src/app/(customer)/checkout/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/checkout/page.tsx) |
-| **Service Layer & Business Logic** | [`src/services/order-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/order-service.ts) & [`src/services/wallet-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/wallet-service.ts) | [`src/services/agent-executor.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-executor.ts), [`src/services/agent-tools.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-tools.ts), [`src/services/cart-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/cart-service.ts), [`src/services/favorites-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/favorites-service.ts), [`src/services/gift-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/gift-service.ts) |
+| **Service Layer & Business Logic** | [`src/services/order-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/order-service.ts) & [`src/services/wallet-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/wallet-service.ts) | [`src/services/agent-executor.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-executor.ts), [`src/services/agent-tools.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-tools.ts), [`src/services/agent-memory-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-memory-service.ts), [`src/services/cart-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/cart-service.ts), [`src/services/favorites-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/favorites-service.ts), [`src/services/gift-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/gift-service.ts) |
 | **Security — Rate Limiting, CSRF, Prompt Safety** | [`src/lib/rate-limiter.ts`](file:///home/batman/Pictures/shopsphere/src/lib/rate-limiter.ts) & [`src/lib/csrf.ts`](file:///home/batman/Pictures/shopsphere/src/lib/csrf.ts) | [`src/lib/prompt-templates.ts`](file:///home/batman/Pictures/shopsphere/src/lib/prompt-templates.ts), [`src/middleware.ts`](file:///home/batman/Pictures/shopsphere/src/middleware.ts) |
 
 ---
@@ -58,6 +60,7 @@ mindmap
       Prompt Safety "src/lib/prompt-templates.ts"
     Customer Portal "(customer)"
       Navbar "src/components/CustomerNavbar.tsx"
+      Agent Tasks Workspace "src/app/(customer)/agent"
       Faceted Explore Feed "src/components/ExploreFeedClient.tsx"
       Amazon Product Detail "src/app/(customer)/product/[id]"
       Buy Box & Reviews "src/components/ProductDetailClient.tsx"
@@ -84,6 +87,9 @@ mindmap
       Immutable Audit Trail
     AI Intelligence Layer
       Customer Super Agent "src/services/agent-executor.ts, src/services/agent-tools.ts"
+      Agent Tasks Workspace "src/app/(customer)/agent/page.tsx"
+      Agent Behavioral Memory "src/services/agent-memory-service.ts"
+      Agent Profile API "/api/v1/ai/agent-profile"
       Autonomous ReAct Loop "13 Tools: Search, Cart, Favorites, Review, Gift, Pay"
       Two-Phase HITL Protocol "Payload Approval + Execution Dispatch"
       Event Bus Bridge "CustomEvent State Synchronization"
@@ -150,6 +156,7 @@ mindmap
 
 ### 3.2 Customer App Portal (`src/app/(customer)/*`)
 * **[`src/app/(customer)/layout.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/layout.tsx)**: Customer shell wrapping all buyer views, hosts [`CustomerNavbar`](file:///home/batman/Pictures/shopsphere/src/components/CustomerNavbar.tsx), CartProvider, and [`PersonalAiAssistant`](file:///home/batman/Pictures/shopsphere/src/components/PersonalAiAssistant.tsx).
+* **[`src/app/(customer)/agent/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/agent/page.tsx)** (`/agent`): Dedicated Autonomous Super Agent Workspace & Mission Control — live memory radar, session dwell tracker, user category affinity (%), 1-click autonomous action presets (Phones under ₹20k, Earbuds, Wishlist inspection, Wallet topup, Gifting), high-fidelity markdown formatting stream, and 1-tap frictionless action cards.
 * **[`src/app/(customer)/explore/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/explore/page.tsx)** (`/explore`): Product discovery grid with category tabs, search, and dynamic AI-personalized carousels rendered by [`ExploreFeedClient`](file:///home/batman/Pictures/shopsphere/src/components/ExploreFeedClient.tsx).
 * **[`src/app/(customer)/product/[id]/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/product/[id]/page.tsx)** (`/product/[id]`): Amazon-grade Product Detail Page with image gallery, 10+ specs table, Buy Box, and verified reviews rendered by [`ProductDetailClient`](file:///home/batman/Pictures/shopsphere/src/components/ProductDetailClient.tsx).
 * **[`src/app/(customer)/checkout/page.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/checkout/page.tsx)** (`/checkout`): Multi-address selection, itemized split-seller totals, "Gift for Friend" delay parameters, and **ShopSphere In-App Wallet** payment method with live balance checking, auto-shortfall calculation, and 1-tap quick top-up chips (+₹500, +₹1,000, +exact shortfall).
@@ -173,6 +180,7 @@ mindmap
 ### 3.5 API Handlers (`src/app/api/v1/*`)
 * **[`src/app/api/v1/ai/categorize/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/ai/categorize/route.ts)**: Multimodal AI endpoint parsing raw product titles, descriptions, and images to generate taxonomy, 10+ specs, and suggested pricing.
 * **[`src/app/api/v1/ai/chat/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/ai/chat/route.ts)**: Customer Super Agent ReAct loop executing 13 function tools with Two-Phase HITL confirmation for autonomous purchasing, cart management, gifting, reviews, and wallet settlement.
+* **[`src/app/api/v1/ai/agent-profile/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/ai/agent-profile/route.ts)**: Customer Behavioral Memory Profiling API — aggregates live dwell time from `user_behavior_events`, session counts, category affinities, price elasticity tiers, wallet balance, active cart, and persistent memories from `ai_agent_memory`.
 * **[`src/app/api/v1/wallet/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/wallet/route.ts)**: In-App Wallet balance inquiry (GET) and top-up funds (POST).
 * **[`src/app/api/v1/wallet/pay/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/wallet/pay/route.ts)**: Atomic wallet payment and balance debit execution for orders.
 * **[`src/app/api/v1/favorites/route.ts`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/favorites/route.ts)**: Customer favorite products CRUD (list favorites, add favorite, remove favorite).
@@ -200,23 +208,37 @@ mindmap
 
 For detailed architecture diagrams, sequence flows, tool contracts, and ReAct loop specifics, see [`AGENT_ARCHITECTURE.md`](file:///home/batman/Pictures/shopsphere/AGENT_ARCHITECTURE.md).
 
-* **Model:** Google Gemini Flash (`gemini-2.5-flash` / `gemini-1.5-flash`), zero-cost tier, non-deprecated, high performance.
+* **Model:** Google Gemini Flash (`gemini-flash-lite-latest` / `gemini-2.5-flash`), zero-cost tier, non-deprecated, high performance.
 * **13 Function Tools:**
-  1. `search_products` — Search catalog by keyword, category, price, rating.
-  2. `get_product_details` — Fetch rich specs, description, stock status.
-  3. `add_to_cart` — Add product variant to active cart.
-  4. `view_cart` — Inspect active cart items and subtotal.
-  5. `add_to_favorites` — Bookmark product to wishlist.
-  6. `remove_from_favorites` — Remove product from wishlist.
-  7. `list_favorites` — View saved favorite items.
-  8. `send_gift_to_friend` — Dispatch product as surprise or scheduled gift.
-  9. `review_purchased_product` — Submit verified review with rating and text.
-  10. `get_wallet_balance` — Check available balance and top-up status.
-  11. `top_up_wallet` — Add digital credits to in-app wallet.
-  12. `pay_with_wallet` — Authorize atomic order payment from wallet balance.
-  13. `request_confirmation` — HITL security gate for monetary/irreversible actions.
-* **Two-Phase Confirmation Protocol (HITL):** Financial operations (`pay_with_wallet`, `send_gift_to_friend`) pause execution to present interactive confirmation cards to the user before running.
-* **Client-Side Event Bus:** Dispatches `shopsphere:cart-update`, `shopsphere:wallet-update`, and `shopsphere:orders-update` custom DOM events for zero-refresh UI reactivity.
+  1. `search_catalog` — Strict category-aware keyword & budget search with canonical category aliasing.
+  2. `get_product_specs` — Fetch rich specs, 10+ dynamic attributes, stock status, seller info.
+  3. `manage_cart` — Add, remove, update, or clear items with instant navbar badge sync.
+  4. `manage_favorites` — Real-time wishlist bookmarking & card heart toggle.
+  5. `get_friends_list` — Query social commerce graph for gifting recipients.
+  6. `send_as_gift` — Dispatch product as surprise or scheduled gift with custom wrapping and notes.
+  7. `get_reviewable_products` — Inspect past verified purchases awaiting customer feedback.
+  8. `submit_product_review` — Submit verified review with star ratings and comments.
+  9. `get_wallet_status` — Check in-app wallet balance in ₹ and transaction ledger.
+  10. `topup_wallet` — Instant digital top-up with fast-fill quick chips.
+  11. `prepare_wallet_checkout` — Phase 1 of HITL: Verifies funds, reserves stock, creates pending order, renders authorization card. Auto-resolves active cart or wishlist if product ID is omitted.
+  12. `confirm_wallet_payment` — Phase 2 of HITL: Atomic debit, marks order confirmed, clears cart, and issues confirmation card.
+  13. `cancel_or_replace_order` — Leniency engine: Extended cancellation through `packed` status with instant 100% wallet refund.
+* **Behavioral Memory & Tracking Layer (`src/services/agent-memory-service.ts`):**
+  - Aggregates dwell time across sessions from `user_behavior_events`.
+  - Calculates user category affinity (% of interactions mapped to top categories).
+  - Determines price elasticity and budget sensitivity tiers.
+  - Ingests active wallet balance, cart contents, and recent wishlist items.
+  - Pulls cross-session facts and user preferences from `ai_agent_memory`.
+  - Exposes `formatBehavioralMemoryPrompt()` for prompt injection and `/api/v1/ai/agent-profile` for client UI.
+* **Dedicated Tasks Workspace (`/agent`) vs. Floating Companion:**
+  - **Top Navbar Section (`/agent`):** Full-screen Command Center with live memory radar, session dwell counter, 1-click autonomous task presets, and zero-click-friction purchasing.
+  - **Bottom-Right Drawer (`PersonalAiAssistant.tsx`):** Available across all pages for quick natural language assistance and queries.
+  - Both share session state and custom events seamlessly.
+* **Strict Category Normalization & Search Filtering:**
+  - Canonical aliases (e.g. `phones`/`smartphones` -> `Electronics`, `earbuds` -> `Audio & Accessories`, `shoes` -> `Footwear`).
+  - Strict SQL boundary checking: Never falls back to unrelated categories. If a user asks for a category under ₹X, queries are strictly constrained.
+* **Two-Phase Confirmation Protocol (HITL):** Financial operations pause execution to present interactive confirmation cards (`WALLET_PAY_AUTH`) to the user before running.
+* **Client-Side Event Bus:** Dispatches `shopsphere:cart-update`, `shopsphere:wallet-update`, `shopsphere:favorites-update`, and `shopsphere:orders-update` custom DOM events for zero-refresh UI reactivity.
 * **Agent Order Tagging & Relaxed Policy:** Orders placed by the agent are flagged with `placed_by: 'agent'`, rendered with `🤖 Agent Purchase` badges, and granted extended cancellation through the `packed` stage with instant 100% wallet refunds.
 
 ---

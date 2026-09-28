@@ -26,6 +26,7 @@ The **ShopSphere Customer Super Agent** transforms the traditional conversationa
 ```mermaid
 flowchart TD
     subgraph ClientUI [Browser Client UI]
+        AgentDesk["Dedicated Agent Tasks Workspace\n((customer)/agent/page.tsx)"]
         ChatDrawer["Personal AI Assistant Drawer\n(PersonalAiAssistant.tsx)"]
         ProductCard["Product Card\n(ProductCard.tsx)"]
         CartBadge["Navbar Cart Badge\n(CustomerNavbar.tsx)"]
@@ -36,6 +37,7 @@ flowchart TD
 
     subgraph APILayer [Next.js API Gateway (Edge & Node)]
         ChatAPI["POST /api/v1/ai/chat\n(Session, User Context, Turn History)"]
+        ProfileAPI["GET /api/v1/ai/agent-profile\n(Dwell, Category Affinity, Memory Facts)"]
         WalletAPI["GET/POST /api/v1/wallet\nPOST /api/v1/wallet/pay"]
         FavAPI["GET/POST/DELETE /api/v1/favorites"]
         OrdersAPI["POST/PATCH /api/v1/orders"]
@@ -46,9 +48,11 @@ flowchart TD
         GeminiModel["Google Gemini\n(gemini-flash-lite-latest)\nFree-Tier & Non-Deprecated"]
         ToolRegistry["13 Gemini Function Declarations\n(agent-tools.ts)"]
         ToolExecutor["Agent Tool Dispatcher\n(agent-executor.ts)"]
+        MemoryInjector["Behavioral Memory Injector\n(agent-memory-service.ts)"]
     end
 
     subgraph Services [Domain Services Layer]
+        MemoryService["AgentMemoryService\n(agent-memory-service.ts)"]
         WalletService["WalletService\n(wallet-service.ts)"]
         OrderService["OrderService\n(order-service.ts)"]
         FavoritesService["FavoritesService\n(favorites-service.ts)"]
@@ -59,11 +63,18 @@ flowchart TD
 
     subgraph Storage [Supabase Storage & Persistence]
         DBTables[("Dedicated DB Tables\nuser_wallets, wallet_transactions,\nuser_favorites, orders")]
+        MemoryDB[("Behavior & Memory Store\nuser_behavior_events, ai_agent_memory,\nuser_features, ai_conversations")]
         ResilientFallback[("Dual-Layer Fallback\nai_user_profiles.feed_weights\nJSON Schema Storage")]
     end
 
     %% Interactions
+    AgentDesk -->|Loads profile & radar stats| ProfileAPI
+    AgentDesk -->|Sends prompt & 1-tap tasks| ChatAPI
     ChatDrawer -->|Sends message & persona| ChatAPI
+    ProfileAPI --> MemoryService
+    ChatAPI --> MemoryInjector
+    MemoryInjector --> MemoryService
+    MemoryService --> MemoryDB
     ChatAPI --> ReActLoop
     ReActLoop <-->|Function Calls & Thought Signatures| GeminiModel
     ReActLoop -->|Dispatches Tool Name & Args| ToolExecutor
@@ -83,12 +94,15 @@ flowchart TD
 
     ToolExecutor -->|Generates ClientActions & ActionCards| ChatAPI
     ChatAPI -->|Returns reply, actionCards, clientActions| ChatDrawer
+    ChatAPI -->|Returns reply, actionCards, clientActions| AgentDesk
 
     ChatDrawer -->|Dispatches events| EventBus
+    AgentDesk -->|Dispatches events| EventBus
     EventBus -->|Update items| CartBadge
     EventBus -->|Toggle heart| ProductCard
     EventBus -->|Sync balance| CheckoutView
     EventBus -->|Sync balance| ChatDrawer
+    EventBus -->|Sync balance| AgentDesk
 
     OrdersView -->|Views '🤖 Agent Purchase' & Relaxed Cancel| OrdersAPI
 ```
@@ -250,6 +264,100 @@ Layer 2: Resilient User Profile JSON Store
 
 ## 9. Verification & Quality Benchmarks
 
-* **Model Compatibility**: Tested with `gemini-flash-lite-latest` and `gemini-3.1-flash-lite` on the Google Gemini v1beta API.
+* **Model Compatibility**: Tested with `gemini-flash-lite-latest` and `gemini-2.5-flash` on the Google Gemini v1beta API.
 * **Compilation**: `npm run typecheck` passes with **0 errors**.
-* **Next.js Production Build**: `npm run build` generates all **57 application routes** without errors.
+* **Next.js Production Build**: `npm run build` generates all **59 application routes** without errors.
+
+---
+
+## 10. Behavioral Memory & User Tracking Layer
+
+The Super Agent features a persistent, multi-dimensional **Behavioral Memory Subsystem** implemented in [`src/services/agent-memory-service.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-memory-service.ts) and surfaced via [`/api/v1/ai/agent-profile`](file:///home/batman/Pictures/shopsphere/src/app/api/v1/ai/agent-profile/route.ts):
+
+```
+                       ┌────────────────────────────────────────────────────────┐
+                       │          src/services/agent-memory-service.ts          │
+                       │               getUserBehavioralProfile()               │
+                       └──────────────────────────┬─────────────────────────────┘
+                                                  │
+            ┌───────────────────┬─────────────────┼──────────────────┬──────────────────┐
+            ▼                   ▼                 ▼                  ▼                  ▼
+    user_behavior_events   user_features     user_wallets      user_favorites     ai_agent_memory
+    ┌──────────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌────────────────┐
+    │ Dwell Time (min) │ │ Price Tier    │ │ Live Balance  │ │ Active Wishlist│ │ Cross-Session  │
+    │ Session Counts   │ │ Category %    │ │ Recent Ledger │ │ Product IDs    │ │ Stored Facts   │
+    └──────────────────┘ └───────────────┘ └───────────────┘ └───────────────┘ └────────────────┘
+                                                  │
+                                                  ▼
+                                ┌───────────────────────────────────┐
+                                │ formatBehavioralMemoryPrompt()    │
+                                │   - Injected into systemPrompt    │
+                                │   - Strictly anchors agent context│
+                                └───────────────────────────────────┘
+```
+
+### 10.1 Key Metrics Tracked
+1. **Dwell Time & Engagement**: Aggregates interaction timestamps from `user_behavior_events`, computing total minutes spent and active session counts.
+2. **Category Affinities**: Analyzes view and click event distributions to compute a ranked breakdown of category interest (e.g. `Electronics: 62%`, `Audio: 24%`).
+3. **Price Sensitivity & Elasticity**: Derives budget tiers (`budget`, `mid`, `premium`) based on historical order values and browse habits.
+4. **Live Commerce State**: Real-time integration with `getWallet` (in-app balance in ₹), `getCart` (current items and quantities), and `getFavorites` (wishlist IDs and names).
+5. **Cross-Session Memory Storage**: Stores declarative user facts (e.g., shoe size, preferred brands, budget constraints) in `ai_agent_memory` via `recordAgentMemory()`.
+
+---
+
+## 11. Dedicated Agent Tasks Workspace (`/agent`)
+
+To support complex autonomous flows without crowding casual browsing, ShopSphere provides a two-tier interaction model:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ Customer Portal Navigation (CustomerNavbar.tsx)                                        │
+│  [Explore]  [Orders]  [Gifts]  [Friends]  [🤖 Agent Tasks (AI)] ───────► /agent route   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        /agent — Dedicated Mission Control Desk                         │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ Top Telemetry Radar:                                                                   │
+│   • Live Dwell Time (~X mins across Y sessions)                                       │
+│   • Category Affinity Index (e.g., Electronics 65%)                                    │
+│   • Real-Time In-App Wallet Balance + 1-Tap Quick Topup (+₹500, +₹1,000)               │
+├─────────────────────────────────────────┬──────────────────────────────────────────────┤
+│ Left Control Deck:                      │ Right Execution Console:                     │
+│   • Specialist Persona Switcher         │   • Formatted Typography Stream (.fmt-*)     │
+│   • 1-Click Autonomous Tasks:           │   • Product Action Cards (⚡ Buy, + Bag, ❤️) │
+│       - Phones under ₹20,000            │   • 1-Tap Wallet Payment Authorization       │
+│       - Earbuds under ₹2,000            │   • Interactive Gift & Review Flow           │
+│       - Inspect Wishlist Items          │   • Synchronized Session with Floating Widget│
+│       - Review Past Purchases           │                                              │
+│   • Memory Inspector ("What I Know")    │                                              │
+└─────────────────────────────────────────┴──────────────────────────────────────────────┘
+```
+
+* **Zero-Friction Purchasing**: Users can purchase, add to cart, or bookmark items directly with single-tap cards (`⚡ Buy Now`, `+ Bag`, `❤️ Wishlist`), eliminating multi-turn typing overhead.
+* **Shared Session Continuity**: Both the `/agent` page and the bottom-right floating drawer share the `shopsphere_agent_session_id` in `localStorage`, maintaining unified context across views.
+
+---
+
+## 12. Strict Category Normalization & Context Retention Engine
+
+### 12.1 Category Alias Normalization
+Natural language requests often use informal terms (e.g., "phone", "sneakers", "earphones"). The `normalizeCategory()` resolver in [`src/services/agent-executor.ts`](file:///home/batman/Pictures/shopsphere/src/services/agent-executor.ts) maps inputs to canonical database categories:
+* `phone`, `smartphone`, `mobile`, `laptop` $\rightarrow$ `Electronics`
+* `earbuds`, `earphone`, `headphone`, `audio` $\rightarrow$ `Audio & Accessories`
+* `cloth`, `shirt`, `apparel`, `wear` $\rightarrow$ `Fashion & Apparel`
+* `shoe`, `sneaker`, `footwear`, `boots` $\rightarrow$ `Footwear`
+* `kitchen`, `cookware`, `home`, `appliance` $\rightarrow$ `Home & Kitchen`
+
+### 12.2 Strict Containment vs. Fallback Bleed
+* **Previous Vulnerability**: When a keyword search yielded zero results, a generic fallback queried arbitrary approved products across *any* category without price bounds, causing unrelated products (e.g., hand exercisers) to be returned for smartphone queries.
+* **Resolution**: If zero items match the specific query keywords within a category, the executor strictly constrains fallbacks to the **same category and budget ceiling**. If no items exist in that price tier, it honestly informs the customer of the category's minimum entry price rather than returning unrelated inventory.
+
+### 12.3 Multi-Turn Context Stitching
+* **Previous Amnesia**: Gemini multi-turn conversation history was previously omitted from the `contents` payload in `ai-service.ts`, preventing the model from knowing which product was discussed in prior turns.
+* **Resolution**: Historical conversation turns are now serialized in proper alternating `user` / `model` sequence with role boundaries preserved.
+* **Auto-Resolving Context**:
+  - `prepare_wallet_checkout`: If `product_id` is omitted by the user, the agent automatically falls back to inspecting items in the user's active cart or recent wishlist.
+  - `confirm_wallet_payment`: If `order_id` is omitted, the executor locates the customer's most recent `pending` order and executes the confirmation atomically.
+

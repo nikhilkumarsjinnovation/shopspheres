@@ -2,6 +2,35 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getWallet, topupWallet, debitWallet, refundWallet } from '@/services/wallet-service';
 import { getFavorites, addFavorite, removeFavorite } from '@/services/favorites-service';
 import { createOrder, calculateTotals } from '@/services/order-service';
+import { getCart } from '@/services/cart-service';
+
+function normalizeCategory(input?: string): string | null {
+  if (!input || typeof input !== 'string') return null;
+  const c = input.trim().toLowerCase();
+  if (c === 'all') return null;
+  if (c.includes('elect') || c.includes('phone') || c.includes('mobile') || c.includes('gadget') || c.includes('laptop') || c.includes('smart') || c.includes('tech')) {
+    return 'Electronics';
+  }
+  if (c.includes('audio') || c.includes('earbud') || c.includes('headphone') || c.includes('speaker') || c.includes('sound')) {
+    return 'Audio & Accessories';
+  }
+  if (c.includes('cloth') || c.includes('fashion') || c.includes('apparel') || c.includes('shirt') || c.includes('kurta') || c.includes('wear') || c.includes('dress') || c.includes('watch')) {
+    return 'Fashion & Apparel';
+  }
+  if (c.includes('kitchen') || c.includes('home') || c.includes('cooker') || c.includes('mixer') || c.includes('appliance') || c.includes('jar')) {
+    return 'Home & Kitchen';
+  }
+  if (c.includes('beauty') || c.includes('health') || c.includes('wash') || c.includes('cream') || c.includes('soap') || c.includes('skin') || c.includes('makeup')) {
+    return 'Health & Beauty';
+  }
+  if (c.includes('gourmet') || c.includes('grocer') || c.includes('food') || c.includes('snack') || c.includes('chocolate') || c.includes('sweet')) {
+    return 'Gourmet & Groceries';
+  }
+  if (c.includes('sport') || c.includes('fitness') || c.includes('exercis') || c.includes('gym')) {
+    return 'Sports & Outdoors';
+  }
+  return input;
+}
 
 export interface AgentExecutionResult {
   toolName: string;
@@ -29,58 +58,112 @@ export async function executeAgentTool(
     // -------------------------------------------------------------
     case 'search_catalog': {
       const { query = '', category, min_price, max_price, in_stock_only } = args;
-      let q = adminDb
+
+      // 1. Normalize and resolve canonical category
+      const normCat = normalizeCategory(category) || normalizeCategory(query);
+
+      // 2. Parse Keywords & Strip Stop Words
+      const stopWords = new Set([
+        'product', 'products', 'item', 'items', 'show', 'me', 'under', 'cheap', 'best',
+        'good', 'from', 'category', 'in', 'the', 'for', 'buy', 'need', 'want', 'please',
+        'any', 'find', 'get', 'give', 'below', 'less', 'than', 'price', 'budget', 'with', 'and'
+      ]);
+
+      const rawWords = (query || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter((w: string) => w.length > 2 && !stopWords.has(w));
+
+      // 3. Build Base Query with Strict Category and Price
+      let baseQ = adminDb
         .from('products')
         .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes')
         .eq('approval_status', 'approved');
 
-      if (category && category !== 'All') {
-        q = q.ilike('category', `%${category}%`);
+      if (normCat) {
+        baseQ = baseQ.ilike('category', `%${normCat}%`);
       }
-      if (min_price && !isNaN(min_price)) {
-        q = q.gte('price', Number(min_price));
+      if (min_price && !isNaN(Number(min_price))) {
+        baseQ = baseQ.gte('price', Number(min_price));
       }
-      if (max_price && !isNaN(max_price)) {
-        q = q.lte('price', Number(max_price));
+      if (max_price && !isNaN(Number(max_price))) {
+        baseQ = baseQ.lte('price', Number(max_price));
       }
       if (in_stock_only) {
-        q = q.gt('stock', 0);
+        baseQ = baseQ.gt('stock', 0);
       }
 
-      if (query && query.trim() !== '') {
-        const clean = query.replace(/[%_,()]/g, '').trim();
-        q = q.or(`title.ilike.%${clean}%,description.ilike.%${clean}%,category.ilike.%${clean}%`);
+      // First attempt: search with extracted keywords if any
+      let matchedProducts: any[] = [];
+      if (rawWords.length > 0) {
+        let kwQ = baseQ;
+        const orClauses: string[] = [];
+        for (const w of rawWords.slice(0, 3)) {
+          orClauses.push(`title.ilike.%${w}%`);
+          orClauses.push(`description.ilike.%${w}%`);
+        }
+        kwQ = kwQ.or(orClauses.join(','));
+        const { data: kwMatches } = await kwQ.order('average_rating', { ascending: false }).limit(6);
+        if (kwMatches && kwMatches.length > 0) {
+          matchedProducts = kwMatches;
+        }
       }
 
-      const { data: products, error } = await q.order('average_rating', { ascending: false }).limit(6);
+      // Second attempt: if keyword search yielded nothing, fetch top-rated products strictly within THAT category and price range
+      if (matchedProducts.length === 0) {
+        const { data: catMatches } = await baseQ.order('average_rating', { ascending: false }).limit(6);
+        if (catMatches && catMatches.length > 0) {
+          matchedProducts = catMatches;
+        }
+      }
 
-      if (error || !products || products.length === 0) {
-        // Fallback: search without category constraint
-        const { data: fallback } = await adminDb
-          .from('products')
-          .select('id, title, price, compare_at_price, category, image_urls, stock, average_rating')
-          .eq('approval_status', 'approved')
-          .limit(4);
+      // Third attempt: If still 0 products found because budget was too low or category was very narrow:
+      if (matchedProducts.length === 0) {
+        let hintMessage = `No products found`;
+        if (normCat) hintMessage += ` in "${normCat}"`;
+        if (max_price) hintMessage += ` under ₹${Number(max_price).toLocaleString('en-IN')}`;
+
+        let altProducts: any[] = [];
+        if (normCat) {
+          // Find the lowest-priced products within THAT SAME category so user sees actual prices
+          const { data: catOnly } = await adminDb
+            .from('products')
+            .select('id, title, price, compare_at_price, category, image_urls, stock, average_rating')
+            .eq('approval_status', 'approved')
+            .ilike('category', `%${normCat}%`)
+            .order('price', { ascending: true })
+            .limit(4);
+
+          if (catOnly && catOnly.length > 0) {
+            altProducts = catOnly;
+            hintMessage += `. The most affordable ${normCat} products start at ₹${catOnly[0].price.toLocaleString('en-IN')}.`;
+          }
+        }
 
         return {
           toolName,
           output: {
-            count: fallback?.length || 0,
-            products: fallback || [],
-            message: `No exact matches for "${query}". Displaying popular items.`,
+            count: altProducts.length,
+            products: altProducts,
+            message: hintMessage,
+            appliedCategory: normCat || 'All',
+            appliedMaxPrice: max_price || null,
           },
-          actionCard: {
+          actionCard: altProducts.length > 0 ? {
             type: 'PRODUCT_CAROUSEL',
-            data: { products: fallback || [] },
-          },
+            data: { products: altProducts },
+          } : undefined,
         };
       }
 
       return {
         toolName,
         output: {
-          count: products.length,
-          products: products.map((p) => ({
+          count: matchedProducts.length,
+          categoryFilter: normCat || 'All',
+          maxPriceFilter: max_price || null,
+          products: matchedProducts.map((p) => ({
             id: p.id,
             title: p.title,
             price: p.price,
@@ -91,7 +174,7 @@ export async function executeAgentTool(
         },
         actionCard: {
           type: 'PRODUCT_CAROUSEL',
-          data: { products },
+          data: { products: matchedProducts },
         },
       };
     }
@@ -503,10 +586,36 @@ export async function executeAgentTool(
         itemToBuy = prod;
       }
 
+      // If no product_id specified, inspect the user's active cart
+      if (!itemToBuy && userId) {
+        try {
+          const cartItems = await getCart(userId);
+          if (Array.isArray(cartItems) && cartItems.length > 0) {
+            const firstCartItem = cartItems[0];
+            const { data: prod } = await adminDb.from('products').select('*').eq('id', firstCartItem.id).maybeSingle();
+            itemToBuy = prod;
+          }
+        } catch {
+          // ignore cart fetch error
+        }
+      }
+
+      // If still no item, inspect user's recent wishlist
+      if (!itemToBuy && userId) {
+        try {
+          const favs = await getFavorites(userId);
+          if (favs.length > 0 && favs[0].product) {
+            itemToBuy = favs[0].product;
+          }
+        } catch {
+          // ignore favs fetch error
+        }
+      }
+
       if (!itemToBuy) {
         return {
           toolName,
-          output: { error: 'Please specify which product you would like to purchase.' },
+          output: { error: 'Please specify which product you would like to purchase (e.g. "Buy POCO X4 Pro 5G with wallet") or add an item to your bag first.' },
         };
       }
 
@@ -610,20 +719,38 @@ export async function executeAgentTool(
     // -------------------------------------------------------------
     case 'confirm_wallet_payment': {
       if (!userId) return { toolName, output: { error: 'Please log in to confirm payment.' } };
-      const { order_id } = args;
+      let { order_id } = args;
 
-      if (!order_id) {
-        return { toolName, output: { error: 'order_id is required.' } };
+      let order: any = null;
+
+      if (order_id) {
+        const { data: foundOrder } = await adminDb
+          .from('orders')
+          .select('*')
+          .eq('id', order_id)
+          .eq('customer_id', userId)
+          .single();
+        order = foundOrder;
+      } else {
+        // Smart resolution: find latest pending order for this user
+        const { data: latestPending } = await adminDb
+          .from('orders')
+          .select('*')
+          .eq('customer_id', userId)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (latestPending) {
+          order = latestPending;
+          order_id = latestPending.id;
+        }
       }
 
-      const { data: order } = await adminDb
-        .from('orders')
-        .select('*')
-        .eq('id', order_id)
-        .eq('customer_id', userId)
-        .single();
-
-      if (!order) return { toolName, output: { error: 'Order not found.' } };
+      if (!order) {
+        return { toolName, output: { error: 'No pending order found to authorize. Please choose a product to purchase first.' } };
+      }
 
       const debitRes = await debitWallet(userId, Number(order.total_amount), order.id);
 

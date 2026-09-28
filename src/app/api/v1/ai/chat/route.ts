@@ -7,6 +7,7 @@ import { csrfMiddleware } from '@/lib/csrf';
 import { chatLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { chat, getRecommendations, intentsToJson, mutateFeed, parseFeedWeights, summarizeConversation } from '@/services/ai-service';
 import { invalidatePersonalizedFeed } from '@/lib/cache';
+import { getUserBehavioralProfile, formatBehavioralMemoryPrompt, type UserBehavioralProfile } from '@/services/agent-memory-service';
 import type { AiUserProfile, UserAccessibilityProfile } from '@/types/database.types';
 
 const ChatRequestSchema = z.object({
@@ -134,17 +135,15 @@ export async function POST(request: NextRequest) {
 
     let memories = '';
     let priorTurns: Array<{ role: string; content: string; created_at: string }> = [];
+    let behavioralProfile: UserBehavioralProfile | null = null;
+
     if (userId) {
-      const { data: memoryRows, error: memoryError } = await supabase
-        .from('ai_agent_memory')
-        .select('content')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      if (memoryError) {
-        throw new Error(memoryError.message);
+      try {
+        behavioralProfile = await getUserBehavioralProfile(userId);
+        memories = formatBehavioralMemoryPrompt(behavioralProfile);
+      } catch (profileErr) {
+        console.warn('[Personal AI Assistant] Failed to load behavioral profile:', profileErr);
       }
-      memories = (memoryRows ?? []).map((row) => row.content).join('\n');
 
       const { data: turns, error: turnsError } = await supabase
         .from('ai_conversations')
@@ -153,10 +152,10 @@ export async function POST(request: NextRequest) {
         .eq('session_id', sessionId)
         .order('created_at', { ascending: true })
         .limit(20);
-      if (turnsError) {
-        throw new Error(turnsError.message);
+
+      if (!turnsError && turns) {
+        priorTurns = turns;
       }
-      priorTurns = turns ?? [];
     }
 
     const validatedOutput = await chat({
@@ -232,6 +231,7 @@ export async function POST(request: NextRequest) {
       clientActions: validatedOutput.clientActions || [],
       actionCards: validatedOutput.actionCards || [],
       toolExecutions: validatedOutput.toolExecutions || [],
+      behavioralProfile,
       sessionId,
     });
   } catch (err: unknown) {

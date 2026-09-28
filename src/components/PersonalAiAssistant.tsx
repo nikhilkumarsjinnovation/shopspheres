@@ -15,6 +15,7 @@ import {
   XCircle,
   Heart,
   ShoppingBag,
+  ArrowRight,
 } from 'lucide-react';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
@@ -384,6 +385,76 @@ function ActionCardRenderer({
   return null;
 }
 
+function renderInlineText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return (
+        <code
+          key={index}
+          style={{
+            background: 'var(--bg-subtle)',
+            padding: '0.1rem 0.3rem',
+            borderRadius: '4px',
+            fontSize: '0.78rem',
+            fontFamily: 'monospace',
+          }}
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return part;
+  });
+}
+
+function renderFormattedMessage(content: string) {
+  return content.split('\n').map((line, idx) => {
+    if (line.startsWith('### ')) {
+      return (
+        <h4 key={idx} style={{ margin: '0.4rem 0 0.2rem', fontSize: '0.88rem', fontWeight: 800 }}>
+          {line.replace('### ', '')}
+        </h4>
+      );
+    }
+    if (line.startsWith('## ')) {
+      return (
+        <h3 key={idx} style={{ margin: '0.45rem 0 0.25rem', fontSize: '0.92rem', fontWeight: 800 }}>
+          {line.replace('## ', '')}
+        </h3>
+      );
+    }
+    if (line.startsWith('- ') || line.startsWith('• ')) {
+      const text = line.replace(/^[-•]\s*/, '');
+      return (
+        <li
+          key={idx}
+          style={{
+            marginLeft: '1rem',
+            listStyleType: 'disc',
+            fontSize: '0.82rem',
+            marginBottom: '0.2rem',
+            lineHeight: 1.45,
+          }}
+        >
+          {renderInlineText(text)}
+        </li>
+      );
+    }
+    if (!line.trim()) {
+      return <div key={idx} style={{ height: '0.35rem' }} />;
+    }
+    return (
+      <p key={idx} style={{ margin: '0 0 0.35rem', fontSize: '0.84rem', lineHeight: 1.45 }}>
+        {renderInlineText(line)}
+      </p>
+    );
+  });
+}
+
 export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [persona, setPersona] = useState<PersonaConfig['id']>('everyday');
@@ -402,7 +473,20 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sessionIdRef = useRef(`sess_${Math.random().toString(36).slice(2)}`);
+  const sessionIdRef = useRef<string>('sess_agent_assistant');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('shopsphere_agent_session_id');
+      if (stored) {
+        sessionIdRef.current = stored;
+      } else {
+        const newId = `sess_${Math.random().toString(36).slice(2)}`;
+        localStorage.setItem('shopsphere_agent_session_id', newId);
+        sessionIdRef.current = newId;
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -557,15 +641,38 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
               </p>
             </div>
 
-            <button
-              type="button"
-              className="btn-card-toggle"
-              style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
-              onClick={() => setIsOpen(false)}
-              aria-label="Close guide"
-            >
-              <X size={14} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Link
+                href="/agent"
+                onClick={() => setIsOpen(false)}
+                className="btn-card-toggle"
+                style={{
+                  padding: '0.3rem 0.55rem',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  color: 'var(--accent-electric)',
+                  background: 'var(--accent-glow)',
+                  borderColor: 'rgba(79, 70, 229, 0.3)',
+                }}
+                title="Open Dedicated Full Agent Workspace"
+              >
+                <span>Tasks Desk</span>
+                <ArrowRight size={11} />
+              </Link>
+              <button
+                type="button"
+                className="btn-card-toggle"
+                style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                onClick={() => setIsOpen(false)}
+                aria-label="Close guide"
+              >
+                <X size={14} />
+              </button>
+            </div>
           </div>
 
           <PersonaSelector value={persona} onChange={setPersona} />
@@ -602,7 +709,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                 key={m.id}
                 className={m.role === 'assistant' ? 'ai-bubble-assistant' : 'ai-bubble-user'}
               >
-                <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{m.content}</div>
+                <div className="ai-bubble-formatted">{renderFormattedMessage(m.content)}</div>
 
                 {/* Render Agent Action Cards (Wallet Pay, Gifting, Order Confirmations, Carousel) */}
                 {m.actionCards &&

@@ -198,19 +198,47 @@ export async function chat(input: {
     `- When the customer wants to purchase or checkout with their wallet: ALWAYS call prepare_wallet_checkout first. This verifies balance, reserves stock, creates an order marked with placed_by: 'agent', and displays an interactive Payment Authorization Card with the exact total and remaining balance for the user to confirm.`,
     `- When the customer confirms or authorizes payment (e.g. 'yes', 'confirm', 'pay now', 'authorize'): call confirm_wallet_payment.`,
     `- When the customer wants to cancel or replace an order: call cancel_or_replace_order. Inform them that because their order was placed by the AI Agent, they benefit from a relaxed cancellation policy allowing cancellation through the packed stage with an instant 100% wallet refund.`,
+    `FORMATTING & STYLE GUIDELINES:`,
+    `- Format your responses cleanly using GitHub-flavored Markdown: bold product names, bullet lists for options/features, and clear INR currency formatting (e.g. ₹1,499).`,
+    `- When a user specifies category and budget (e.g. "smartphone under 50000"), NEVER recommend items outside that category or above their budget!`,
+    `- Keep replies crisp, actionable, and free of unnecessary fluff.`,
     input.accessibilityNote ? `ACCESSIBILITY: ${input.accessibilityNote}` : '',
     input.memories ? `CUSTOMER PROFILE & MEMORIES:\n${input.memories}` : '',
   ].filter(Boolean).join('\n\n');
 
-  // Build initial message contents
-  const contents: any[] = [
-    {
+  // Build conversational turns from input.history to preserve multi-turn memory
+  const contents: any[] = [];
+
+  if (Array.isArray(input.history) && input.history.length > 0) {
+    const recent = input.history.slice(-10);
+    let lastRole: string | null = null;
+
+    for (const turn of recent) {
+      const role = turn.role === 'assistant' || turn.role === 'model' ? 'model' : 'user';
+      const text = turn.content?.trim();
+      if (!text) continue;
+
+      if (role === lastRole && contents.length > 0) {
+        contents[contents.length - 1].parts[0].text += `\n${text}`;
+      } else {
+        contents.push({
+          role,
+          parts: [{ text }],
+        });
+        lastRole = role;
+      }
+    }
+  }
+
+  // Ensure current user message is appended
+  if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+    contents[contents.length - 1].parts[0].text += `\n${safeMessage}`;
+  } else {
+    contents.push({
       role: 'user',
-      parts: [
-        { text: `${systemInstructions}\n\nCustomer Message: ${safeMessage}` },
-      ],
-    },
-  ];
+      parts: [{ text: safeMessage }],
+    });
+  }
 
   const accumulatedClientActions: any[] = [];
   const accumulatedActionCards: any[] = [];
@@ -225,10 +253,13 @@ export async function chat(input: {
     while (turnCount < maxTurns) {
       turnCount++;
 
-      const res = await fetch(url, {
+      let res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: systemInstructions }],
+          },
           contents,
           tools: SUPER_AGENT_TOOLS,
           generationConfig: {
@@ -236,6 +267,23 @@ export async function chat(input: {
           },
         }),
       });
+
+      // Resilient fallback if the model doesn't support system_instruction top-level
+      if (!res.ok && res.status === 400 && contents.length > 0) {
+        const clonedContents = JSON.parse(JSON.stringify(contents));
+        clonedContents[0].parts[0].text = `${systemInstructions}\n\n${clonedContents[0].parts[0].text}`;
+        res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: clonedContents,
+            tools: SUPER_AGENT_TOOLS,
+            generationConfig: {
+              temperature: 0.2,
+            },
+          }),
+        });
+      }
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -306,7 +354,18 @@ export async function chat(input: {
 
     if (!finalReply) {
       if (accumulatedActionCards.length > 0) {
-        finalReply = `I've handled that for you! Here are the details:`;
+        const cardTypes = accumulatedActionCards.map((c) => c.type);
+        if (cardTypes.includes('WALLET_PAY_AUTH')) {
+          finalReply = `I have verified your wallet balance and prepared your order. Please click **Authorize & Confirm Order** below to finalize:`;
+        } else if (cardTypes.includes('ORDER_CONFIRMED')) {
+          finalReply = `🎉 **Order Confirmed!** Your payment was processed via your in-app wallet under the relaxed AI Agent policy.`;
+        } else if (cardTypes.includes('WALLET_TOPUP_PROMPT')) {
+          finalReply = `Your wallet balance is low for this purchase. Top up your balance below with 1-tap:`;
+        } else if (cardTypes.includes('PRODUCT_CAROUSEL')) {
+          finalReply = `Here are the matching products from our catalog:`;
+        } else {
+          finalReply = `I've handled that for you! Here are the details:`;
+        }
       } else {
         return generateResilientFallback(safeMessage, input.catalog, input.userId);
       }

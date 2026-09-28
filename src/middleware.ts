@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
   // Protected route boundaries
   const isCustomerRoute =
     path.startsWith('/customer') ||
+    path.startsWith('/agent') ||
     path === '/explore' ||
     path === '/checkout' ||
     path === '/orders' ||
