@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, Sparkles, Compass, Store, ReceiptText, Gift, Users, Bot } from 'lucide-react';
+import { ShoppingBag, Sparkles, Compass, Store, ReceiptText, Gift, Users, Bot, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAgentBackground } from '@/context/AgentBackgroundContext';
 import SignOutButton from '@/components/SignOutButton';
 
 interface CustomerNavbarProps {
@@ -13,6 +14,7 @@ interface CustomerNavbarProps {
 export default function CustomerNavbar({ email }: CustomerNavbarProps) {
   const pathname = usePathname();
   const { totalItems } = useCart();
+  const { isWorking, lastCompletedTask } = useAgentBackground();
 
   const navItems = [
     { label: 'Explore', href: '/explore', icon: Compass },
@@ -56,21 +58,41 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
                 {item.isAgent && <Bot size={15} style={{ marginRight: '0.35rem', verticalAlign: 'middle', color: 'var(--accent-electric)' }} />}
                 <span>{item.label}</span>
                 {item.isAgent && (
-                  <span
-                    style={{
-                      marginLeft: '0.4rem',
-                      padding: '0.1rem 0.4rem',
-                      fontSize: '0.62rem',
-                      fontWeight: 800,
-                      borderRadius: 'var(--radius-full)',
-                      background: 'var(--accent-electric)',
-                      color: '#ffffff',
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    AI
-                  </span>
+                  isWorking ? (
+                    <span
+                      style={{
+                        marginLeft: '0.4rem',
+                        padding: '0.12rem 0.5rem',
+                        fontSize: '0.62rem',
+                        fontWeight: 800,
+                        borderRadius: 'var(--radius-full)',
+                        background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                        color: '#ffffff',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                      }}
+                    >
+                      <span className="pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} />
+                      Working
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        marginLeft: '0.4rem',
+                        padding: '0.1rem 0.4rem',
+                        fontSize: '0.62rem',
+                        fontWeight: 800,
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--accent-electric)',
+                        color: '#ffffff',
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      AI
+                    </span>
+                  )
                 )}
               </Link>
             );

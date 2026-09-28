@@ -19,62 +19,34 @@ import {
   AlertCircle,
   ArrowRight,
   Zap,
+  Bell,
 } from 'lucide-react';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import PersonaSelector from '@/components/ai/PersonaSelector';
 import type { PersonaConfig } from '@/lib/personas';
 import type { UserBehavioralProfile } from '@/services/agent-memory-service';
-
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  actionCards?: any[];
-  toolExecutions?: any[];
-  createdAt?: string;
-}
+import { useAgentBackground } from '@/context/AgentBackgroundContext';
 
 export default function AgentTasksPage() {
+  const {
+    messages,
+    setMessages,
+    isWorking,
+    activeTask,
+    notificationPermission,
+    requestNotifications,
+    submitBackgroundTask,
+  } = useAgentBackground();
+
   const [profile, setProfile] = useState<UserBehavioralProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [persona, setPersona] = useState<PersonaConfig['id']>('everyday');
   const [inputMessage, setInputMessage] = useState('');
-  const [loading, setLoading] = useState(false);
   const [topupLoading, setTopupLoading] = useState(false);
-
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content:
-        `### 👋 Namaste! Welcome to your Autonomous Super Agent Workspace.\n\n` +
-        `I am your dedicated AI Shopping Agent powered by Gemini. I continuously learn your shopping preferences, track your dwell time and category interests, and can execute real tasks on your behalf without manual browsing.\n\n` +
-        `**What I can do for you:**\n` +
-        `- 🎯 **Strict Budget & Category Search:** Tell me any category and price limit (e.g., *"Smartphones under ₹20,000"*). I will strictly honor your constraints.\n` +
-        `- ⚡ **1-Tap In-App Wallet Checkout:** Say *"Purchase the first phone for me"* and I will reserve inventory and present instant 1-tap confirmation.\n` +
-        `- 🛡️ **Relaxed Lenient Cancellation:** Any order placed through me can be cancelled through the packed stage with an instant 100% wallet refund.\n` +
-        `- 🎁 **Surprise Gifting & Reviews:** Send parcels to friends or write verified reviews on delivered orders.\n\n` +
-        `Click any **Autonomous Quick Task** on the left or type your command below!`,
-    },
-  ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sessionIdRef = useRef<string>('sess_agent_workspace');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('shopsphere_agent_session_id');
-      if (stored) {
-        sessionIdRef.current = stored;
-      } else {
-        const newId = `sess_${Math.random().toString(36).slice(2)}`;
-        localStorage.setItem('shopsphere_agent_session_id', newId);
-        sessionIdRef.current = newId;
-      }
-    }
-  }, []);
 
   const fetchProfile = async () => {
     try {
@@ -92,7 +64,7 @@ export default function AgentTasksPage() {
             content: c.content,
             createdAt: c.created_at,
           }));
-          setMessages((prev) => [prev[0], ...loaded]);
+          setMessages((prev) => (prev.length <= 1 ? [prev[0], ...loaded] : prev));
         }
       }
     } catch (err) {
@@ -111,15 +83,23 @@ export default function AgentTasksPage() {
       }
     };
 
+    const handleProfileUpdate = (e: any) => {
+      if (e.detail) {
+        setProfile(e.detail);
+      }
+    };
+
     window.addEventListener('shopsphere:wallet-update', handleWalletUpdate);
+    window.addEventListener('shopsphere:profile-update', handleProfileUpdate);
     return () => {
       window.removeEventListener('shopsphere:wallet-update', handleWalletUpdate);
+      window.removeEventListener('shopsphere:profile-update', handleProfileUpdate);
     };
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, isWorking]);
 
   const handleQuickTopup = async (amount: number) => {
     try {
@@ -143,78 +123,9 @@ export default function AgentTasksPage() {
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputMessage).trim();
-    if (!text || loading) return;
-
-    const userMsg: ChatMessage = {
-      id: `usr_${Date.now()}`,
-      role: 'user',
-      content: text,
-      createdAt: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
+    if (!text || isWorking) return;
     setInputMessage('');
-    setLoading(true);
-
-    try {
-      const res = await fetchWithCsrf('/api/v1/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          persona,
-          sessionId: sessionIdRef.current,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to get response from Super Agent');
-      }
-
-      const data = await res.json();
-
-      // Dispatch Reactive Client Actions
-      if (Array.isArray(data.clientActions)) {
-        for (const act of data.clientActions) {
-          if (act.type === 'CART_SYNC') {
-            window.dispatchEvent(new CustomEvent('shopsphere:cart-update', { detail: act.payload }));
-          } else if (act.type === 'CART_CLEAR') {
-            window.dispatchEvent(new CustomEvent('shopsphere:cart-clear', { detail: act.payload }));
-          } else if (act.type === 'FAVORITES_SYNC') {
-            window.dispatchEvent(new CustomEvent('shopsphere:favorites-update', { detail: act.payload }));
-          } else if (act.type === 'WALLET_SYNC') {
-            window.dispatchEvent(new CustomEvent('shopsphere:wallet-update', { detail: act.payload }));
-          }
-        }
-      }
-
-      if (data.behavioralProfile) {
-        setProfile(data.behavioralProfile);
-      }
-
-      const assistantMsg: ChatMessage = {
-        id: `ast_${Date.now()}`,
-        role: 'assistant',
-        content: data.reply,
-        actionCards: data.actionCards || [],
-        toolExecutions: data.toolExecutions || [],
-        createdAt: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error communicating with Super Agent';
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `err_${Date.now()}`,
-          role: 'assistant',
-          content: `⚠️ **Execution Error:** ${msg}. Please try again.`,
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+    await submitBackgroundTask(text, persona);
   };
 
   return (
@@ -293,6 +204,52 @@ export default function AgentTasksPage() {
             </div>
           </div>
         </div>
+
+        {/* 5. Background Task Alerts & Cross-Tab Persistence Status */}
+        <div className="radar-metric">
+          <div className="radar-icon-box">
+            <Bell size={20} className={notificationPermission === 'granted' ? 'text-electric' : ''} />
+          </div>
+          <div className="radar-content">
+            <span className="radar-label">Background Task Alerts</span>
+            {notificationPermission === 'granted' ? (
+              <div className="radar-value-row">
+                <span className="radar-main-val" style={{ fontSize: '0.85rem', color: 'var(--success)' }}>
+                  Active & Ready
+                </span>
+                <span className="status-live-pill" style={{ background: 'var(--success-bg)', color: 'var(--success)', borderColor: 'var(--success-border)' }}>
+                  Chime + Notify
+                </span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="chip-topup-mini"
+                style={{
+                  width: 'fit-content',
+                  marginTop: '0.25rem',
+                  background: 'var(--accent-glow)',
+                  color: 'var(--accent-electric)',
+                  borderColor: 'rgba(79, 70, 229, 0.3)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                }}
+                onClick={() => void requestNotifications()}
+                title="Enable desktop notifications when tasks complete in background tabs"
+              >
+                <Bell size={12} />
+                <span>Enable Alerts</span>
+              </button>
+            )}
+            <small className="radar-subtext">
+              {notificationPermission === 'granted'
+                ? 'Alerts when switching tabs'
+                : 'Click to enable tab notifications'}
+            </small>
+          </div>
+        </div>
       </section>
 
       {/* Main Two-Column Layout */}
@@ -319,7 +276,7 @@ export default function AgentTasksPage() {
               <button
                 type="button"
                 className="btn-preset-task"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage('Search smartphones in Electronics under ₹20,000 for me')}
               >
                 <span className="task-emoji">📱</span>
@@ -333,7 +290,7 @@ export default function AgentTasksPage() {
               <button
                 type="button"
                 className="btn-preset-task"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage('Search audio accessories and wireless earbuds under ₹2,000')}
               >
                 <span className="task-emoji">🎧</span>
@@ -347,7 +304,7 @@ export default function AgentTasksPage() {
               <button
                 type="button"
                 className="btn-preset-task"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage('Show all my favorited products')}
               >
                 <span className="task-emoji">❤️</span>
@@ -361,7 +318,7 @@ export default function AgentTasksPage() {
               <button
                 type="button"
                 className="btn-preset-task"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage('What is my current wallet balance and recent activity?')}
               >
                 <span className="task-emoji">💰</span>
@@ -375,7 +332,7 @@ export default function AgentTasksPage() {
               <button
                 type="button"
                 className="btn-preset-task"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage('Review my delivered orders with verified 5-star ratings')}
               >
                 <span className="task-emoji">⭐</span>
@@ -389,7 +346,7 @@ export default function AgentTasksPage() {
               <button
                 type="button"
                 className="btn-preset-task"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage('Show friends list so I can send a surprise gift')}
               >
                 <span className="task-emoji">🎁</span>
@@ -448,6 +405,17 @@ export default function AgentTasksPage() {
 
         {/* Right Column: High-Fidelity Agent Action Console */}
         <main className="agent-main-console">
+          {/* Background Working Status Notice Bar */}
+          {isWorking && (
+            <div className="agent-working-notice-bar" role="status" aria-live="polite">
+              <span className="pulse-dot" style={{ color: 'var(--accent-electric)', fontSize: '1.25rem', lineHeight: 1 }}>●</span>
+              <div style={{ flex: 1 }}>
+                <strong>Agent executing in background:</strong> &ldquo;{activeTask?.prompt || 'Autonomous ReAct reasoning'}&rdquo;
+              </div>
+              <small>Feel free to switch tabs or browse other pages; you will receive a chime & desktop alert upon completion.</small>
+            </div>
+          )}
+
           <div className="console-stream">
             {messages.map((m) => (
               <div
@@ -496,7 +464,7 @@ export default function AgentTasksPage() {
                         key={`${m.id}_card_${cIdx}`}
                         card={card}
                         onExecute={(cmd) => void handleSendMessage(cmd)}
-                        loading={loading}
+                        loading={isWorking}
                       />
                     ))}
                   </div>
@@ -504,10 +472,10 @@ export default function AgentTasksPage() {
               </div>
             ))}
 
-            {loading && (
+            {isWorking && (
               <div className="console-loading-indicator">
                 <Sparkles size={16} className="animate-spin text-electric" />
-                <span>Super Agent executing ReAct multi-turn actions…</span>
+                <span>Super Agent executing ReAct multi-turn actions in background…</span>
               </div>
             )}
 
@@ -527,7 +495,7 @@ export default function AgentTasksPage() {
                 key={chip}
                 type="button"
                 className="console-chip"
-                disabled={loading}
+                disabled={isWorking}
                 onClick={() => handleSendMessage(chip)}
               >
                 {chip}
@@ -550,12 +518,12 @@ export default function AgentTasksPage() {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Ask agent: 'Find smartphones under ₹20,000' or 'Buy item with wallet'..."
-              disabled={loading}
+              disabled={isWorking}
             />
             <button
               type="submit"
               className="btn-console-send"
-              disabled={loading || !inputMessage.trim()}
+              disabled={isWorking || !inputMessage.trim()}
             >
               <Send size={16} />
               <span>Send Command</span>

@@ -23,6 +23,7 @@ import PersonaSelector from '@/components/ai/PersonaSelector';
 import VoiceInterface from '@/components/ai/VoiceInterface';
 import VisualSearch from '@/components/ai/VisualSearch';
 import type { PersonaConfig } from '@/lib/personas';
+import { useAgentBackground } from '@/context/AgentBackgroundContext';
 
 export interface RecommendedProduct {
   id: string;
@@ -456,37 +457,19 @@ function renderFormattedMessage(content: string) {
 }
 
 export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssistantProps) {
+  const {
+    messages,
+    isWorking,
+    submitBackgroundTask,
+  } = useAgentBackground();
+
   const [isOpen, setIsOpen] = useState(false);
   const [persona, setPersona] = useState<PersonaConfig['id']>('everyday');
   const [inputMessage, setInputMessage] = useState('');
-  const [loading, setLoading] = useState(false);
   const [feedNotification, setFeedNotification] = useState<string | null>(null);
-
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content:
-        "Namaste! I'm your **Customer Super Agent** powered by Gemini. I can perform real shopping actions for you:\n\n• 🔍 **Search & Compare** products across our catalog\n• 🛍️ **Manage Your Cart** (add, update, or clear items)\n• ❤️ **Manage Favorites** with a single command\n• 🎁 **Send Surprise Gifts** to friends with custom notes & scheduled reveals\n• 💰 **In-App Wallet Payments** with 1-tap checkout\n• ⭐ **Write Verified Reviews** on your past purchases\n• 🤖 **Agent Purchases** come with relaxed, lenient cancellation & instant 100% wallet refunds!",
-    },
-  ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sessionIdRef = useRef<string>('sess_agent_assistant');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('shopsphere_agent_session_id');
-      if (stored) {
-        sessionIdRef.current = stored;
-      } else {
-        const newId = `sess_${Math.random().toString(36).slice(2)}`;
-        localStorage.setItem('shopsphere_agent_session_id', newId);
-        sessionIdRef.current = newId;
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -500,109 +483,25 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
       setIsOpen(true);
     };
 
+    const handleFeedUpdate = () => {
+      setFeedNotification('Your explore feed was personalized to match this conversation.');
+      onFeedUpdated?.();
+      setTimeout(() => setFeedNotification(null), 5000);
+    };
+
     window.addEventListener('shopsphere:open-ai', handleOpenAi);
+    window.addEventListener('shopsphere:feed-updated', handleFeedUpdate);
     return () => {
       window.removeEventListener('shopsphere:open-ai', handleOpenAi);
+      window.removeEventListener('shopsphere:feed-updated', handleFeedUpdate);
     };
-  }, []);
+  }, [onFeedUpdated]);
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputMessage).trim();
-    if (!text || loading) return;
-
-    const userMsg: ChatMessage = {
-      id: `usr_${Date.now()}`,
-      role: 'user',
-      content: text,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
+    if (!text || isWorking) return;
     setInputMessage('');
-    setLoading(true);
-
-    try {
-      const res = await fetchWithCsrf('/api/v1/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          persona,
-          sessionId: sessionIdRef.current,
-        }),
-      });
-
-      if (!res.ok) {
-        let message = 'Failed to get a response from AI';
-        try {
-          const data: unknown = await res.json();
-          if (data && typeof data === 'object' && 'error' in data && typeof data.error === 'string') {
-            message = data.error;
-          }
-        } catch {
-          // Response body was not JSON.
-        }
-        throw new Error(message);
-      }
-
-      const data = await res.json();
-
-      // Dispatch reactive client actions (Cart sync, Favorites sync, Wallet sync)
-      if (data.clientActions && Array.isArray(data.clientActions)) {
-        for (const act of data.clientActions) {
-          if (act.type === 'CART_SYNC') {
-            window.dispatchEvent(new CustomEvent('shopsphere:cart-update', { detail: act.payload }));
-          } else if (act.type === 'CART_CLEAR') {
-            window.dispatchEvent(new CustomEvent('shopsphere:cart-clear', { detail: act.payload }));
-          } else if (act.type === 'FAVORITES_SYNC') {
-            window.dispatchEvent(
-              new CustomEvent('shopsphere:favorites-update', {
-                detail: {
-                  productId: act.payload.productId,
-                  isFavorite: act.payload.action === 'add',
-                },
-              })
-            );
-          } else if (act.type === 'WALLET_SYNC') {
-            window.dispatchEvent(new CustomEvent('shopsphere:wallet-update', { detail: act.payload }));
-          }
-        }
-      }
-
-      const assistantMsg: ChatMessage = {
-        id: `ast_${Date.now()}`,
-        role: 'assistant',
-        content: data.reply,
-        recommendedProducts: data.recommendedProducts || [],
-        actionCards: data.actionCards || [],
-        toolExecutions: data.toolExecutions || [],
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
-
-      if (data.feedUpdated) {
-        setFeedNotification('Your explore feed was personalized to match this conversation.');
-        onFeedUpdated?.();
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('shopsphere:feed-updated', { detail: data }));
-        }
-        setTimeout(() => setFeedNotification(null), 5000);
-      }
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Sorry, I ran into an error retrieving recommendations. Please try again!';
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `err_${Date.now()}`,
-          role: 'assistant',
-          content: message,
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+    await submitBackgroundTask(text, persona);
   };
 
   return (
@@ -719,7 +618,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                       card={card}
                       onAction={(text) => void handleSendMessage(text)}
                       onCloseDrawer={() => setIsOpen(false)}
-                      loading={loading}
+                      loading={isWorking}
                     />
                   ))}
 
@@ -807,7 +706,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
               </div>
             ))}
 
-            {loading && (
+            {isWorking && (
               <div
                 style={{
                   fontSize: '0.8rem',
@@ -819,7 +718,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                   padding: '0.5rem',
                 }}
               >
-                <Sparkles size={14} className="pulse-badge" /> Super Agent executing actions…
+                <Sparkles size={14} className="pulse-badge" /> Super Agent executing actions in background…
               </div>
             )}
 
@@ -841,6 +740,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                 key={pill}
                 type="button"
                 className="ai-prompt-chip"
+                disabled={isWorking}
                 onClick={() => handleSendMessage(pill)}
               >
                 {pill}
@@ -867,13 +767,13 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Ask agent to buy, add to bag, gift friend, or check wallet..."
-              disabled={loading}
+              disabled={isWorking}
             />
             <button
               type="submit"
               className="btn-card-add"
               style={{ padding: '0 1rem', height: '2.6rem', fontSize: '0.825rem' }}
-              disabled={loading || !inputMessage.trim()}
+              disabled={isWorking || !inputMessage.trim()}
             >
               <Send size={14} />
             </button>

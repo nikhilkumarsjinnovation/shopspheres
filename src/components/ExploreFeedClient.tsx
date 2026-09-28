@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Search, X, Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Truck, ShieldCheck, BadgeCheck, Check } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Truck, ShieldCheck, BadgeCheck, Check } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import BehavioralOffersBanner from '@/components/BehavioralOffersBanner';
 import type { FeedCarousel } from '@/app/api/v1/feed/personalized/route';
@@ -53,6 +53,15 @@ export default function ExploreFeedClient({
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc' | 'rating' | 'newest'>('featured');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Listen for search from header
+  useEffect(() => {
+    const handleHeaderSearch = (e: any) => {
+      setSearchQuery(e.detail?.query || '');
+    };
+    window.addEventListener('shopsphere:header-search', handleHeaderSearch);
+    return () => window.removeEventListener('shopsphere:header-search', handleHeaderSearch);
+  }, []);
 
   // AI Personalized Feed State (summary banner intentionally not rendered)
   const [carousels, setCarousels] = useState<FeedCarousel[]>([]);
@@ -147,6 +156,9 @@ export default function ExploreFeedClient({
     setMinRating(0);
     setInStockOnly(false);
     setSortBy('featured');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('shopsphere:clear-header-search'));
+    }
   };
 
   // Filtered & Sorted Products
@@ -415,68 +427,13 @@ export default function ExploreFeedClient({
           </div>
         )}
 
-        {/* Search hub */}
-        <div className="feed-filter-bar explore-search-card">
-          <div className="search-row">
-            <div className="search-input-wrap">
-              <Search size={18} className="search-icon" />
-              <input
-                type="text"
-                className="search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search 300+ items by name, category, brand, or feature..."
-                aria-label="Search marketplace catalog"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  className="search-clear-btn"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search input"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="btn-ai-guide explore-ai-btn"
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.dispatchEvent(new CustomEvent('shopsphere:open-ai'));
-                }
-              }}
-            >
-              <Sparkles size={14} />
-              <span>AI Assistant</span>
-            </button>
-          </div>
-
-          <div className="category-pills-row" role="tablist" aria-label="Product categories">
-            {['All', ...availableCategories].map((cat) => {
-              const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  role="tab"
-                  aria-selected={isSelected}
-                  className={`category-pill ${isSelected ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat}
-                </button>
-              );
-            })}
-          </div>
-
-          {isFiltering && (
-            <div className="explore-result-meta">
+        {/* Result meta — only rendered while filtering (no empty bar otherwise) */}
+        {isFiltering && (
+          <div className="feed-filter-bar explore-search-card" style={{ padding: '0.75rem 1.25rem' }}>
+            <div className="explore-result-meta" style={{ borderTop: 'none', paddingTop: 0 }}>
               <span>
                 Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
-                {searchQuery.trim() && <> for “<strong>{searchQuery.trim()}</strong>”</>}
+                {searchQuery.trim() && <> for <strong>{searchQuery.trim()}</strong></>}
               </span>
               <button
                 type="button"
@@ -486,8 +443,8 @@ export default function ExploreFeedClient({
                 Clear all
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* VIEW 1: ACTIVE FILTER / SEARCH RESULTS */}
         {isFiltering ? (

@@ -361,3 +361,55 @@ Natural language requests often use informal terms (e.g., "phone", "sneakers", "
   - `prepare_wallet_checkout`: If `product_id` is omitted by the user, the agent automatically falls back to inspecting items in the user's active cart or recent wishlist.
   - `confirm_wallet_payment`: If `order_id` is omitted, the executor locates the customer's most recent `pending` order and executes the confirmation atomically.
 
+---
+
+## 13. Background Task Execution, Cross-Tab Sync & Multi-Channel Notifications
+
+To enable true agentic autonomy where users do not need to wait synchronously inside the tab, ShopSphere features a resilient background execution architecture:
+
+```mermaid
+flowchart TD
+    User["Customer (Submits Task)"] --> AgentContext["AgentBackgroundProvider\n(layout.tsx)"]
+    AgentContext -->|Spawns Fetch Task| Worker["Background ReAct Worker\n(/api/v1/ai/chat)"]
+    AgentContext -->|Writes Active Task| LocalStore[("localStorage\nshopsphere_agent_active_task")]
+    AgentContext -->|Broadcasts TASK_STARTED| BC["BroadcastChannel\n('shopsphere_agent_channel')"]
+    BC --> OtherTabs["Other Browser Tabs\n(Syncs Navbar Radar & State)"]
+
+    User -.->|Switches Tab / Navigates Away| InactiveTab["Tab Inactive\n(visibilityState === 'hidden')"]
+
+    Worker -->|Resolves Execution & ClientActions| FinishHandler["Task Completion Pipeline"]
+    FinishHandler --> DispatchActions["Dispatch Reactive Events\n(Cart, Wallet, Favorites, Profile)"]
+    FinishHandler --> PersistMessages["Persist History\n(localStorage)"]
+    FinishHandler --> BroadcastDone["Broadcast TASK_COMPLETED"]
+
+    FinishHandler --> AlertEngine["Multi-Channel Notification Engine\n(agent-notifications.ts)"]
+    AlertEngine --> AudioEarcon["Web Audio API Earcon Chime\n(D5 -> A5 -> D6 Chords)"]
+    AlertEngine --> DesktopNotify["Web Notification API\n(Native Desktop Alert with Click-to-Focus)"]
+    AlertEngine --> TitleFlash["Document Title Pulsing\n('(1) 🤖 Agent Finished — ShopSphere')"]
+    AlertEngine --> InAppToast["In-App Floating Toast\n(.agent-bg-toast with 'View Results')"]
+```
+
+### 13.1 Provider-Level Decoupling (`AgentBackgroundContext.tsx`)
+* **Lifespan Decoupling**: Rather than attaching the execution promise to local component state in `page.tsx` or `PersonalAiAssistant.tsx` (which would cancel or orphan the task if the user navigates routes), the task lifecycle is anchored inside `<AgentBackgroundProvider>` in [`src/app/(customer)/layout.tsx`](file:///home/batman/Pictures/shopsphere/src/app/(customer)/layout.tsx).
+* **Guaranteed Execution**: Tasks continue executing uninterrupted whether the customer switches routes (e.g. from `/agent` to `/explore`), minimizes the browser, or switches to a different browser tab.
+
+### 13.2 Cross-Tab Coordination via `BroadcastChannel`
+* Utilizes `new BroadcastChannel('shopsphere_agent_channel')` combined with `localStorage` fallback.
+* When a task starts in Tab A, Tab B's navbar instantly lights up with `● Working...`.
+* When Tab A completes the task, Tab B automatically syncs the updated conversation turns, dismisses the working radar, and displays the completion toast banner.
+
+### 13.3 Multi-Channel Completion Notification Engine (`agent-notifications.ts`)
+When a background task completes, `triggerAgentCompletionAlert()` executes an orchestrated 4-channel alert:
+1. **Zero-Latency Earcon Chime (Web Audio API)**:
+   - Uses the browser's native `AudioContext` to synthesize a dual-tone ascending arpeggio (D5: 587.33Hz $\rightarrow$ A5: 880.00Hz $\rightarrow$ D6: 1174.66Hz) using soft sine wave oscillators.
+   - Requires zero external `.mp3` or `.wav` network downloads, guarantees zero network latency, and operates even on low-bandwidth connections.
+2. **Native Desktop Web Notifications**:
+   - Uses standard `Notification` API with permission negotiation.
+   - When the user clicks the notification banner, the browser focuses the ShopSphere tab (`window.focus()`) and automatically navigates to `/agent` to view the execution results.
+3. **Document Title Pulse / Flashing**:
+   - If `document.visibilityState === 'hidden'`, the document title toggles every 1,200ms between `(1) 🤖 Agent Finished — ShopSphere` and `ShopSphere`.
+   - The flash terminates automatically as soon as the user refocuses the window.
+4. **Persistent In-App Toast Banner (`.agent-bg-toast`)**:
+   - Renders globally on any customer page with a summary of the task result and a direct `View Results` action button linking to `/agent`.
+
+
