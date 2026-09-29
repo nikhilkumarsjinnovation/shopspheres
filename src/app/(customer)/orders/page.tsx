@@ -15,11 +15,17 @@ export default async function OrdersPage() {
     redirect('/login');
   }
 
-  // Fetch orders placed by this customer, newest first
+  // Fetch orders placed by this customer or sent as a gift to this customer, newest first
+  const userEmail = session.user.email?.toLowerCase().trim();
+  const filter = userEmail
+    ? `customer_id.eq.${session.user.id},recipient_email.eq.${userEmail}`
+    : `customer_id.eq.${session.user.id}`;
+
   let { data: orders, error } = await supabase
     .from('orders')
     .select(`
       id,
+      customer_id,
       total_amount,
       status,
       placed_by,
@@ -41,7 +47,7 @@ export default async function OrdersPage() {
         )
       )
     `)
-    .eq('customer_id', session.user.id)
+    .or(filter)
     .order('created_at', { ascending: false });
 
   if (error && error.message.includes('placed_by')) {
@@ -49,6 +55,7 @@ export default async function OrdersPage() {
       .from('orders')
       .select(`
         id,
+        customer_id,
         total_amount,
         status,
         is_gift,
@@ -69,7 +76,7 @@ export default async function OrdersPage() {
           )
         )
       `)
-      .eq('customer_id', session.user.id)
+      .or(filter)
       .order('created_at', { ascending: false });
     orders = (fallback.data as any) || [];
     error = fallback.error;
@@ -77,7 +84,7 @@ export default async function OrdersPage() {
 
   const orderList = orders || [];
   const orderIds = orderList.map((order) => order.id);
-  const sellerIds = Array.from(new Set(orderList.flatMap((order) => order.order_items.map((item) => item.seller_id))));
+  const sellerIds = Array.from(new Set(orderList.flatMap((order) => (order.order_items || []).map((item) => item.seller_id))));
   const { data: tracking } = orderIds.length
     ? await supabase.from('order_tracking_events').select('order_id, title, description, location, status, occurred_at').in('order_id', orderIds).order('occurred_at', { ascending: false })
     : { data: [] };
@@ -90,11 +97,20 @@ export default async function OrdersPage() {
 
   return (
     <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Order History & Tracking</h1>
-        <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-          Review and monitor your verified purchases and gift deliveries in real time.
-        </p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Order History & Tracking</h1>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+            Review and monitor your verified purchases and gift deliveries in real time.
+          </p>
+        </div>
+        <Link
+          href="/gifts"
+          className="btn-card-toggle"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.85rem', textDecoration: 'none' }}
+        >
+          <span>🎁 Open Gifting Hub</span>
+        </Link>
       </div>
 
       {error && (
@@ -139,6 +155,9 @@ export default async function OrdersPage() {
               (order as any).placed_by === 'agent' ||
               Boolean((order.shipping_address as any)?._metadata?.placed_by === 'agent');
 
+            const isRecipient =
+              Boolean(order.is_gift && order.recipient_email?.toLowerCase() === userEmail && (order as any).customer_id !== session.user.id);
+
             return (
               <div key={order.id} className="order-card">
                 {/* Header Row */}
@@ -168,6 +187,25 @@ export default async function OrdersPage() {
                           🤖 Agent Purchase
                         </span>
                       )}
+                      {order.is_gift && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.15rem 0.55rem',
+                            background: 'rgba(236, 72, 153, 0.12)',
+                            border: '1px solid rgba(236, 72, 153, 0.3)',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            color: '#ec4899',
+                            letterSpacing: '0.02em',
+                          }}
+                        >
+                          🎁 {isRecipient ? 'Gift Received' : 'Gift Sent'}
+                        </span>
+                      )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
                       <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Placed on {dateStr}</span>
@@ -191,7 +229,18 @@ export default async function OrdersPage() {
                     >
                       {order.status.replace(/_/g, ' ')}
                     </span>
-                    <CancelOrderButton orderId={order.id} status={order.status} placedBy={isAgent ? 'agent' : 'customer'} />
+                    {!isRecipient && (
+                      <CancelOrderButton orderId={order.id} status={order.status} placedBy={isAgent ? 'agent' : 'customer'} />
+                    )}
+                    {isRecipient && (
+                      <Link
+                        href="/gifts"
+                        className="btn-card-toggle"
+                        style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem', textDecoration: 'none' }}
+                      >
+                        🎁 Open in Gifting Hub
+                      </Link>
+                    )}
                   </div>
                 </div>
 
@@ -213,7 +262,7 @@ export default async function OrdersPage() {
                 <div style={{ padding: '0.85rem 1rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', marginBottom: '1.25rem', fontSize: '0.825rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--fg-secondary)', marginBottom: '0.25rem' }}>
                     <Store size={14} />
-                    {(shops ?? []).filter((shop) => order.order_items.some((item) => item.seller_id === shop.seller_id)).map((shop) => (
+                    {(shops ?? []).filter((shop) => (order.order_items || []).some((item) => item.seller_id === shop.seller_id)).map((shop) => (
                       <span key={shop.seller_id}>Fulfillment partner: <strong>{shop.name}</strong> ({shop.city})</span>
                     ))}
                   </div>
@@ -229,9 +278,21 @@ export default async function OrdersPage() {
                   )}
                 </div>
 
-                {order.is_gift && (
-                  <div style={{ padding: '0.75rem 1rem', background: 'var(--accent-glow)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(79, 70, 229, 0.2)', fontSize: '0.85rem', color: 'var(--accent-electric)', marginBottom: '1.25rem', fontWeight: 500 }}>
-                    🎁 <strong>Gift Order:</strong> Sent to {order.recipient_email}. Surprise tracking is active.
+                {order.is_gift && !isRecipient && (
+                  <div style={{ padding: '0.75rem 1rem', background: 'var(--accent-glow)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(79, 70, 229, 0.2)', fontSize: '0.85rem', color: 'var(--accent-electric)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', fontWeight: 500 }}>
+                    <span>🎁 <strong>Surprise Gift Order:</strong> Sent to <strong>{order.recipient_email}</strong>. Digital reveal tracking active.</span>
+                    <Link href="/gifts" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--accent-electric)', textDecoration: 'underline' }}>
+                      Manage in Gifting Hub →
+                    </Link>
+                  </div>
+                )}
+
+                {isRecipient && (
+                  <div style={{ padding: '0.75rem 1rem', background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(168, 85, 247, 0.08))', borderRadius: 'var(--radius-md)', border: '1px solid rgba(236, 72, 153, 0.25)', fontSize: '0.85rem', color: 'var(--fg-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', fontWeight: 500 }}>
+                    <span>🎁 <strong>Surprise Gift for You!</strong> A friend ordered this gift parcel for you. Delivery tracking is live.</span>
+                    <Link href="/gifts" className="btn-card-toggle" style={{ padding: '0.35rem 0.85rem', fontSize: '0.8rem', textDecoration: 'none' }}>
+                      Open & Unwrap in Gifting Hub →
+                    </Link>
                   </div>
                 )}
 
@@ -241,7 +302,7 @@ export default async function OrdersPage() {
                     Items in this package
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {order.order_items.map((item) => (
+                    {(order.order_items || []).map((item) => (
                       <div
                         key={item.id}
                         style={{

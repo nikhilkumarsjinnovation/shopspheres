@@ -6,6 +6,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { buildShopHealth } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
+import PopulateProductsButton from '@/components/seller/PopulateProductsButton';
 
 export default async function SellerDashboardPage() {
   const supabase = await createClient();
@@ -57,14 +58,17 @@ export default async function SellerDashboardPage() {
           </p>
         </div>
 
-        <Link
-          href="/seller/add-product"
-          className="btn-card-add"
-          style={{ padding: '0.65rem 1.4rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
-        >
-          <PlusCircle size={16} />
-          <span>Add New Listing</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <PopulateProductsButton />
+          <Link
+            href="/seller/add-product"
+            className="btn-card-add"
+            style={{ padding: '0.65rem 1.4rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
+          >
+            <PlusCircle size={16} />
+            <span>Add New Listing</span>
+          </Link>
+        </div>
       </div>
 
       {error && (

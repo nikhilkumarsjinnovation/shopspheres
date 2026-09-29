@@ -2,7 +2,14 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getWallet, topupWallet, debitWallet, refundWallet } from '@/services/wallet-service';
 import { getFavorites, addFavorite, removeFavorite } from '@/services/favorites-service';
 import { createOrder, calculateTotals } from '@/services/order-service';
+import { createGift } from '@/services/gift-service';
 import { getCart } from '@/services/cart-service';
+import {
+  getWalletEligibleOffers,
+  calculateWalletCouponDiscount,
+  AppliedOfferInfo,
+  WalletAvailableOffer,
+} from '@/lib/offer-eligibility';
 
 function normalizeCategory(input?: string): string | null {
   if (!input || typeof input !== 'string') return null;
@@ -38,8 +45,53 @@ function stemWord(word: string): string {
   if (w.endsWith('smartwatches')) return w.slice(0, -2);
   if (w.endsWith('ies') && w.length > 4) return w.slice(0, -3) + 'y';
   if (w.endsWith('es') && w.length > 4) return w.slice(0, -2);
-  if (w.endsWith('s') && !w.endsWith('ss') && w.length > 3) return w.slice(0, -1);
   return w;
+}
+
+function isValidUuid(id: unknown): boolean {
+  return typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id.trim());
+}
+
+async function resolveProduct(productIdOrTitle?: string, fallbackTitle?: string) {
+  const adminDb = createAdminClient();
+  const idCandidate = productIdOrTitle ? String(productIdOrTitle).trim() : '';
+  const titleCandidate = fallbackTitle ? String(fallbackTitle).trim() : (!isValidUuid(idCandidate) ? idCandidate : '');
+
+  if (isValidUuid(idCandidate)) {
+    const { data } = await adminDb
+      .from('products')
+      .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes, seller_id')
+      .eq('id', idCandidate)
+      .maybeSingle();
+    if (data) return data;
+  }
+
+  if (titleCandidate) {
+    // 1. Partial title match
+    const { data: prods } = await adminDb
+      .from('products')
+      .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes, seller_id')
+      .ilike('title', `%${titleCandidate}%`)
+      .eq('approval_status', 'approved')
+      .limit(3);
+    if (prods && prods.length > 0) return prods[0];
+
+    // 2. Token match
+    const tokens = titleCandidate.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+    if (tokens.length > 0) {
+      let q = adminDb
+        .from('products')
+        .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes, seller_id')
+        .eq('approval_status', 'approved');
+      for (const t of tokens.slice(0, 2)) {
+        q = q.ilike('title', `%${t}%`);
+      }
+      const { data: tokenProds } = await q.limit(1);
+      if (tokenProds && tokenProds.length > 0) return tokenProds[0];
+    }
+  }
+
+  return null;
 }
 
 export interface AgentExecutionResult {
@@ -50,7 +102,7 @@ export interface AgentExecutionResult {
     payload: any;
   }>;
   actionCard?: {
-    type: 'PRODUCT_CAROUSEL' | 'WALLET_CARD' | 'WALLET_PAY_AUTH' | 'WALLET_TOPUP_PROMPT' | 'GIFT_CARD' | 'ORDER_CONFIRMED' | 'REVIEWABLE_LIST' | 'ORDER_CANCELLED';
+    type: 'PRODUCT_CAROUSEL' | 'WALLET_CARD' | 'WALLET_PAY_AUTH' | 'WALLET_TOPUP_PROMPT' | 'WALLET_TOPUP_SUCCESS' | 'GIFT_CARD' | 'ORDER_CONFIRMED' | 'REVIEWABLE_LIST' | 'ORDER_CANCELLED';
     data: any;
   };
 }
@@ -93,36 +145,84 @@ export async function executeAgentTool(
 
       // 3. Helper to query products with or without category filter
       const executeQuery = async (targetCategory: string | null) => {
-        let q = adminDb
-          .from('products')
-          .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes')
-          .eq('approval_status', 'approved');
+        const buildBase = () => {
+          let b = adminDb
+            .from('products')
+            .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes')
+            .eq('approval_status', 'approved');
 
-        if (targetCategory) {
-          q = q.ilike('category', `%${targetCategory}%`);
-        }
-        if (min_price && !isNaN(Number(min_price))) {
-          q = q.gte('price', Number(min_price));
-        }
-        if (max_price && !isNaN(Number(max_price))) {
-          q = q.lte('price', Number(max_price));
-        }
-        if (in_stock_only) {
-          q = q.gt('stock', 0);
-        }
-
-        if (searchTerms.length > 0) {
-          const orClauses: string[] = [];
-          for (const term of searchTerms.slice(0, 4)) {
-            orClauses.push(`title.ilike.%${term}%`);
-            orClauses.push(`description.ilike.%${term}%`);
-            orClauses.push(`sub_category.ilike.%${term}%`);
+          if (targetCategory) {
+            b = b.ilike('category', `%${targetCategory}%`);
           }
-          q = q.or(orClauses.join(','));
+          if (min_price && !isNaN(Number(min_price))) {
+            b = b.gte('price', Number(min_price));
+          }
+          if (max_price && !isNaN(Number(max_price))) {
+            b = b.lte('price', Number(max_price));
+          }
+          if (in_stock_only) {
+            b = b.gt('stock', 0);
+          }
+          return b;
+        };
+
+        if (searchTerms.length === 0) {
+          const { data } = await buildBase().order('average_rating', { ascending: false }).limit(6);
+          return data || [];
         }
 
-        const { data } = await q.order('average_rating', { ascending: false }).limit(6);
-        return data || [];
+        // Phase 1: High-relevance query matching Title or Subcategory
+        const titleClauses = searchTerms.map((t) => `title.ilike.%${t}%,sub_category.ilike.%${t}%`).join(',');
+        const { data: titleData } = await buildBase().or(titleClauses).limit(25);
+        let candidates: any[] = titleData || [];
+
+        // Phase 2: If title matches are fewer than 6, supplement with description matches
+        if (candidates.length < 6) {
+          const descClauses = searchTerms.slice(0, 3).map((t) => `description.ilike.%${t}%`).join(',');
+          const { data: descData } = await buildBase().or(descClauses).limit(20);
+          if (descData && descData.length > 0) {
+            const seen = new Set(candidates.map((p) => p.id));
+            for (const dp of descData) {
+              if (!seen.has(dp.id)) {
+                candidates.push(dp);
+                seen.add(dp.id);
+              }
+            }
+          }
+        }
+
+        if (candidates.length === 0) return [];
+
+        // Smart relevance scoring:
+        // Direct title match = +15 per matched term
+        // Direct sub_category match = +20 per matched term
+        // Tag match = +5
+        // Description match = +1
+        const scored = candidates.map((p) => {
+          let score = 0;
+          const t = (p.title || '').toLowerCase();
+          const sc = (p.sub_category || '').toLowerCase();
+          const d = (p.description || '').toLowerCase();
+          const tags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : '';
+
+          for (const term of searchTerms) {
+            if (t.includes(term)) score += 20;
+            if (sc.includes(term)) score += 15;
+            if (tags.includes(term)) score += 5;
+            if (d.includes(term)) score += 1;
+          }
+
+          // Bonus for higher rating
+          score += (Number(p.average_rating) || 0) * 0.5;
+          return { product: p, score };
+        });
+
+        // Filter out low-relevance noise if strong matches exist
+        const hasStrongMatches = scored.some((s) => s.score >= 15);
+        const filtered = hasStrongMatches ? scored.filter((s) => s.score >= 10) : scored;
+
+        filtered.sort((a, b) => b.score - a.score);
+        return filtered.map((s) => s.product).slice(0, 6);
       };
 
       let matchedProducts: any[] = await executeQuery(normCat);
@@ -198,11 +298,7 @@ export async function executeAgentTool(
     // -------------------------------------------------------------
     case 'get_product_specs': {
       const { product_id } = args;
-      const { data: product } = await adminDb
-        .from('products')
-        .select('*')
-        .eq('id', product_id)
-        .maybeSingle();
+      const product = await resolveProduct(product_id);
 
       if (!product) {
         return { toolName, output: { error: 'Product not found.' } };
@@ -211,7 +307,7 @@ export async function executeAgentTool(
       const { data: variants } = await adminDb
         .from('product_variants')
         .select('id, sku, title, price, stock, attributes')
-        .eq('product_id', product_id);
+        .eq('product_id', product.id);
 
       return {
         toolName,
@@ -249,14 +345,10 @@ export async function executeAgentTool(
       }
 
       if (!product_id) {
-        return { toolName, output: { error: 'product_id is required for this action.' } };
+        return { toolName, output: { error: 'product_id or title is required for this action.' } };
       }
 
-      const { data: product } = await adminDb
-        .from('products')
-        .select('id, title, price, seller_id, image_urls, category')
-        .eq('id', product_id)
-        .maybeSingle();
+      const product = await resolveProduct(product_id);
 
       if (!product) {
         return { toolName, output: { error: 'Product not found to update cart.' } };
@@ -352,24 +444,26 @@ export async function executeAgentTool(
         };
       }
 
-      if (!product_id) return { toolName, output: { error: 'product_id is required.' } };
+      if (!product_id) return { toolName, output: { error: 'product_id or title is required.' } };
+
+      const product = await resolveProduct(product_id);
+      if (!product) return { toolName, output: { error: 'Product not found.' } };
 
       if (action === 'add') {
-        await addFavorite(userId, product_id);
-        const { data: prod } = await adminDb.from('products').select('title').eq('id', product_id).maybeSingle();
+        await addFavorite(userId, product.id);
         return {
           toolName,
-          output: { success: true, isFavorite: true, productTitle: prod?.title || 'Product' },
-          clientActions: [{ type: 'FAVORITES_SYNC', payload: { productId: product_id, isFavorite: true } }],
+          output: { success: true, isFavorite: true, productTitle: product.title },
+          clientActions: [{ type: 'FAVORITES_SYNC', payload: { productId: product.id, isFavorite: true } }],
         };
       }
 
       if (action === 'remove') {
-        await removeFavorite(userId, product_id);
+        await removeFavorite(userId, product.id);
         return {
           toolName,
           output: { success: true, isFavorite: false },
-          clientActions: [{ type: 'FAVORITES_SYNC', payload: { productId: product_id, isFavorite: false } }],
+          clientActions: [{ type: 'FAVORITES_SYNC', payload: { productId: product.id, isFavorite: false } }],
         };
       }
 
@@ -418,34 +512,228 @@ export async function executeAgentTool(
     // 6. Send as Gift
     // -------------------------------------------------------------
     case 'send_as_gift': {
-      if (!userId) return { toolName, output: { error: 'Please log in to send gifts.' } };
-      const { friend_email_or_name, product_id, gift_message, reveal_date } = args;
+      if (!userId) {
+        return { toolName, output: { error: 'Please log in to send a surprise gift.' } };
+      }
 
-      const { data: product } = await adminDb
-        .from('products')
-        .select('id, title, price, image_urls, category')
-        .eq('id', product_id)
+      const { friend_email_or_name, product_id, product_title, gift_message, reveal_date, coupon_code } = args;
+
+      if (!friend_email_or_name) {
+        return { toolName, output: { error: 'Recipient email or friend name is required.' } };
+      }
+
+      const product = await resolveProduct(product_id, product_title);
+
+      if (!product) {
+        return {
+          toolName,
+          output: {
+            error: `Could not find product "${product_title || product_id || ''}" in catalog for gifting. Please search catalog first.`,
+          },
+        };
+      }
+
+      let recipientEmail: string | null = null;
+      let recipientId: string | null = null;
+
+      if (String(friend_email_or_name).includes('@')) {
+        recipientEmail = String(friend_email_or_name).trim().toLowerCase();
+      } else {
+        // Check if user has an accepted friend by this name
+        const { data: relations } = await adminDb
+          .from('friend_relationships')
+          .select('friend_id')
+          .eq('user_id', userId)
+          .eq('status', 'accepted');
+
+        const friendIds = (relations || []).map((r) => r.friend_id);
+        if (friendIds.length > 0) {
+          const { data: friendUsers } = await adminDb
+            .from('users')
+            .select('id, full_name, email')
+            .in('id', friendIds);
+
+          const candidate = String(friend_email_or_name).toLowerCase().trim();
+          const matched = (friendUsers || []).find(
+            (u) => u.full_name?.toLowerCase().includes(candidate) || u.email?.toLowerCase().includes(candidate)
+          );
+          if (matched) {
+            recipientEmail = matched.email?.toLowerCase() || null;
+            recipientId = matched.id;
+          }
+        }
+      }
+
+      // If we have an email, resolve recipientId from users table
+      if (recipientEmail && !recipientId) {
+        const { data: userRec } = await adminDb
+          .from('users')
+          .select('id')
+          .eq('email', recipientEmail)
+          .maybeSingle();
+        recipientId = userRec?.id || null;
+      }
+
+      const subtotal = Number(product.price);
+      let appliedOffer: AppliedOfferInfo | null = null;
+      let couponError: string | null = null;
+
+      // Handle coupon only if explicitly provided by customer. Agent will NOT auto-apply!
+      if (coupon_code) {
+        const couponCheck = calculateWalletCouponDiscount(coupon_code, subtotal, true, product.category);
+        if (couponCheck.valid) {
+          appliedOffer = {
+            code: coupon_code.toUpperCase(),
+            title: couponCheck.title,
+            discountAmount: couponCheck.discountAmount,
+          };
+        } else {
+          couponError = couponCheck.reason || 'Invalid coupon for this gift.';
+        }
+      }
+
+      // Discovered wallet-compatible offers (non-card, non-UPI) to show customer
+      const availableOffers = getWalletEligibleOffers(subtotal, product.category, true);
+      const totals = calculateTotals(subtotal, appliedOffer?.discountAmount || 0);
+      const orderTotal = totals.total;
+
+      const wallet = await getWallet(userId);
+      if (wallet.balance < orderTotal) {
+        return {
+          toolName,
+          output: {
+            error: `Insufficient wallet balance to send gift. Required: ₹${orderTotal.toLocaleString('en-IN')}, Available: ₹${wallet.balance.toLocaleString('en-IN')} (shortfall: ₹${(orderTotal - wallet.balance).toLocaleString('en-IN')}). Please top up your wallet via Card, UPI, or Net Banking to proceed.`,
+            required: orderTotal,
+            currentBalance: wallet.balance,
+            shortfall: orderTotal - wallet.balance,
+            availableOffers,
+            appliedOffer,
+            couponError,
+          },
+          actionCard: {
+            type: 'WALLET_TOPUP_PROMPT',
+            data: {
+              currentBalance: wallet.balance,
+              requiredTotal: orderTotal,
+              shortfall: orderTotal - wallet.balance,
+              product,
+              recipient: recipientEmail || friend_email_or_name,
+              availableOffers,
+              appliedOffer,
+            },
+          },
+        };
+      }
+
+      // Fetch user address or default fallback
+      const { data: addr } = await adminDb
+        .from('user_addresses')
+        .select('*')
+        .eq('user_id', userId)
+        .order('is_default', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
-      if (!product) return { toolName, output: { error: 'Product not found for gifting.' } };
+      const shippingAddress = addr
+        ? {
+            recipient_name: friend_email_or_name,
+            recipient_phone: addr.recipient_phone,
+            address_line: addr.address_line1 + (addr.address_line2 ? `, ${addr.address_line2}` : ''),
+            city: addr.city,
+            state: addr.state,
+            postal_code: addr.postal_code,
+            country: 'India',
+          }
+        : {
+            recipient_name: friend_email_or_name,
+            recipient_phone: '+91 98765 43210',
+            address_line: '12-A Heritage Residency, MG Road',
+            city: 'Bengaluru',
+            state: 'Karnataka',
+            postal_code: '560001',
+            country: 'India',
+          };
+
+      // Create order with confirmNow: true (immediately paid via in-app wallet and marked confirmed!)
+      const order = await createOrder(
+        {
+          items: [{ id: product.id, quantity: 1, price: Number(product.price) }],
+          shippingAddress,
+          paymentMethod: 'wallet',
+          appliedOffer: appliedOffer || undefined,
+          confirmNow: true,
+          isGift: true,
+          giftRecipientEmail: recipientEmail || String(friend_email_or_name).trim(),
+          giftRevealDate: reveal_date || null,
+          placedBy: 'agent',
+        },
+        userId
+      );
+
+      // Create gift record in Supabase gifts table
+      let giftRecord: any = null;
+      try {
+        giftRecord = await createGift(adminDb, {
+          senderId: userId,
+          recipientId,
+          recipientEmail: recipientEmail || String(friend_email_or_name).trim(),
+          revealTrigger: reveal_date ? 'date' : 'manual',
+          revealDate: reveal_date || null,
+          message: gift_message || 'A special gift for you!',
+          orderId: order.id,
+        });
+      } catch (giftErr) {
+        console.warn('[send_as_gift] createGift warning:', giftErr);
+      }
+
+      // Record tracking event for gift order
+      await adminDb.from('order_tracking_events').insert({
+        order_id: order.id,
+        status: 'confirmed',
+        title: 'Gift Package Confirmed & Sealed',
+        description: `Surprise gift order successfully placed and paid in full (₹${orderTotal.toLocaleString('en-IN')}) via in-app wallet for ${recipientEmail || friend_email_or_name}.`,
+        location: `${shippingAddress.city}, ${shippingAddress.state}`,
+      });
+
+      const updatedWallet = await getWallet(userId);
 
       return {
         toolName,
         output: {
           success: true,
-          recipient: friend_email_or_name,
+          paymentConfirmed: true,
+          orderId: order.id,
+          giftId: giftRecord?.id || null,
+          recipient: recipientEmail || friend_email_or_name,
+          recipientId,
           product: product.title,
+          productId: product.id,
           price: product.price,
+          totalAmount: orderTotal,
+          walletBalance: updatedWallet.balance,
           message: gift_message || 'A special gift for you!',
           reveal_date: reveal_date || 'Instant reveal',
+          status: 'confirmed',
         },
+        clientActions: [
+          { type: 'WALLET_SYNC', payload: { balance: updatedWallet.balance } },
+          { type: 'CART_CLEAR', payload: {} },
+        ],
         actionCard: {
-          type: 'GIFT_CARD',
+          type: 'ORDER_CONFIRMED',
           data: {
-            recipient: friend_email_or_name,
+            orderId: order.id,
+            giftId: giftRecord?.id,
+            total: orderTotal,
+            subtotal,
+            discount: appliedOffer?.discountAmount || 0,
+            appliedOffer,
+            availableOffers,
+            remainingBalance: updatedWallet.balance,
+            placedBy: 'agent',
+            isGift: true,
+            recipient: recipientEmail || friend_email_or_name,
             product,
-            giftMessage: gift_message || 'A special gift for you from ShopSphere!',
-            revealDate: reveal_date,
           },
         },
       };
@@ -557,29 +845,178 @@ export async function executeAgentTool(
     // -------------------------------------------------------------
     case 'topup_wallet': {
       if (!userId) return { toolName, output: { error: 'Please log in to top up your wallet.' } };
-      const { amount } = args;
+      const { amount, payment_method, order_id } = args;
 
       const numAmount = Number(amount);
       if (!numAmount || numAmount <= 0) {
         return { toolName, output: { error: 'Valid positive top-up amount required.' } };
       }
 
-      const res = await topupWallet(userId, numAmount, 'Demo Top-up via AI Assistant');
+      const method = String(payment_method || 'upi').toLowerCase().trim();
+      const methodName =
+        method === 'card'
+          ? 'Credit / Debit Card'
+          : method === 'netbanking'
+          ? 'Net Banking'
+          : 'Instant UPI';
+
+      const res = await topupWallet(userId, numAmount, `Top-up ₹${numAmount} via ${methodName}`);
+
+      // Locate pending order to allow customer to immediately return and complete payment
+      let pendingOrder: any = null;
+      if (order_id) {
+        const { data: ord } = await adminDb
+          .from('orders')
+          .select('id, total_amount, status')
+          .eq('id', order_id)
+          .eq('customer_id', userId)
+          .maybeSingle();
+        if (ord && ord.status === 'pending') pendingOrder = ord;
+      }
+      if (!pendingOrder) {
+        const { data: latestPending } = await adminDb
+          .from('orders')
+          .select('id, total_amount, status')
+          .eq('customer_id', userId)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (latestPending) pendingOrder = latestPending;
+      }
+
       return {
         toolName,
         output: {
           success: true,
           creditedAmount: numAmount,
+          paymentMethod: methodName,
           newBalance: res.new_balance,
+          pendingOrderId: pendingOrder?.id || null,
+          pendingOrderTotal: pendingOrder?.total_amount || null,
+          message: `Successfully added ₹${numAmount.toLocaleString('en-IN')} to your in-app wallet via ${methodName}! Your new balance is ₹${res.new_balance.toLocaleString('en-IN')}.${pendingOrder ? ' You can now return to the agent and authorize your order payment.' : ''}`,
         },
         clientActions: [{ type: 'WALLET_SYNC', payload: { balance: res.new_balance } }],
         actionCard: {
-          type: 'WALLET_CARD',
+          type: 'WALLET_TOPUP_SUCCESS',
           data: {
-            balance: res.new_balance,
+            creditedAmount: numAmount,
+            paymentMethod: methodName,
+            newBalance: res.new_balance,
             currency: 'INR',
-            message: `Successfully added ₹${numAmount.toLocaleString('en-IN')} to your in-app wallet!`,
+            pendingOrderId: pendingOrder?.id || null,
+            pendingOrderTotal: pendingOrder?.total_amount || null,
+            message: `Successfully credited ₹${numAmount.toLocaleString('en-IN')} via ${methodName}!`,
           },
+        },
+      };
+    }
+
+    // -------------------------------------------------------------
+    // 10b. Apply Coupon (Explicit Customer Choice Only)
+    // -------------------------------------------------------------
+    case 'apply_coupon': {
+      if (!userId) return { toolName, output: { error: 'Please log in to apply coupons.' } };
+      const { coupon_code, order_id } = args;
+
+      if (!coupon_code) {
+        return { toolName, output: { error: 'Please specify a coupon code to apply.' } };
+      }
+
+      // Check if user has a pending order
+      let order: any = null;
+      if (order_id) {
+        const { data: ord } = await adminDb
+          .from('orders')
+          .select('*, order_items(*, products(*))')
+          .eq('id', order_id)
+          .eq('customer_id', userId)
+          .maybeSingle();
+        order = ord;
+      } else {
+        const { data: latestPending } = await adminDb
+          .from('orders')
+          .select('*, order_items(*, products(*))')
+          .eq('customer_id', userId)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        order = latestPending;
+      }
+
+      const wallet = await getWallet(userId);
+
+      if (order) {
+        const items = order.order_items || [];
+        const subtotal = items.reduce(
+          (sum: number, it: any) => sum + Number(it.unit_price) * Number(it.quantity || 1),
+          0
+        ) || Number(order.total_amount);
+        const isGift = Boolean(order.is_gift);
+        const category = items[0]?.products?.category || null;
+
+        const check = calculateWalletCouponDiscount(coupon_code, subtotal, isGift, category);
+        if (!check.valid) {
+          return {
+            toolName,
+            output: {
+              error: check.reason || `Coupon "${coupon_code}" cannot be applied to this order.`,
+              availableOffers: getWalletEligibleOffers(subtotal, category, isGift),
+            },
+          };
+        }
+
+        const newTotals = calculateTotals(subtotal, check.discountAmount);
+
+        // Update order in Supabase
+        await adminDb
+          .from('orders')
+          .update({
+            total_amount: newTotals.total,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', order.id);
+
+        const appliedOffer = {
+          code: coupon_code.toUpperCase(),
+          title: check.title,
+          discountAmount: check.discountAmount,
+        };
+
+        const firstProduct = items[0]?.products || { title: 'Order Item', price: subtotal };
+
+        return {
+          toolName,
+          output: {
+            success: true,
+            appliedOffer,
+            newTotal: newTotals.total,
+            savings: check.discountAmount,
+            message: `🎉 Coupon ${coupon_code.toUpperCase()} applied! Saved ₹${check.discountAmount}. New order total is ₹${newTotals.total.toLocaleString('en-IN')}.`,
+          },
+          actionCard: {
+            type: 'WALLET_PAY_AUTH',
+            data: {
+              orderId: order.id,
+              total: newTotals.total,
+              subtotal,
+              discount: check.discountAmount,
+              appliedOffer,
+              product: firstProduct,
+              quantity: items[0]?.quantity || 1,
+              walletBalance: wallet.balance,
+              remainingBalance: wallet.balance - newTotals.total,
+              authToken: `auth_${Date.now()}`,
+            },
+          },
+        };
+      }
+
+      return {
+        toolName,
+        output: {
+          error: `No pending order found to apply coupon "${coupon_code}". Please pick a product first, and I will show you available coupons you can apply!`,
         },
       };
     }
@@ -589,28 +1026,12 @@ export async function executeAgentTool(
     // -------------------------------------------------------------
     case 'prepare_wallet_checkout': {
       if (!userId) return { toolName, output: { error: 'Please log in to make purchases.' } };
-      const { product_id, product_title, quantity = 1, checkout_cart } = args;
+      const { product_id, product_title, quantity = 1, checkout_cart, coupon_code } = args;
 
       const wallet = await getWallet(userId);
 
       // Fetch product to buy
-      let itemToBuy: any = null;
-      if (product_id) {
-        const { data: prod } = await adminDb.from('products').select('*').eq('id', product_id).maybeSingle();
-        itemToBuy = prod;
-      }
-
-      // If product_title or query was passed instead of product_id
-      if (!itemToBuy && product_title) {
-        const { data: prod } = await adminDb
-          .from('products')
-          .select('*')
-          .ilike('title', `%${product_title.trim()}%`)
-          .eq('approval_status', 'approved')
-          .limit(1)
-          .maybeSingle();
-        itemToBuy = prod;
-      }
+      let itemToBuy = await resolveProduct(product_id, product_title);
 
       // If user specifically requested checking out their entire cart
       if (!itemToBuy && checkout_cart && userId) {
@@ -618,8 +1039,7 @@ export async function executeAgentTool(
           const cartItems = await getCart(userId);
           if (Array.isArray(cartItems) && cartItems.length > 0) {
             const firstCartItem = cartItems[0];
-            const { data: prod } = await adminDb.from('products').select('*').eq('id', firstCartItem.id).maybeSingle();
-            itemToBuy = prod;
+            itemToBuy = await resolveProduct(firstCartItem.id);
           }
         } catch {
           // ignore cart fetch error
@@ -637,7 +1057,28 @@ export async function executeAgentTool(
 
       const unitPrice = Number(itemToBuy.price);
       const qty = Math.max(1, quantity);
-      const totals = calculateTotals(unitPrice * qty, 0);
+      const subtotal = unitPrice * qty;
+
+      let appliedOffer: AppliedOfferInfo | null = null;
+      let couponError: string | null = null;
+
+      // Only apply coupon if user explicitly requested it!
+      if (coupon_code) {
+        const couponCheck = calculateWalletCouponDiscount(coupon_code, subtotal, false, itemToBuy.category);
+        if (couponCheck.valid) {
+          appliedOffer = {
+            code: coupon_code.toUpperCase(),
+            title: couponCheck.title,
+            discountAmount: couponCheck.discountAmount,
+          };
+        } else {
+          couponError = couponCheck.reason || 'Invalid coupon for this purchase.';
+        }
+      }
+
+      // Discovered wallet-compatible offers (non-card, non-UPI) to present to customer
+      const availableOffers = getWalletEligibleOffers(subtotal, itemToBuy.category, false);
+      const totals = calculateTotals(subtotal, appliedOffer?.discountAmount || 0);
 
       // Check balance
       if (wallet.balance < totals.total) {
@@ -649,7 +1090,10 @@ export async function executeAgentTool(
             currentBalance: wallet.balance,
             requiredTotal: totals.total,
             shortfall,
-            message: `Your wallet balance is ₹${wallet.balance.toLocaleString('en-IN')}, but ₹${totals.total.toLocaleString('en-IN')} is required. Top up ₹${shortfall.toLocaleString('en-IN')} to proceed.`,
+            availableOffers,
+            appliedOffer,
+            couponError,
+            message: `Your wallet balance is ₹${wallet.balance.toLocaleString('en-IN')}, but ₹${totals.total.toLocaleString('en-IN')} is required (shortfall: ₹${shortfall.toLocaleString('en-IN')}). Please top up your wallet via Card, UPI, or Net Banking to proceed.`,
           },
           actionCard: {
             type: 'WALLET_TOPUP_PROMPT',
@@ -658,6 +1102,9 @@ export async function executeAgentTool(
               requiredTotal: totals.total,
               shortfall,
               product: itemToBuy,
+              quantity: qty,
+              availableOffers,
+              appliedOffer,
             },
           },
         };
@@ -698,6 +1145,7 @@ export async function executeAgentTool(
           items: [{ id: itemToBuy.id, quantity: qty, price: unitPrice }],
           shippingAddress,
           paymentMethod: 'wallet',
+          appliedOffer: appliedOffer || undefined,
           confirmNow: false, // Wait for customer 1-tap authorization
           placedBy: 'agent',
         },
@@ -711,6 +1159,10 @@ export async function executeAgentTool(
           orderId: order.id,
           itemTitle: itemToBuy.title,
           quantity: qty,
+          subtotal,
+          discountAmount: appliedOffer?.discountAmount || 0,
+          appliedOffer,
+          availableOffers,
           totalAmount: totals.total,
           walletBalance: wallet.balance,
           remainingBalanceAfterPayment: wallet.balance - totals.total,
@@ -720,6 +1172,10 @@ export async function executeAgentTool(
           data: {
             orderId: order.id,
             total: totals.total,
+            subtotal,
+            discount: appliedOffer?.discountAmount || 0,
+            appliedOffer,
+            availableOffers,
             product: itemToBuy,
             quantity: qty,
             walletBalance: wallet.balance,

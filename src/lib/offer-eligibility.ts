@@ -120,3 +120,177 @@ export function validateOfferEligibility(
 
   return { valid: true };
 }
+
+export interface WalletAvailableOffer {
+  code: string;
+  title: string;
+  description: string;
+  discountAmount: number;
+  minOrderAmount: number;
+}
+
+/**
+ * Returns non-card, non-UPI offers eligible for In-App Wallet payments.
+ * Excludes UPI-exclusive (UPISAVE50) and card-exclusive promotions.
+ * Agent will NOT auto-apply these offers, but present them as options to the customer.
+ */
+export function getWalletEligibleOffers(
+  subtotal: number,
+  category?: string | null,
+  isGift?: boolean
+): WalletAvailableOffer[] {
+  const eligible: WalletAvailableOffer[] = [];
+  const cat = (category || '').toLowerCase();
+
+  // 1. WELCOME10 (General 10% off up to ₹250 on min ₹499)
+  if (subtotal >= 499) {
+    const discount = Math.min(Math.round(subtotal * 0.1), 250);
+    eligible.push({
+      code: 'WELCOME10',
+      title: '🎉 WELCOME10 (10% OFF)',
+      description: `Save ${formatINR(discount)} (10% off up to ₹250 on orders ≥ ₹499)`,
+      discountAmount: discount,
+      minOrderAmount: 499,
+    });
+  }
+
+  // 2. GIFT300 (₹300 off on gifting parcels min ₹1,499)
+  if (isGift && subtotal >= 1499) {
+    eligible.push({
+      code: 'GIFT300',
+      title: '🎁 GIFT300 (Flat ₹300 OFF)',
+      description: 'Special ₹300 off on surprise gift orders ≥ ₹1,499',
+      discountAmount: 300,
+      minOrderAmount: 1499,
+    });
+  }
+
+  // 3. TECH1000 (Flat ₹1,000 off on Electronics ≥ ₹10,000)
+  if (subtotal >= 10000 && (!cat || cat.includes('electr') || cat.includes('tech') || cat.includes('gadget') || cat.includes('phone'))) {
+    eligible.push({
+      code: 'TECH1000',
+      title: '⚡ TECH1000 (Flat ₹1,000 OFF)',
+      description: 'Flat ₹1,000 instant discount on electronics ≥ ₹10,000',
+      discountAmount: 1000,
+      minOrderAmount: 10000,
+    });
+  }
+
+  // 4. UTSAV500 (Flat ₹500 off on Fashion / Festive ≥ ₹1,999)
+  if (subtotal >= 1999 && (!cat || cat.includes('fash') || cat.includes('cloth') || cat.includes('festiv') || cat.includes('ethnic'))) {
+    eligible.push({
+      code: 'UTSAV500',
+      title: '🪔 UTSAV500 (Flat ₹500 OFF)',
+      description: 'Flat ₹500 off on apparel and festive collections ≥ ₹1,999',
+      discountAmount: 500,
+      minOrderAmount: 1999,
+    });
+  }
+
+  // 5. AUDIO15 (15% off up to ₹400 on audio/accessories ≥ ₹999)
+  if (subtotal >= 999 && (!cat || cat.includes('audio') || cat.includes('electr') || cat.includes('headphone') || cat.includes('earbud') || cat.includes('watch'))) {
+    const discount = Math.min(Math.round(subtotal * 0.15), 400);
+    eligible.push({
+      code: 'AUDIO15',
+      title: '🎧 AUDIO15 (15% OFF)',
+      description: `Save ${formatINR(discount)} on audio & gadgets ≥ ₹999`,
+      discountAmount: discount,
+      minOrderAmount: 999,
+    });
+  }
+
+  // 6. KITCHEN300 (Flat ₹300 off on Home & Kitchen ≥ ₹1,500)
+  if (subtotal >= 1500 && (!cat || cat.includes('home') || cat.includes('kitchen') || cat.includes('cook'))) {
+    eligible.push({
+      code: 'KITCHEN300',
+      title: '🍳 KITCHEN300 (Flat ₹300 OFF)',
+      description: 'Flat ₹300 off on home & kitchen gear ≥ ₹1,500',
+      discountAmount: 300,
+      minOrderAmount: 1500,
+    });
+  }
+
+  return eligible;
+}
+
+/**
+ * Calculates discount for a specific coupon when paying via In-App Wallet.
+ * Rejects card-specific or UPI-specific coupons (e.g. UPISAVE50).
+ */
+export function calculateWalletCouponDiscount(
+  rawCode: string,
+  subtotal: number,
+  isGift?: boolean,
+  category?: string | null
+): { valid: boolean; discountAmount: number; title: string; reason?: string } {
+  const code = (rawCode || '').trim().toUpperCase();
+
+  if (!code) {
+    return { valid: false, discountAmount: 0, title: '', reason: 'No coupon code provided.' };
+  }
+
+  // Strictly reject UPI or Card exclusive codes for wallet checkout
+  if (code === 'UPISAVE50') {
+    return {
+      valid: false,
+      discountAmount: 0,
+      title: '',
+      reason: 'Coupon "UPISAVE50" is exclusively for Instant UPI gateway payments and cannot be used with In-App Wallet payments.',
+    };
+  }
+
+  if (code === 'WELCOME10') {
+    if (subtotal < 499) {
+      return { valid: false, discountAmount: 0, title: '', reason: `Minimum order of ₹499 required for WELCOME10 (Current subtotal: ${formatINR(subtotal)}).` };
+    }
+    const discount = Math.min(Math.round(subtotal * 0.1), 250);
+    return { valid: true, discountAmount: discount, title: 'Welcome 10% Discount' };
+  }
+
+  if (code === 'GIFT300') {
+    if (!isGift && subtotal < 1499) {
+      return { valid: false, discountAmount: 0, title: '', reason: 'GIFT300 requires a gift order with minimum subtotal of ₹1,499.' };
+    }
+    if (subtotal < 1499) {
+      return { valid: false, discountAmount: 0, title: '', reason: `Minimum gift order of ₹1,499 required for GIFT300 (Current subtotal: ${formatINR(subtotal)}).` };
+    }
+    return { valid: true, discountAmount: 300, title: 'Gift Special ₹300 Discount' };
+  }
+
+  if (code === 'TECH1000') {
+    if (subtotal < 10000) {
+      return { valid: false, discountAmount: 0, title: '', reason: `Minimum order of ₹10,000 required for TECH1000 (Current subtotal: ${formatINR(subtotal)}).` };
+    }
+    return { valid: true, discountAmount: 1000, title: 'TechFest ₹1,000 Instant Discount' };
+  }
+
+  if (code === 'UTSAV500') {
+    if (subtotal < 1999) {
+      return { valid: false, discountAmount: 0, title: '', reason: `Minimum order of ₹1,999 required for UTSAV500 (Current subtotal: ${formatINR(subtotal)}).` };
+    }
+    return { valid: true, discountAmount: 500, title: 'Festive Ethnic ₹500 Discount' };
+  }
+
+  if (code === 'AUDIO15') {
+    if (subtotal < 999) {
+      return { valid: false, discountAmount: 0, title: '', reason: `Minimum order of ₹999 required for AUDIO15 (Current subtotal: ${formatINR(subtotal)}).` };
+    }
+    const discount = Math.min(Math.round(subtotal * 0.15), 400);
+    return { valid: true, discountAmount: discount, title: 'Audio 15% Discount' };
+  }
+
+  if (code === 'KITCHEN300') {
+    if (subtotal < 1500) {
+      return { valid: false, discountAmount: 0, title: '', reason: `Minimum order of ₹1,500 required for KITCHEN300 (Current subtotal: ${formatINR(subtotal)}).` };
+    }
+    return { valid: true, discountAmount: 300, title: 'Home & Kitchen ₹300 Discount' };
+  }
+
+  return {
+    valid: false,
+    discountAmount: 0,
+    title: '',
+    reason: `Invalid coupon "${code}". Available wallet coupons: WELCOME10, GIFT300, TECH1000, UTSAV500, AUDIO15, KITCHEN300.`,
+  };
+}
+

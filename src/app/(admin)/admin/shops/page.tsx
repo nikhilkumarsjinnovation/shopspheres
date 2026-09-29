@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import ResetBrandingButton from '@/components/admin/ResetBrandingButton';
+import AdminPopulateControls from '@/components/admin/AdminPopulateControls';
 
 export default async function AdminShopsPage() {
   const supabase = await createClient();
@@ -22,6 +23,8 @@ export default async function AdminShopsPage() {
           Overview of registered shops, active catalog volumes, and branding edit allowances.
         </p>
       </div>
+
+      <AdminPopulateControls shops={(shops ?? []).map((s) => ({ id: s.id, name: s.name }))} />
 
       {error ? (
         <div style={{ padding: '1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>

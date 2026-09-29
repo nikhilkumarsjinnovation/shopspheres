@@ -2527,6 +2527,135 @@ a {
   color: var(--fg-primary);
 }
 
+/* AI Mode Switcher Toggle Pill */
+.ai-mode-toggle-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 3px;
+  margin: 0.5rem 1rem 0;
+}
+
+.ai-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ai-mode-btn:hover {
+  color: var(--fg-primary);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.ai-mode-btn.active {
+  background: var(--bg-surface);
+  color: var(--accent-electric);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.ai-mode-btn.active.agent-active {
+  color: #7c3aed;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(168, 85, 247, 0.12));
+  border: 1px solid rgba(124, 58, 237, 0.25);
+}
+
+/* Quick Replies / Cross-Questioning Suggestions */
+.ai-quick-replies-container {
+  margin-top: 0.65rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.quick-replies-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+}
+
+.quick-replies-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ai-quick-reply-pill {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--accent-electric);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.ai-quick-reply-pill:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent-electric);
+  transform: translateY(-1px);
+}
+
+/* Provenance & Hallucination Gate Verification Badge */
+.ai-provenance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-full);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #059669;
+}
+
+.ai-mode-indicator-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.45rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.35rem;
+}
+
+.ai-mode-indicator-chip.chat {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.ai-mode-indicator-chip.agent {
+  background: rgba(124, 58, 237, 0.12);
+  color: #7c3aed;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+}
+
 .ai-input-bar {
   padding: 0.75rem 1rem;
   background: var(--bg-surface);
