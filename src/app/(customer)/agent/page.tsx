@@ -24,6 +24,10 @@ import {
   Trash2,
   History,
   MessageSquare,
+  CreditCard,
+  Building2,
+  QrCode,
+  Tag,
 } from 'lucide-react';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
@@ -46,6 +50,8 @@ export default function AgentTasksPage() {
     notificationPermission,
     requestNotifications,
     submitBackgroundTask,
+    mode,
+    setMode,
   } = useAgentBackground();
 
   const [profile, setProfile] = useState<UserBehavioralProfile | null>(null);
@@ -125,7 +131,7 @@ export default function AgentTasksPage() {
     const text = (textToSend || inputMessage).trim();
     if (!text || isWorking) return;
     setInputMessage('');
-    await submitBackgroundTask(text, persona);
+    await submitBackgroundTask(text, persona, mode);
   };
 
   const sessionGroups = React.useMemo(() => {
@@ -541,6 +547,8 @@ export default function AgentTasksPage() {
               padding: '0.75rem 1.25rem',
               borderBottom: '1px solid var(--border-subtle)',
               background: 'var(--bg-canvas)',
+              flexWrap: 'wrap',
+              gap: '0.65rem',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
@@ -553,7 +561,7 @@ export default function AgentTasksPage() {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '350px',
+                  maxWidth: '240px',
                 }}
               >
                 {sessions.find((s) => s.id === sessionId)?.title || 'Current Shopping Session'}
@@ -562,6 +570,29 @@ export default function AgentTasksPage() {
                 {messages.length - 1 <= 0 ? 'Fresh Thread' : `${messages.length - 1} turns`}
               </span>
             </div>
+
+            {/* Mode Switcher Toggle Pill */}
+            <div className="ai-mode-toggle-bar" style={{ margin: 0 }}>
+              <button
+                type="button"
+                className={`ai-mode-btn ${mode === 'chat' ? 'active' : ''}`}
+                onClick={() => setMode('chat')}
+                title="Chat Mode: Conversational shopping consultations, styling advice & product questions"
+              >
+                <MessageSquare size={13} />
+                <span>💬 Chat Mode</span>
+              </button>
+              <button
+                type="button"
+                className={`ai-mode-btn ${mode === 'agent' ? 'active agent-active' : ''}`}
+                onClick={() => setMode('agent')}
+                title="Agent Mode: Autonomous tasks, bag mutations, 1-tap checkout & relaxed cancellation"
+              >
+                <Zap size={13} />
+                <span>⚡ Agent Mode</span>
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={createNewSession}
@@ -602,14 +633,25 @@ export default function AgentTasksPage() {
                 key={m.id}
                 className={`console-bubble ${m.role === 'assistant' ? 'assistant-stream' : 'user-stream'}`}
               >
-                <div className="bubble-header">
+                <div className="bubble-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
                   {m.role === 'assistant' ? (
-                    <div className="agent-badge-tag">
-                      <Bot size={14} />
-                      <span>ShopSphere Super Agent</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <div className="agent-badge-tag">
+                        <Bot size={14} />
+                        <span>{m.mode === 'chat' ? 'ShopSphere Shopping Guide' : 'ShopSphere Super Agent'}</span>
+                      </div>
+                      <span className={`ai-mode-indicator-chip ${m.mode || mode}`}>
+                        {m.mode === 'chat' ? '💬 Chat' : '⚡ Agent'}
+                      </span>
                     </div>
                   ) : (
                     <span className="user-badge-tag">You</span>
+                  )}
+                  {m.role === 'assistant' && m.provenance && (
+                    <div className="ai-provenance-badge">
+                      <ShieldCheck size={11} />
+                      <span>{m.provenance.source} · {m.provenance.rowCount} verified items</span>
+                    </div>
                   )}
                 </div>
 
@@ -635,6 +677,31 @@ export default function AgentTasksPage() {
                     return <p key={lIdx} className="fmt-p">{renderInlineFormatting(line)}</p>;
                   })}
                 </div>
+
+                {/* Interactive Quick Reply Suggestion Chips */}
+                {m.role === 'assistant' && m.quickReplies && m.quickReplies.length > 0 && (
+                  <div className="ai-quick-replies-container">
+                    <span className="quick-replies-label">Suggested replies / options:</span>
+                    <div className="quick-replies-pills">
+                      {m.quickReplies.map((qr, qidx) => (
+                        <button
+                          key={qidx}
+                          type="button"
+                          className="ai-quick-reply-pill"
+                          disabled={isWorking}
+                          onClick={() => {
+                            if (qr.includes('Switch to Agent Mode')) {
+                              setMode('agent');
+                            }
+                            void handleSendMessage(qr);
+                          }}
+                        >
+                          {qr}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Render Interactive Action Cards with 1-Tap Frictionless Controls */}
                 {m.actionCards && m.actionCards.length > 0 && (
@@ -697,7 +764,11 @@ export default function AgentTasksPage() {
               className="console-input-field"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask agent: 'Find smartphones under ₹20,000' or 'Buy item with wallet'..."
+              placeholder={
+                mode === 'chat'
+                  ? "Ask anything: 'Recommend casual shoes under ₹2,000', 'Compare Noise & Boat watches'..."
+                  : "Ask agent: 'Find smartphones under ₹20,000' or 'Buy item with wallet'..."
+              }
               disabled={isWorking}
             />
             <button
@@ -744,7 +815,7 @@ function WorkspaceActionCard({
   loading: boolean;
 }) {
   if (card.type === 'WALLET_PAY_AUTH') {
-    const { orderId, total, product, quantity, walletBalance, remainingBalance } = card.data;
+    const { orderId, total, subtotal, discount, product, quantity, walletBalance, remainingBalance, appliedOffer, availableOffers } = card.data;
     return (
       <div className="agent-action-card wallet-pay-auth-card">
         <div className="card-header">
@@ -766,6 +837,51 @@ function WorkspaceActionCard({
             {formatINR(total)}
           </div>
         </div>
+
+        {/* Applied Coupon Info if active */}
+        {appliedOffer && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0.65rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--success)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}>
+              <Tag size={14} />
+              <span>Coupon {appliedOffer.code} Applied</span>
+            </div>
+            <strong style={{ fontWeight: 800 }}>-{formatINR(appliedOffer.discountAmount || discount || 0)}</strong>
+          </div>
+        )}
+
+        {/* Available Wallet-Compatible Offers to select (Strict Rule: Zero auto-apply) */}
+        {!appliedOffer && availableOffers && availableOffers.length > 0 && (
+          <div style={{ margin: '0.2rem 0', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--fg-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <Tag size={13} style={{ color: 'var(--accent-electric)' }} />
+              <span>Available Wallet Offers (Tap to apply):</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {availableOffers.map((offer: any) => (
+                <button
+                  key={offer.code}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => onExecute(`Apply coupon ${offer.code} to order ${orderId}`)}
+                  className="btn-agent-chip-action"
+                  style={{
+                    background: 'rgba(79, 70, 229, 0.08)',
+                    border: '1px dashed var(--accent-electric)',
+                    color: 'var(--accent-electric)',
+                    fontSize: '0.75rem',
+                    padding: '0.25rem 0.6rem',
+                    borderRadius: 'var(--radius-sm)',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                  }}
+                  title={offer.description}
+                >
+                  🏷️ Apply {offer.code} (-{formatINR(offer.discountAmount)})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="wallet-balance-row">
           <span>
@@ -794,28 +910,197 @@ function WorkspaceActionCard({
   }
 
   if (card.type === 'WALLET_TOPUP_PROMPT') {
-    const { currentBalance, requiredTotal, shortfall } = card.data;
+    const { currentBalance, requiredTotal, shortfall, availableOffers, appliedOffer, product } = card.data;
     return (
-      <div className="agent-action-card">
+      <div className="agent-action-card" style={{ border: '1.5px solid rgba(245, 158, 11, 0.4)' }}>
         <div className="card-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--warning)' }}>
             <Wallet size={16} />
             <strong style={{ fontSize: '0.9rem' }}>Insufficient Wallet Balance</strong>
           </div>
-          <span className="order-tag">Shortfall</span>
+          <span className="order-tag" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)', fontWeight: 700 }}>
+            Shortfall: {formatINR(shortfall)}
+          </span>
         </div>
-        <p style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', margin: '0.4rem 0' }}>
-          Your wallet balance is <strong>{formatINR(currentBalance)}</strong>, but this order requires <strong>{formatINR(requiredTotal)}</strong> (short by {formatINR(shortfall)}).
+        <p style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)', margin: '0.2rem 0' }}>
+          Your in-app wallet balance is <strong>{formatINR(currentBalance)}</strong>, but this order requires <strong>{formatINR(requiredTotal)}</strong>.
         </p>
-        <button
-          type="button"
-          className="btn-agent-chip-action"
-          disabled={loading}
-          onClick={() => onExecute(`Top up my wallet with ₹${shortfall}`)}
-        >
-          <Wallet size={15} />
-          <span>1-Tap Top-Up ₹{Number(shortfall).toLocaleString('en-IN')} to Wallet</span>
-        </button>
+
+        {/* Optional offer chips to reduce total before topping up */}
+        {!appliedOffer && availableOffers && availableOffers.length > 0 && (
+          <div style={{ padding: '0.4rem 0.5rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-subtle)', margin: '0.2rem 0' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
+              💡 Or apply a wallet offer to lower your shortfall:
+            </div>
+            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+              {availableOffers.map((offer: any) => (
+                <button
+                  key={offer.code}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => onExecute(product ? `Buy ${product.title} with coupon ${offer.code}` : `Apply coupon ${offer.code}`)}
+                  className="btn-agent-chip-action"
+                  style={{
+                    background: 'var(--accent-glow)',
+                    color: 'var(--accent-electric)',
+                    fontSize: '0.72rem',
+                    padding: '0.2rem 0.5rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  🏷️ {offer.code} (-{formatINR(offer.discountAmount)})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Multi-Option Top-Up Methods (Card, UPI, Bank) */}
+        <div style={{ marginTop: '0.35rem' }}>
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-primary)', marginBottom: '0.45rem' }}>
+            Choose Top-Up Payment Method:
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.5rem' }}>
+            {/* 1. Instant UPI */}
+            <button
+              type="button"
+              className="btn-agent-chip-action"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '0.6rem 0.75rem',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                textAlign: 'left',
+                gap: '0.25rem',
+                cursor: 'pointer',
+              }}
+              disabled={loading}
+              onClick={() => onExecute(`Top up my wallet with ₹${shortfall} via UPI`)}
+              title="Top up using Google Pay, PhonePe, Paytm, or BHIM"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--accent-electric)', fontWeight: 700, fontSize: '0.82rem' }}>
+                <QrCode size={15} />
+                <span>Instant UPI</span>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--fg-muted)' }}>GPay · PhonePe · Paytm</span>
+              <strong style={{ fontSize: '0.8rem', color: 'var(--fg-primary)', marginTop: '0.15rem' }}>+ ₹{Number(shortfall).toLocaleString('en-IN')}</strong>
+            </button>
+
+            {/* 2. Credit / Debit Card */}
+            <button
+              type="button"
+              className="btn-agent-chip-action"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '0.6rem 0.75rem',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                textAlign: 'left',
+                gap: '0.25rem',
+                cursor: 'pointer',
+              }}
+              disabled={loading}
+              onClick={() => onExecute(`Top up my wallet with ₹${shortfall} via Card`)}
+              title="Top up using Visa, Mastercard, or RuPay card"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--accent-electric)', fontWeight: 700, fontSize: '0.82rem' }}>
+                <CreditCard size={15} />
+                <span>Credit / Debit Card</span>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--fg-muted)' }}>Visa · RuPay · MC</span>
+              <strong style={{ fontSize: '0.8rem', color: 'var(--fg-primary)', marginTop: '0.15rem' }}>+ ₹{Number(shortfall).toLocaleString('en-IN')}</strong>
+            </button>
+
+            {/* 3. Net Banking */}
+            <button
+              type="button"
+              className="btn-agent-chip-action"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '0.6rem 0.75rem',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                textAlign: 'left',
+                gap: '0.25rem',
+                cursor: 'pointer',
+              }}
+              disabled={loading}
+              onClick={() => onExecute(`Top up my wallet with ₹${shortfall} via Net Banking`)}
+              title="Top up using Net Banking (SBI, HDFC, ICICI, Axis)"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--accent-electric)', fontWeight: 700, fontSize: '0.82rem' }}>
+                <Building2 size={15} />
+                <span>Net Banking</span>
+              </div>
+              <span style={{ fontSize: '0.72rem', color: 'var(--fg-muted)' }}>SBI · HDFC · ICICI</span>
+              <strong style={{ fontSize: '0.8rem', color: 'var(--fg-primary)', marginTop: '0.15rem' }}>+ ₹{Number(shortfall).toLocaleString('en-IN')}</strong>
+            </button>
+          </div>
+        </div>
+
+        <div style={{ fontSize: '0.72rem', color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.3rem' }}>
+          <span>💡 Once top-up is completed, return to the agent to finalize and authorize your order.</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (card.type === 'WALLET_TOPUP_SUCCESS') {
+    const { creditedAmount, paymentMethod, newBalance, pendingOrderId, pendingOrderTotal } = card.data;
+    return (
+      <div className="agent-action-card" style={{ border: '1.5px solid rgba(16, 185, 129, 0.4)' }}>
+        <div className="card-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)' }}>
+            <CheckCircle2 size={18} />
+            <strong style={{ fontSize: '0.95rem' }}>Wallet Top-Up Completed</strong>
+          </div>
+          <span className="order-tag" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--success)', fontWeight: 700 }}>
+            +{formatINR(creditedAmount)}
+          </span>
+        </div>
+        <p style={{ margin: '0.3rem 0', fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>
+          Credited <strong>{formatINR(creditedAmount)}</strong> via <strong>{paymentMethod}</strong>. Your updated wallet balance is <strong>{formatINR(newBalance)}</strong>.
+        </p>
+
+        {pendingOrderId ? (
+          <div style={{ padding: '0.6rem', background: 'rgba(79, 70, 229, 0.06)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(79, 70, 229, 0.2)', marginTop: '0.3rem' }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--fg-primary)', marginBottom: '0.2rem' }}>
+              Order #SS-{String(pendingOrderId).slice(0, 8).toUpperCase()} is ready!
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginBottom: '0.5rem' }}>
+              Your wallet balance now satisfies this order requirement. You can authorize payment now.
+            </div>
+            <button
+              type="button"
+              className="btn-agent-pay"
+              disabled={loading}
+              onClick={() => onExecute(`Confirm payment for order ${pendingOrderId}`)}
+            >
+              <CheckCircle2 size={16} />
+              <span>Return & Authorize Payment ({formatINR(pendingOrderTotal || creditedAmount)})</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="btn-agent-chip-action"
+            style={{ background: 'var(--accent-primary)', color: '#fff', alignSelf: 'flex-start', marginTop: '0.3rem' }}
+            disabled={loading}
+            onClick={() => onExecute('Show my recommendations')}
+          >
+            <span>Proceed to Shopping</span>
+            <ArrowRight size={14} />
+          </button>
+        )}
       </div>
     );
   }
@@ -891,27 +1176,38 @@ function WorkspaceActionCard({
   }
 
   if (card.type === 'ORDER_CONFIRMED') {
-    const { orderId, total, remainingBalance } = card.data;
+    const { orderId, total, remainingBalance, isGift, recipient } = card.data;
     return (
       <div className="agent-action-card order-confirmed-card">
         <div className="card-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)' }}>
             <CheckCircle2 size={18} />
-            <strong style={{ fontSize: '0.95rem' }}>Order Placed & Confirmed!</strong>
+            <strong style={{ fontSize: '0.95rem' }}>{isGift ? '🎁 Gift Placed & Confirmed!' : 'Order Placed & Confirmed!'}</strong>
           </div>
           <span className="order-tag">#SS-{String(orderId).slice(0, 8).toUpperCase()}</span>
         </div>
+        {isGift && (
+          <div style={{ padding: '0.45rem 0.65rem', background: 'var(--accent-glow)', borderRadius: 'var(--radius-sm)', fontSize: '0.825rem', color: 'var(--accent-electric)', marginBottom: '0.5rem', fontWeight: 600 }}>
+            🎁 Surprise gift sent to: <strong>{recipient}</strong>
+          </div>
+        )}
         <p style={{ margin: '0.4rem 0', fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>
           Total of <strong>{formatINR(total)}</strong> paid via in-app wallet. Remaining balance: <strong>{formatINR(remainingBalance)}</strong>.
         </p>
         <div className="policy-note">
           🤖 <strong>Lenient Cancellation Available:</strong> Relaxed cancellation active through <em>packed</em> stage with instant 100% wallet refund.
         </div>
-        <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
           <Link href="/orders" className="btn-agent-chip-action" style={{ textDecoration: 'none' }}>
             <span>View in My Orders</span>
             <ArrowRight size={14} />
           </Link>
+          {isGift && (
+            <Link href="/gifts" className="btn-agent-chip-action" style={{ textDecoration: 'none', background: 'var(--accent-glow)', color: 'var(--accent-electric)' }}>
+              <span>View in Gifting Hub</span>
+              <Gift size={14} />
+            </Link>
+          )}
           <button
             type="button"
             className="btn-agent-chip-action"
@@ -921,6 +1217,87 @@ function WorkspaceActionCard({
           >
             Cancel Order
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (card.type === 'GIFT_CARD') {
+    const { recipient, product, giftMessage, revealDate, orderId, total, appliedOffer, availableOffers } = card.data;
+    return (
+      <div className="agent-action-card gift-preview-card">
+        <div className="card-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-electric)' }}>
+            <Gift size={18} />
+            <strong style={{ fontSize: '0.95rem' }}>Surprise Gift Package Configured</strong>
+          </div>
+          {orderId && <span className="order-tag">#SS-{String(orderId).slice(0, 8).toUpperCase()}</span>}
+        </div>
+        <div style={{ fontSize: '0.825rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', margin: '0.5rem 0' }}>
+          <div>To: <strong>{recipient}</strong></div>
+          {product && (
+            <div>Product: <strong>{product.title}</strong> ({formatINR(product.price)})</div>
+          )}
+          <div style={{ padding: '0.4rem 0.6rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-subtle)', fontStyle: 'italic', fontSize: '0.8rem' }}>
+            &ldquo;{giftMessage || 'A special gift for you!'}&rdquo;
+          </div>
+          {revealDate && <span style={{ fontSize: '0.72rem', color: 'var(--fg-muted)' }}>Reveal: {revealDate}</span>}
+
+          {/* Applied Coupon Info */}
+          {appliedOffer && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.35rem 0.55rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem', color: 'var(--success)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 700 }}>
+                <Tag size={13} />
+                <span>Coupon {appliedOffer.code} Applied</span>
+              </div>
+              <strong style={{ fontWeight: 800 }}>-{formatINR(appliedOffer.discountAmount)}</strong>
+            </div>
+          )}
+
+          {/* Available Gifting Offers (User choice) */}
+          {!appliedOffer && availableOffers && availableOffers.length > 0 && (
+            <div style={{ margin: '0.2rem 0' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fg-secondary)', marginBottom: '0.25rem' }}>
+                🏷️ Available Offers for this Gift:
+              </div>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {availableOffers.map((offer: any) => (
+                  <button
+                    key={offer.code}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => onExecute(`Apply coupon ${offer.code}${orderId ? ` to order ${orderId}` : ''}`)}
+                    className="btn-agent-chip-action"
+                    style={{
+                      background: 'rgba(79, 70, 229, 0.08)',
+                      border: '1px dashed var(--accent-electric)',
+                      color: 'var(--accent-electric)',
+                      fontSize: '0.72rem',
+                      padding: '0.2rem 0.5rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    🏷️ Apply {offer.code} (-{formatINR(offer.discountAmount)})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn-agent-chip-action"
+            style={{ background: 'var(--accent-primary)', color: '#fff' }}
+            disabled={loading}
+            onClick={() => onExecute(orderId ? `Confirm payment for order ${orderId}` : `Send ${product?.title || 'gift'} to ${recipient}`)}
+          >
+            <CheckCircle2 size={14} />
+            <span>Authorize & Dispatch Gift ({formatINR(total || product?.price || 0)})</span>
+          </button>
+          <Link href="/gifts" className="btn-agent-chip-action" style={{ textDecoration: 'none' }}>
+            <span>Gifting Hub</span>
+          </Link>
         </div>
       </div>
     );

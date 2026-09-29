@@ -82,16 +82,18 @@ export const SUPER_AGENT_TOOLS: { function_declarations: GeminiFunctionDeclarati
       },
       {
         name: 'send_as_gift',
-        description: 'Send a product as a gift parcel to a friend with optional gift wrapping and scheduled reveal.',
+        description: 'Send and place a surprise gift parcel order for a friend. Automatically debits the in-app wallet, creates the order and tracking, registers the gift in the Gifting Hub (/gifts), and returns the confirmed order details and remaining wallet balance.',
         parameters: {
           type: 'OBJECT',
           properties: {
             friend_email_or_name: { type: 'STRING', description: 'Friend email or display name' },
-            product_id: { type: 'STRING', description: 'Product UUID to gift' },
+            product_id: { type: 'STRING', description: 'Product UUID (or product title if UUID is unknown)' },
+            product_title: { type: 'STRING', description: 'Product name or title keyword (e.g. "Bella Vita Perfume")' },
             gift_message: { type: 'STRING', description: 'Personalized greeting card message' },
             reveal_date: { type: 'STRING', description: 'Scheduled surprise reveal date (YYYY-MM-DD)' },
+            coupon_code: { type: 'STRING', description: 'Optional coupon code (e.g. GIFT300, WELCOME10) explicitly requested by customer. NEVER auto-apply coupons without customer confirmation.' },
           },
-          required: ['friend_email_or_name', 'product_id'],
+          required: ['friend_email_or_name'],
         },
       },
       {
@@ -126,23 +128,39 @@ export const SUPER_AGENT_TOOLS: { function_declarations: GeminiFunctionDeclarati
       },
       {
         name: 'topup_wallet',
-        description: 'Add money or promo credit to the customer in-app wallet.',
+        description: 'Add balance to the customer in-app wallet via chosen payment method (UPI, Card, or Net Banking). Once topped up, user returns to authorize payments.',
         parameters: {
           type: 'OBJECT',
           properties: {
             amount: { type: 'NUMBER', description: 'Amount in INR to top up (e.g. 500, 1000, 2500)' },
+            payment_method: { type: 'STRING', enum: ['upi', 'card', 'netbanking'], description: 'Payment method chosen by customer: upi, card, or netbanking' },
+            order_id: { type: 'STRING', description: 'Optional pending order UUID to resume checkout after top-up' },
           },
           required: ['amount'],
         },
       },
       {
-        name: 'prepare_wallet_checkout',
-        description: 'Validate wallet balance for purchasing products, reserve inventory, create order tagged with placed_by: "agent", and generate a payment confirmation card for customer authorization.',
+        name: 'apply_coupon',
+        description: 'Apply or validate an eligible wallet-compatible coupon code (e.g. WELCOME10, GIFT300, TECH1000, UTSAV500, AUDIO15, KITCHEN300) to an order upon explicit customer request. Updates order total with discount.',
         parameters: {
           type: 'OBJECT',
           properties: {
-            product_id: { type: 'STRING', description: 'Product UUID to buy now (or leaves empty to buy entire current cart)' },
+            coupon_code: { type: 'STRING', description: 'Coupon code to apply (e.g. WELCOME10, GIFT300, TECH1000)' },
+            order_id: { type: 'STRING', description: 'Optional pending order UUID' },
+          },
+          required: ['coupon_code'],
+        },
+      },
+      {
+        name: 'prepare_wallet_checkout',
+        description: 'Validate wallet balance for purchasing products, reserve inventory, create order tagged with placed_by: "agent", and generate an interactive payment confirmation card. Does NOT auto-apply coupons, but lists available wallet offers for the customer to choose.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            product_id: { type: 'STRING', description: 'Product UUID to buy now (or leave empty if product_title is provided or buying cart)' },
+            product_title: { type: 'STRING', description: 'Product title or keywords (e.g. "Bella Vita") to buy if UUID is unknown' },
             quantity: { type: 'NUMBER', description: 'Quantity (defaults to 1)' },
+            coupon_code: { type: 'STRING', description: 'Optional coupon code explicitly requested by customer (e.g. WELCOME10). NEVER auto-apply coupons without customer confirmation.' },
           },
         },
       },
@@ -174,3 +192,38 @@ export const SUPER_AGENT_TOOLS: { function_declarations: GeminiFunctionDeclarati
     ],
   },
 ];
+
+export function getOpenAiTools(): Array<{
+  type: 'function';
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: 'object';
+      properties: Record<string, any>;
+      required?: string[];
+    };
+  };
+}> {
+  return SUPER_AGENT_TOOLS[0].function_declarations.map((decl) => ({
+    type: 'function' as const,
+    function: {
+      name: decl.name,
+      description: decl.description,
+      parameters: {
+        type: 'object' as const,
+        properties: Object.fromEntries(
+          Object.entries(decl.parameters.properties).map(([key, val]) => [
+            key,
+            {
+              type: val.type.toLowerCase(),
+              description: val.description,
+              ...(val.enum ? { enum: val.enum } : {}),
+            },
+          ])
+        ),
+        required: decl.parameters.required,
+      },
+    },
+  }));
+}

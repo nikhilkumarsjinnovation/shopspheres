@@ -33,6 +33,16 @@ export interface AgentChatMessage {
   toolExecutions?: any[];
   recommendedProducts?: any[];
   createdAt?: string;
+  mode?: 'chat' | 'agent';
+  validationReport?: any;
+  provenance?: {
+    verifiedAt: string;
+    source: string;
+    rowCount: number;
+    confidence: 'verified' | 'qualified';
+  };
+  quickReplies?: string[];
+  needsClarification?: boolean;
 }
 
 export interface AgentChatSession {
@@ -52,9 +62,11 @@ interface AgentBackgroundContextType {
   sessionId: string;
   sessions: AgentChatSession[];
   isWorking: boolean;
+  mode: 'chat' | 'agent';
+  setMode: (mode: 'chat' | 'agent') => void;
   notificationPermission: NotificationPermission;
   requestNotifications: () => Promise<NotificationPermission>;
-  submitBackgroundTask: (text: string, persona?: string) => Promise<void>;
+  submitBackgroundTask: (text: string, persona?: string, overrideMode?: 'chat' | 'agent') => Promise<void>;
   switchSession: (sessionId: string) => Promise<void>;
   createNewSession: () => void;
   deleteSession: (sessionId: string) => Promise<void>;
@@ -69,19 +81,32 @@ const STORAGE_KEY_SESSION = 'shopsphere_agent_session_id';
 const STORAGE_KEY_SESSIONS = 'shopsphere_agent_sessions_index';
 const STORAGE_KEY_ACTIVE_TASK = 'shopsphere_agent_active_task';
 const STORAGE_KEY_LAST_COMPLETED = 'shopsphere_agent_last_completed_task';
+const STORAGE_KEY_MODE = 'shopsphere_ai_interaction_mode';
 
 export const DEFAULT_AGENT_WELCOME_MESSAGE: AgentChatMessage = {
   id: 'welcome',
   role: 'assistant',
   content:
-    `### 👋 Namaste! Welcome to your Autonomous Super Agent Workspace.\n\n` +
-    `I am your dedicated AI Shopping Agent powered by Gemini. I continuously learn your shopping preferences, track your dwell time and category interests, and can execute real tasks on your behalf without manual browsing.\n\n` +
-    `**What I can do for you:**\n` +
+    `### 👋 Namaste! Welcome to your ShopSphere AI Shopping Companion.\n\n` +
+    `I am your intelligent assistant powered by Gemini and governed by Supabase database controls. Toggle between **💬 Chat Mode** for shopping advice and product guidance, and **⚡ Agent Mode** for autonomous task execution and purchases.\n\n` +
+    `**Core Capabilities:**\n` +
     `- 🎯 **Strict Budget & Category Search:** Tell me any category and price limit (e.g., *"Smartphones under ₹20,000"*). I will strictly honor your constraints.\n` +
     `- ⚡ **1-Tap In-App Wallet Checkout:** Say *"Purchase the first phone for me"* and I will reserve inventory and present instant 1-tap confirmation.\n` +
     `- 🛡️ **Relaxed Lenient Cancellation:** Any order placed through me can be cancelled through the packed stage with an instant 100% wallet refund.\n` +
-    `- 🎁 **Surprise Gifting & Reviews:** Send parcels to friends or write verified reviews on delivered orders.\n\n` +
-    `Click any **Autonomous Quick Task** on the left or type your command below!`,
+    `- ❓ **Smart Clarification:** If you're not sure, tell me what you're thinking and I'll ask smart follow-up questions to find the exact match!\n\n` +
+    `Select a prompt below or type your request:`,
+  quickReplies: [
+    '📱 Smartphones under ₹20,000',
+    '👟 Running Shoes under ₹2,000',
+    '💳 Check My Wallet Balance',
+    '🎁 Surprise Gift for a Friend',
+  ],
+  provenance: {
+    verifiedAt: new Date().toISOString(),
+    source: 'ShopSphere Governed Core',
+    rowCount: 0,
+    confidence: 'verified',
+  },
 };
 
 function getMsgStorageKey(sid: string) {
@@ -97,8 +122,19 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [toastVisible, setToastVisible] = useState(false);
   const [toastContent, setToastContent] = useState<{ title: string; body: string; taskId: string } | null>(null);
+  const [mode, setModeState] = useState<'chat' | 'agent'>('agent');
 
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+
+  const setMode = useCallback((newMode: 'chat' | 'agent') => {
+    setModeState(newMode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_MODE, newMode);
+    }
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({ type: 'MODE_CHANGED', mode: newMode });
+    }
+  }, []);
 
   // Refresh sessions from backend and localStorage
   const refreshSessions = useCallback(async () => {
@@ -158,6 +194,12 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
     }
     setSessionId(currentSession);
 
+    // Restore mode
+    const storedMode = localStorage.getItem(STORAGE_KEY_MODE);
+    if (storedMode === 'chat' || storedMode === 'agent') {
+      setModeState(storedMode);
+    }
+
     // Check notification permission
     setNotificationPermission(getNotificationPermissionStatus());
 
@@ -203,7 +245,9 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         const data = event.data;
         if (!data || !data.type) return;
 
-        if (data.type === 'TASK_STARTED') {
+        if (data.type === 'MODE_CHANGED' && (data.mode === 'chat' || data.mode === 'agent')) {
+          setModeState(data.mode);
+        } else if (data.type === 'TASK_STARTED') {
           setActiveTask(data.task);
         } else if (data.type === 'TASK_COMPLETED') {
           setActiveTask(null);
@@ -395,10 +439,11 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
    * Preserves full multi-turn conversation history across turns!
    */
   const submitBackgroundTask = useCallback(
-    async (text: string, persona = 'tech') => {
+    async (text: string, persona = 'tech', overrideMode?: 'chat' | 'agent') => {
       const trimmed = text.trim();
       if (!trimmed) return;
 
+      const effectiveMode = overrideMode || mode;
       const currentSid = sessionId || `sess_${Date.now()}`;
       const taskId = `task_${Date.now()}`;
 
@@ -407,6 +452,7 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         role: 'user',
         content: trimmed,
         createdAt: new Date().toISOString(),
+        mode: effectiveMode,
       };
 
       const task: BackgroundAgentTask = {
@@ -432,14 +478,14 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
       // Add user message to conversation list
       setMessages((prev) => [...prev, userMsg]);
 
-      // Prepare in-thread history for conversational memory
+      // Prepare in-thread history for conversational memory (retain up to 30 recent messages)
       const recentHistory = messages
         .filter((m) => m.id !== 'welcome' && (m.role === 'user' || m.role === 'assistant'))
-        .slice(-10)
+        .slice(-30)
         .map((m) => ({ role: m.role, content: m.content }));
 
       try {
-        // Request execution from API with full history
+        // Request execution from API with full history and active interaction mode
         const res = await fetchWithCsrf('/api/v1/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -448,6 +494,7 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
             persona,
             sessionId: currentSid,
             history: recentHistory,
+            mode: effectiveMode,
           }),
         });
 
@@ -499,6 +546,11 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
           toolExecutions: data.toolExecutions || [],
           recommendedProducts: data.recommendedProducts || [],
           createdAt: new Date().toISOString(),
+          mode: data.mode || effectiveMode,
+          validationReport: data.validationReport,
+          provenance: data.provenance,
+          quickReplies: data.quickReplies || [],
+          needsClarification: data.needsClarification || false,
         };
 
         const completedTask: BackgroundAgentTask = {
@@ -611,7 +663,7 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         }
       }
     },
-    [sessionId, messages]
+    [sessionId, messages, mode]
   );
 
   return (
@@ -624,6 +676,8 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         sessionId,
         sessions,
         isWorking: activeTask?.status === 'running',
+        mode,
+        setMode,
         notificationPermission,
         requestNotifications,
         submitBackgroundTask,

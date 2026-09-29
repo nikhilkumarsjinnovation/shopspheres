@@ -14,6 +14,7 @@ const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty').max(2000),
   sessionId: z.string().optional(),
   persona: z.enum(['everyday', 'tech', 'fashion', 'gourmet', 'beauty', 'accessibility']).optional().default('everyday'),
+  mode: z.enum(['chat', 'agent']).optional().default('agent'),
   history: z.array(z.object({
     role: z.enum(['user', 'assistant', 'model']),
     content: z.string(),
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, persona } = validatedBody.data;
+    const { message, persona, mode } = validatedBody.data;
     const sessionId = validatedBody.data.sessionId || `sess_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     const apiKey =
@@ -154,21 +155,23 @@ export async function POST(request: NextRequest) {
         .select('role, content, created_at')
         .eq('user_id', userId)
         .eq('session_id', sessionId)
-        .order('created_at', { ascending: true })
-        .limit(20);
+        .order('created_at', { ascending: false })
+        .limit(40);
 
       if (!turnsError && turns && turns.length > 0) {
-        priorTurns = turns;
+        priorTurns = [...turns].reverse();
       }
     }
 
     const clientHistory = validatedBody.data.history || [];
     let combinedHistory: Array<{ role: string; content: string }> = [];
 
-    if (priorTurns.length > 0) {
-      combinedHistory = priorTurns.map((t) => ({ role: t.role, content: t.content }));
-    } else if (clientHistory.length > 0) {
+    // Prioritize client in-thread history as it reflects the live conversation state,
+    // fallback to DB turns if clientHistory is empty
+    if (clientHistory.length > 0) {
       combinedHistory = clientHistory;
+    } else if (priorTurns.length > 0) {
+      combinedHistory = priorTurns.map((t) => ({ role: t.role, content: t.content }));
     }
 
     const validatedOutput = await chat({
@@ -182,6 +185,8 @@ export async function POST(request: NextRequest) {
       apiKey,
       userId,
       history: combinedHistory,
+      mode,
+      sessionId,
     });
 
     let feedMutated = false;
@@ -247,6 +252,11 @@ export async function POST(request: NextRequest) {
       toolExecutions: validatedOutput.toolExecutions || [],
       behavioralProfile,
       sessionId,
+      mode: validatedOutput.mode || mode,
+      validationReport: validatedOutput.validationReport,
+      provenance: validatedOutput.provenance,
+      quickReplies: validatedOutput.quickReplies || [],
+      needsClarification: validatedOutput.needsClarification || false,
     });
   } catch (err: unknown) {
     console.error('[Personal AI Assistant] Error:', err);

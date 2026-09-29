@@ -6,6 +6,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { buildShopHealth, categoryKey } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
+import PopulateProductsButton from '@/components/seller/PopulateProductsButton';
 
 export default async function MiniShopPage({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
@@ -49,14 +50,17 @@ export default async function MiniShopPage({ params }: { params: Promise<{ categ
           <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{name} Department</h1>
         </div>
 
-        <Link
-          href={`/seller/add-product?category=${encodeURIComponent(name)}`}
-          className="btn-card-add"
-          style={{ padding: '0.65rem 1.4rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
-        >
-          <PlusCircle size={16} />
-          <span>Add Product to {name}</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <PopulateProductsButton category={name} />
+          <Link
+            href={`/seller/add-product?category=${encodeURIComponent(name)}`}
+            className="btn-card-add"
+            style={{ padding: '0.65rem 1.4rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
+          >
+            <PlusCircle size={16} />
+            <span>Add Product to {name}</span>
+          </Link>
+        </div>
       </div>
 
       {/* KPI Stats */}

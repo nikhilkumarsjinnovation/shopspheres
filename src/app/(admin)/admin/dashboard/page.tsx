@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import AdminApprovalQueue, { type QueueProduct } from '@/components/AdminApprovalQueue';
 import { formatINR } from '@/lib/formatters';
 import { orderCode, parsePlatformStats } from '@/lib/platform-stats';
+import AdminPopulateControls from '@/components/admin/AdminPopulateControls';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -24,6 +25,11 @@ export default async function AdminDashboardPage() {
     .select('id, total_amount, status, created_at')
     .order('created_at', { ascending: false })
     .limit(10);
+
+  const { data: adminShops } = await supabase
+    .from('shops')
+    .select('id, name')
+    .order('name', { ascending: true });
 
   return (
     <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
@@ -48,6 +54,8 @@ export default async function AdminDashboardPage() {
           <Metric label="Pending Gifts" value={String(stats.gifts_pending)} note="Gifts awaiting reveal" />
         </div>
       )}
+
+      <AdminPopulateControls shops={(adminShops ?? []).map((s) => ({ id: s.id, name: s.name }))} />
 
       <div style={{ marginBottom: '2.5rem' }}>
         <AdminApprovalQueue initialPendingProducts={(pendingProductsData ?? []) as QueueProduct[]} />
