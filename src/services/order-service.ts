@@ -196,7 +196,9 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
     newOrder = ord;
   }
 
-  const { error: itemsErr } = await supabase.from('order_items').insert(
+  const adminDb = createAdminClient();
+
+  const { error: itemsErr } = await adminDb.from('order_items').insert(
     validatedItems.map((item) => ({
       order_id: newOrder.id,
       product_id: item.product_id,
@@ -207,11 +209,11 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
   );
 
   if (itemsErr) {
-    await supabase.from('orders').delete().eq('id', newOrder.id);
+    await adminDb.from('orders').delete().eq('id', newOrder.id);
     throw new Error(`Failed to record order items: ${itemsErr.message}`);
   }
 
-  await supabase.from('order_tracking_events').insert({
+  await adminDb.from('order_tracking_events').insert({
     order_id: newOrder.id,
     status: 'pending',
     title: input.paymentMethod === 'wallet' ? 'Paid via In-App Wallet' : 'Order Confirmed',
@@ -233,8 +235,8 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
         `Payment for order SS-${newOrder.id.slice(0, 8).toUpperCase()}`
       );
       if (!debitRes.success) {
-        await supabase.from('order_items').delete().eq('order_id', newOrder.id);
-        await supabase.from('orders').delete().eq('id', newOrder.id);
+        await adminDb.from('order_items').delete().eq('order_id', newOrder.id);
+        await adminDb.from('orders').delete().eq('id', newOrder.id);
         throw new Error(debitRes.error || 'Failed to debit in-app wallet.');
       }
       paymentConfirmed = await confirmPayment(newOrder.id, userId);

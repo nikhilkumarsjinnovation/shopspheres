@@ -2,28 +2,33 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ImageOff, Minus, Plus, ChevronDown, ChevronUp, Check, Sparkles, Layers, Heart } from 'lucide-react';
+import { ImageOff, Minus, Plus, ChevronDown, ChevronUp, Check, Sparkles, Layers, Heart, Eye, X } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
+export interface CardProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  compare_at_price?: number | null;
+  average_rating?: number | null;
+  review_count?: number | null;
+  category: string;
+  sub_category?: string | null;
+  seller_id?: string;
+  image_urls?: string[] | null;
+  stock?: number | null;
+  attributes?: any;
+  tags?: string[] | null;
+}
+
 interface ProductCardProps {
-  product: {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    compare_at_price?: number | null;
-    average_rating?: number | null;
-    review_count?: number | null;
-    category: string;
-    sub_category?: string | null;
-    seller_id?: string;
-    image_urls?: string[] | null;
-    stock?: number | null;
-    attributes?: any;
-    tags?: string[] | null;
-  };
+  product: CardProduct;
+  /** When provided, media/title clicks select into an inline detail panel instead of navigating. */
+  onPreview?: (product: CardProduct) => void;
+  isSelected?: boolean;
 }
 
 interface VariantOption {
@@ -36,9 +41,10 @@ interface ColorOption {
   hex: string;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onPreview, isSelected }: ProductCardProps) {
   const { addToCart, updateQuantity, cart } = useCart();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [flipped, setFlipped] = useState(false);
   const [added, setAdded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [selectedQty, setSelectedQty] = useState(1);
@@ -227,10 +233,87 @@ export default function ProductCard({ product }: ProductCardProps) {
     setIsExpanded((prev) => !prev);
   };
 
+  // Shared purchase actions (quick add / stepper + options toggle).
+  // Rendered on the flip-back face, and on the front row in preview mode.
+  const actionsBlock = (
+    <>
+      {inCart ? (
+        <div
+          className="qty-stepper"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          <button
+            type="button"
+            className="qty-stepper-btn"
+            aria-label="Decrease quantity"
+            onClick={() => updateQuantity(product.id, inCart.quantity - 1)}
+          >
+            <Minus size={13} />
+          </button>
+          <span className="qty-stepper-val">{inCart.quantity}</span>
+          <button
+            type="button"
+            className="qty-stepper-btn"
+            aria-label="Increase quantity"
+            onClick={() => updateQuantity(product.id, inCart.quantity + 1)}
+          >
+            <Plus size={13} />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={`btn-card-add ${added ? 'added' : ''}`}
+          style={{ flex: 1 }}
+          onClick={handleQuickAdd}
+          disabled={isOutOfStock}
+        >
+          {isOutOfStock ? 'Sold out' : added ? '✓ Added' : 'Add to Bag'}
+        </button>
+      )}
+
+      <button
+        type="button"
+        className={`btn-card-toggle ${isExpanded ? 'active' : ''}`}
+        onClick={toggleExpand}
+        aria-expanded={isExpanded}
+        aria-label={isExpanded ? "Collapse product options" : "Expand product variations and specifications"}
+        title="Configure options inline"
+      >
+        <Layers size={13} strokeWidth={2} />
+        <span>{isExpanded ? 'Close' : 'Options'}</span>
+        {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </button>
+    </>
+  );
+
   return (
-    <article className={`modular-product-card ${isExpanded ? 'is-expanded' : ''}`}>
+    <article
+      className={`modular-product-card book-product-card ${isExpanded ? 'is-expanded' : ''} ${flipped ? 'is-flipped' : ''} ${onPreview ? 'preview-mode' : ''} ${isSelected ? 'is-selected' : ''}`}
+      onClick={
+        onPreview
+          ? (e) => {
+              const t = e.target as HTMLElement;
+              if (t.closest('button, a, input, select, textarea, [role="switch"], [role="radio"]')) return;
+              onPreview(product);
+            }
+          : undefined
+      }
+    >
+      {/* Violet identity strip (card-1 nod) */}
+      <span className="book-top-strip" aria-hidden="true" />
+      <div className="flip-scene">
+        <div className="flip-inner">
+          {/* FRONT — clean: image, title, price */}
+          <div className="flip-front">
       {/* 1. Visual Card Header Frame */}
-      <Link href={`/product/${product.id}`} className="card-media-wrapper" tabIndex={-1}>
+      <Link
+        href={`/product/${product.id}`}
+        className="card-media-wrapper"
+        tabIndex={-1}
+        onClick={onPreview ? (e) => { e.preventDefault(); onPreview(product); } : undefined}
+        aria-label={onPreview ? `Preview ${product.title}` : undefined}
+      >
         {firstImage && !imageError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -289,11 +372,24 @@ export default function ProductCard({ product }: ProductCardProps) {
         >
           <Heart size={16} fill={isFav ? 'currentColor' : 'none'} strokeWidth={isFav ? 2.5 : 1.75} />
         </button>
+
+        {/* Gloss sweep (book-cover light) */}
+        <span className="book-shine" aria-hidden="true" />
       </Link>
 
-      {/* 2. Compact Body & Meta */}
-      <div className="card-body">
-        <div className="card-meta-line">
+      {/* 2. Clean Front Body — title + price only */}
+      <div className="card-body card-body-front">
+        <h3 className="card-title">
+          <Link
+            href={`/product/${product.id}`}
+            onClick={onPreview ? (e) => { e.preventDefault(); onPreview(product); } : undefined}
+          >
+            {product.title}
+          </Link>
+        </h3>
+
+        {/* List-view scan line (hidden in grid view) */}
+        <div className="card-meta-line card-meta-front">
           <span className="card-category-label">{product.category}</span>
           {rating > 0 ? (
             <span className="card-rating-chip">
@@ -306,19 +402,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        <h3 className="card-title">
-          <Link href={`/product/${product.id}`}>
-            {product.title}
-          </Link>
-        </h3>
-
-        {!inCart && stock > 0 && stock <= 5 && (
-          <p className="card-stock-notice">
-            ⚡ Only {stock} units left in stock
-          </p>
-        )}
-
-        {/* Price & Primary Interactive Bar */}
         <div className="card-price-row">
           <div className="price-stack">
             <span className="price-current">{formatINR(product.price)}</span>
@@ -327,55 +410,91 @@ export default function ProductCard({ product }: ProductCardProps) {
             ) : null}
           </div>
 
-          <div className="card-action-btns">
-            {/* Modular Options In-View Expand Trigger */}
+          {onPreview ? (
+            <div className="card-action-btns">{actionsBlock}</div>
+          ) : (
             <button
               type="button"
-              className={`btn-card-toggle ${isExpanded ? 'active' : ''}`}
-              onClick={toggleExpand}
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? "Collapse product options" : "Expand product variations and specifications"}
-              title="Configure options inline"
+              className="btn-flip"
+              onClick={() => setFlipped(true)}
+              aria-label={`View details for ${product.title}`}
+              title="View details"
             >
-              <Layers size={13} strokeWidth={2} />
-              <span>{isExpanded ? 'Close' : 'Options'}</span>
-              {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              <Eye size={14} />
+              <span>Details</span>
             </button>
+          )}
+        </div>
+      </div>
+          </div>
 
-            {/* Quick Add or Cart Stepper */}
-            {inCart ? (
-              <div
-                className="qty-stepper"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              >
+          {/* BACK — hunted details revealed on hover / tap */}
+          <div className="flip-back">
+            <div className="flip-back-scroll">
+              <div className="flip-back-head">
+                <span className="card-category-label">{product.category}</span>
                 <button
                   type="button"
-                  className="qty-stepper-btn"
-                  aria-label="Decrease quantity"
-                  onClick={() => updateQuantity(product.id, inCart.quantity - 1)}
+                  className="btn-unflip"
+                  onClick={() => setFlipped(false)}
+                  aria-label="Back to product overview"
+                  title="Back to overview"
                 >
-                  <Minus size={13} />
-                </button>
-                <span className="qty-stepper-val">{inCart.quantity}</span>
-                <button
-                  type="button"
-                  className="qty-stepper-btn"
-                  aria-label="Increase quantity"
-                  onClick={() => updateQuantity(product.id, inCart.quantity + 1)}
-                >
-                  <Plus size={13} />
+                  <X size={14} />
                 </button>
               </div>
-            ) : (
-              <button
-                type="button"
-                className={`btn-card-add ${added ? 'added' : ''}`}
-                onClick={handleQuickAdd}
-                disabled={isOutOfStock}
-              >
-                {isOutOfStock ? 'Sold out' : added ? '✓ Added' : 'Add'}
-              </button>
-            )}
+
+              {rating > 0 ? (
+                <p className="flip-rating">
+                  ★ {rating.toFixed(1)} <span>({product.review_count || 1} verified reviews)</span>
+                </p>
+              ) : (
+                <p className="flip-rating">
+                  ★ 5.0 <span>New arrival</span>
+                </p>
+              )}
+
+              <div className="price-stack flip-back-price">
+                <span className="price-current">{formatINR(product.price)}</span>
+                {product.compare_at_price && product.compare_at_price > product.price ? (
+                  <span className="price-compare">{formatINR(product.compare_at_price)}</span>
+                ) : null}
+                {discountPercent !== null && (
+                  <span className="flip-save">Save {discountPercent}%</span>
+                )}
+              </div>
+
+              <div className="specs-matrix-grid">
+                {specs.map((s, idx) => (
+                  <div key={idx} className="spec-cell">
+                    <span className="spec-cell-label">{s.label}</span>
+                    <span className="spec-cell-value">{s.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {isOutOfStock ? (
+                <p className="card-stock-notice" style={{ marginBottom: 0 }}>
+                  Sold out
+                </p>
+              ) : !inCart && stock <= 5 ? (
+                <p className="card-stock-notice" style={{ marginBottom: 0 }}>
+                  ⚡ Only {stock} units left in stock
+                </p>
+              ) : (
+                <p className="flip-stock-ok">
+                  ✓ In stock · Express delivery
+                </p>
+              )}
+
+              <div className="flip-back-actions">
+                {actionsBlock}
+              </div>
+
+              <Link href={`/product/${product.id}`} className="btn-view-details" style={{ marginTop: 0 }}>
+                Full specs & verified reviews →
+              </Link>
+            </div>
           </div>
         </div>
       </div>

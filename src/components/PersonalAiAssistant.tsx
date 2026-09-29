@@ -481,6 +481,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
   useEffect(() => {
     const handleOpenAi = () => {
       setIsOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 150);
     };
 
     const handleFeedUpdate = () => {
@@ -518,11 +519,17 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
       </button>
 
       {isOpen && (
-        <div
-          role="dialog"
-          aria-label="Customer Super Agent AI Shopping Companion"
-          className="ai-assistant-drawer"
-        >
+        <>
+          <div
+            className="ai-drawer-backdrop"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-label="Customer Super Agent AI Shopping Companion"
+            className="ai-assistant-drawer"
+          >
           {/* Header */}
           <div className="ai-header">
             <div>
@@ -779,6 +786,7 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
             </button>
           </form>
         </div>
+        </>
       )}
     </>
   );

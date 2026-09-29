@@ -96,7 +96,7 @@ export default async function ShopDetailPage({ params }: { params: Promise<{ id:
           This shop has no approved products yet. Check back soon!
         </div>
       ) : (
-        <div className="product-grid">
+        <div className="product-list">
           {productList.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

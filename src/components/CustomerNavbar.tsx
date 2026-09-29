@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, Sparkles, Compass, Store, ReceiptText, Gift, Users, Bot, Check } from 'lucide-react';
+import { ShoppingBag, Sparkles, Compass, Store, ReceiptText, Gift, Bot, User } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAgentBackground } from '@/context/AgentBackgroundContext';
 import SignOutButton from '@/components/SignOutButton';
@@ -22,7 +22,7 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
     { label: 'Shops', href: '/shops', icon: Store },
     { label: 'Orders', href: '/orders', icon: ReceiptText },
     { label: 'Gifts', href: '/gifts', icon: Gift },
-    { label: 'Friends', href: '/friends', icon: Users },
+    { label: 'Profile', href: '/profile', icon: User },
   ];
 
   const handleOpenAI = () => {
@@ -126,9 +126,15 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
 
           {/* User Account / Email */}
           {email && (
-            <span className="user-email-chip" title={email}>
+            <Link
+              href="/profile"
+              className="user-email-chip"
+              title={`Logged in as ${email} — View Profile`}
+              aria-label="User Profile"
+              style={{ textDecoration: 'none', cursor: 'pointer', transition: 'color 0.15s ease' }}
+            >
               {email}
-            </span>
+            </Link>
           )}
 
           {/* Sign Out */}

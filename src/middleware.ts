@@ -58,7 +58,8 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/gifts') ||
     path.startsWith('/product') ||
     path.startsWith('/shops') ||
-    path.startsWith('/friends');
+    path.startsWith('/friends') ||
+    path.startsWith('/profile');
   const isSellerRoute = path.startsWith('/seller');
   const isAdminRoute = path.startsWith('/admin') || path === '/dashboard';
 

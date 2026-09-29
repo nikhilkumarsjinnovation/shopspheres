@@ -35,16 +35,30 @@ export interface AgentChatMessage {
   createdAt?: string;
 }
 
+export interface AgentChatSession {
+  id: string;
+  title: string;
+  lastMessage: string;
+  messageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AgentBackgroundContextType {
   activeTask: BackgroundAgentTask | null;
   lastCompletedTask: BackgroundAgentTask | null;
   messages: AgentChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<AgentChatMessage[]>>;
   sessionId: string;
+  sessions: AgentChatSession[];
   isWorking: boolean;
   notificationPermission: NotificationPermission;
   requestNotifications: () => Promise<NotificationPermission>;
   submitBackgroundTask: (text: string, persona?: string) => Promise<void>;
+  switchSession: (sessionId: string) => Promise<void>;
+  createNewSession: () => void;
+  deleteSession: (sessionId: string) => Promise<void>;
+  refreshSessions: () => Promise<void>;
   dismissToast: () => void;
   clearMessages: () => void;
 }
@@ -52,7 +66,7 @@ interface AgentBackgroundContextType {
 const AgentBackgroundContext = createContext<AgentBackgroundContextType | undefined>(undefined);
 
 const STORAGE_KEY_SESSION = 'shopsphere_agent_session_id';
-const STORAGE_KEY_MESSAGES = 'shopsphere_agent_messages_cache';
+const STORAGE_KEY_SESSIONS = 'shopsphere_agent_sessions_index';
 const STORAGE_KEY_ACTIVE_TASK = 'shopsphere_agent_active_task';
 const STORAGE_KEY_LAST_COMPLETED = 'shopsphere_agent_last_completed_task';
 
@@ -70,8 +84,13 @@ export const DEFAULT_AGENT_WELCOME_MESSAGE: AgentChatMessage = {
     `Click any **Autonomous Quick Task** on the left or type your command below!`,
 };
 
+function getMsgStorageKey(sid: string) {
+  return `shopsphere_agent_msgs_${sid}`;
+}
+
 export function AgentBackgroundProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string>('');
+  const [sessions, setSessions] = useState<AgentChatSession[]>([]);
   const [messages, setMessages] = useState<AgentChatMessage[]>([DEFAULT_AGENT_WELCOME_MESSAGE]);
   const [activeTask, setActiveTask] = useState<BackgroundAgentTask | null>(null);
   const [lastCompletedTask, setLastCompletedTask] = useState<BackgroundAgentTask | null>(null);
@@ -80,6 +99,52 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
   const [toastContent, setToastContent] = useState<{ title: string; body: string; taskId: string } | null>(null);
 
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
+
+  // Refresh sessions from backend and localStorage
+  const refreshSessions = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+
+    // 1. Load locally cached sessions
+    let localSessions: AgentChatSession[] = [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_SESSIONS);
+      if (stored) {
+        localSessions = JSON.parse(stored);
+      }
+    } catch {
+      // ignore
+    }
+
+    // 2. Fetch server sessions
+    try {
+      const res = await fetchWithCsrf('/api/v1/ai/conversations');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.sessions)) {
+          // Merge local and server sessions
+          const map = new Map<string, AgentChatSession>();
+          for (const s of localSessions) {
+            map.set(s.id, s);
+          }
+          for (const s of data.sessions) {
+            map.set(s.id, s);
+          }
+          const merged = Array.from(map.values()).sort(
+            (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
+          setSessions(merged);
+          localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(merged));
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch conversations from server:', err);
+    }
+
+    if (localSessions.length > 0) {
+      setSessions(localSessions);
+    }
+  }, []);
 
   // Initialize session ID and load cached state
   useEffect(() => {
@@ -96,9 +161,9 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
     // Check notification permission
     setNotificationPermission(getNotificationPermissionStatus());
 
-    // Restore cached messages
+    // Restore cached messages for this current session
     try {
-      const cached = localStorage.getItem(STORAGE_KEY_MESSAGES);
+      const cached = localStorage.getItem(getMsgStorageKey(currentSession));
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -109,13 +174,15 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
       console.warn('Could not parse cached messages:', err);
     }
 
+    // Load sessions index
+    refreshSessions();
+
     // Restore active background task if any
     try {
       const storedTask = localStorage.getItem(STORAGE_KEY_ACTIVE_TASK);
       if (storedTask) {
         const parsedTask = JSON.parse(storedTask) as BackgroundAgentTask;
         if (parsedTask && parsedTask.status === 'running') {
-          // If task started more than 3 minutes ago, mark as timed out
           if (Date.now() - parsedTask.startedAt > 180000) {
             localStorage.removeItem(STORAGE_KEY_ACTIVE_TASK);
           } else {
@@ -141,16 +208,18 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         } else if (data.type === 'TASK_COMPLETED') {
           setActiveTask(null);
           setLastCompletedTask(data.task);
-          if (Array.isArray(data.updatedMessages)) {
+          if (data.task.sessionId === currentSession && Array.isArray(data.updatedMessages)) {
             setMessages(data.updatedMessages);
           }
-          // Show toast on other tabs as well
           setToastContent({
             title: 'Agent Completed Task',
             body: data.task.reply?.slice(0, 120) || `Task "${data.task.prompt}" finished.`,
             taskId: data.task.id,
           });
           setToastVisible(true);
+          refreshSessions();
+        } else if (data.type === 'SESSIONS_UPDATED') {
+          refreshSessions();
         }
       };
     }
@@ -167,18 +236,18 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         broadcastChannelRef.current.close();
       }
     };
-  }, []);
+  }, [refreshSessions]);
 
-  // Sync messages to localStorage
+  // Sync messages to localStorage whenever they change
   useEffect(() => {
-    if (typeof window !== 'undefined' && messages.length > 0) {
+    if (typeof window !== 'undefined' && sessionId && messages.length > 0) {
       try {
-        localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messages.slice(-50)));
+        localStorage.setItem(getMsgStorageKey(sessionId), JSON.stringify(messages.slice(-50)));
       } catch (err) {
         console.warn('Failed to cache agent messages:', err);
       }
     }
-  }, [messages]);
+  }, [messages, sessionId]);
 
   const requestNotifications = async (): Promise<NotificationPermission> => {
     const status = await requestNotificationPermission();
@@ -191,15 +260,139 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
   };
 
   const clearMessages = () => {
-    setMessages([]);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEY_MESSAGES);
+    setMessages([DEFAULT_AGENT_WELCOME_MESSAGE]);
+    if (typeof window !== 'undefined' && sessionId) {
+      localStorage.removeItem(getMsgStorageKey(sessionId));
     }
   };
 
   /**
+   * Switch between chat sessions seamlessly
+   */
+  const switchSession = useCallback(async (newSid: string) => {
+    if (!newSid || newSid === sessionId) return;
+
+    setSessionId(newSid);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_SESSION, newSid);
+    }
+
+    // 1. Try local cache first for instant UI response
+    let loadedFromLocal = false;
+    if (typeof window !== 'undefined') {
+      const localCached = localStorage.getItem(getMsgStorageKey(newSid));
+      if (localCached) {
+        try {
+          const parsed = JSON.parse(localCached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+            loadedFromLocal = true;
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    // 2. Fetch full message history from server for this session
+    try {
+      const res = await fetchWithCsrf(`/api/v1/ai/conversations?sessionId=${newSid}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.messages) && data.messages.length > 0) {
+          setMessages(data.messages);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(getMsgStorageKey(newSid), JSON.stringify(data.messages));
+          }
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load session messages from server:', err);
+    }
+
+    if (!loadedFromLocal) {
+      setMessages([DEFAULT_AGENT_WELCOME_MESSAGE]);
+    }
+  }, [sessionId]);
+
+  /**
+   * Start a brand new Chat Thread (ChatGPT / Gemini style)
+   */
+  const createNewSession = useCallback(() => {
+    const newSid = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    setSessionId(newSid);
+    setMessages([DEFAULT_AGENT_WELCOME_MESSAGE]);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_SESSION, newSid);
+      localStorage.setItem(getMsgStorageKey(newSid), JSON.stringify([DEFAULT_AGENT_WELCOME_MESSAGE]));
+
+      const newSessionMeta: AgentChatSession = {
+        id: newSid,
+        title: 'New Shopping Chat',
+        lastMessage: 'Ready to assist...',
+        messageCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      setSessions((prev) => {
+        const updated = [newSessionMeta, ...prev.filter((s) => s.id !== newSid)];
+        localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(updated));
+        return updated;
+      });
+    }
+
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({ type: 'SESSIONS_UPDATED' });
+    }
+  }, []);
+
+  /**
+   * Delete a chat session
+   */
+  const deleteSession = useCallback(async (targetSid: string) => {
+    if (!targetSid) return;
+
+    // 1. Call server DELETE
+    try {
+      await fetchWithCsrf(`/api/v1/ai/conversations?sessionId=${targetSid}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.warn('Failed to delete session on server:', err);
+    }
+
+    // 2. Remove from local storage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(getMsgStorageKey(targetSid));
+    }
+
+    // 3. Update session list
+    const remaining = sessions.filter((s) => s.id !== targetSid);
+    setSessions(remaining);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(remaining));
+    }
+
+    // 4. If current active session was deleted, switch to another or create new
+    if (targetSid === sessionId) {
+      if (remaining.length > 0) {
+        await switchSession(remaining[0].id);
+      } else {
+        createNewSession();
+      }
+    }
+
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.postMessage({ type: 'SESSIONS_UPDATED' });
+    }
+  }, [sessions, sessionId, switchSession, createNewSession]);
+
+  /**
    * Resilient Background Task Submitter
-   * Continues running across tab switches and route navigations!
+   * Preserves full multi-turn conversation history across turns!
    */
   const submitBackgroundTask = useCallback(
     async (text: string, persona = 'tech') => {
@@ -239,8 +432,14 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
       // Add user message to conversation list
       setMessages((prev) => [...prev, userMsg]);
 
+      // Prepare in-thread history for conversational memory
+      const recentHistory = messages
+        .filter((m) => m.id !== 'welcome' && (m.role === 'user' || m.role === 'assistant'))
+        .slice(-10)
+        .map((m) => ({ role: m.role, content: m.content }));
+
       try {
-        // Request background execution from API
+        // Request execution from API with full history
         const res = await fetchWithCsrf('/api/v1/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -248,6 +447,7 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
             message: trimmed,
             persona,
             sessionId: currentSid,
+            history: recentHistory,
           }),
         });
 
@@ -257,7 +457,7 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
 
         const data = await res.json();
 
-        // 2. Dispatch reactive client actions (Cart, Favorites, Wallet)
+        // Dispatch reactive client actions (Cart, Favorites, Wallet)
         if (Array.isArray(data.clientActions)) {
           for (const act of data.clientActions) {
             if (act.type === 'CART_SYNC') {
@@ -310,9 +510,12 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
           toolExecutions: data.toolExecutions,
         };
 
-        // 3. Update global messages
+        // Update global messages
         setMessages((prev) => {
           const updated = [...prev, assistantMsg];
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(getMsgStorageKey(currentSid), JSON.stringify(updated.slice(-50)));
+          }
           if (broadcastChannelRef.current) {
             broadcastChannelRef.current.postMessage({
               type: 'TASK_COMPLETED',
@@ -323,6 +526,44 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
           return updated;
         });
 
+        // Update sessions index with new title / last message
+        setSessions((prev) => {
+          const title = trimmed.length > 40 ? trimmed.slice(0, 40) + '…' : trimmed;
+          const existing = prev.find((s) => s.id === currentSid);
+          let updatedSessions: AgentChatSession[];
+
+          if (existing) {
+            updatedSessions = prev.map((s) =>
+              s.id === currentSid
+                ? {
+                    ...s,
+                    title: s.title === 'New Shopping Chat' || !s.title ? title : s.title,
+                    lastMessage: (data.reply || '').slice(0, 70),
+                    messageCount: s.messageCount + 2,
+                    updatedAt: new Date().toISOString(),
+                  }
+                : s
+            );
+          } else {
+            updatedSessions = [
+              {
+                id: currentSid,
+                title,
+                lastMessage: (data.reply || '').slice(0, 70),
+                messageCount: 2,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              ...prev,
+            ];
+          }
+
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(updatedSessions));
+          }
+          return updatedSessions;
+        });
+
         setActiveTask(null);
         setLastCompletedTask(completedTask);
         if (typeof window !== 'undefined') {
@@ -330,11 +571,10 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
           localStorage.setItem(STORAGE_KEY_LAST_COMPLETED, JSON.stringify(completedTask));
         }
 
-        // 4. Trigger Multi-Channel Completion Notification!
-        // (Plays audio chime, flashes title if tab is inactive, and triggers native Web Notification)
+        // Trigger Multi-Channel Completion Notification
         triggerAgentCompletionAlert(trimmed, data.reply || 'Task finished!');
 
-        // 5. Show in-app completion toast banner
+        // Show in-app completion toast banner
         setToastContent({
           title: 'Autonomous Agent Task Completed',
           body: data.reply ? data.reply.slice(0, 110) + '…' : `Finished: "${trimmed}"`,
@@ -342,7 +582,6 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         });
         setToastVisible(true);
 
-        // Auto-dismiss in-app toast after 8 seconds
         setTimeout(() => {
           setToastVisible(false);
         }, 8000);
@@ -372,7 +611,7 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         }
       }
     },
-    [sessionId]
+    [sessionId, messages]
   );
 
   return (
@@ -383,10 +622,15 @@ export function AgentBackgroundProvider({ children }: { children: React.ReactNod
         messages,
         setMessages,
         sessionId,
+        sessions,
         isWorking: activeTask?.status === 'running',
         notificationPermission,
         requestNotifications,
         submitBackgroundTask,
+        switchSession,
+        createNewSession,
+        deleteSession,
+        refreshSessions,
         dismissToast,
         clearMessages,
       }}

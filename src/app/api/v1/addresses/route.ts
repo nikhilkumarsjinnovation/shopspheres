@@ -125,6 +125,13 @@ export async function PATCH(request: NextRequest) {
     const record = body && typeof body === 'object' ? body : {};
     const id = 'id' in record && typeof record.id === 'string' ? record.id : '';
     if (!id) return NextResponse.json({ error: 'Address id is required.' }, { status: 400 });
+    if ('is_default' in record && record.is_default === true) {
+      await supabase
+        .from('user_addresses')
+        .update({ is_default: false })
+        .eq('user_id', session.user.id);
+    }
+
     const { data, error } = await supabase.from('user_addresses').update({
       recipient_name: 'recipient_name' in record && typeof record.recipient_name === 'string' ? record.recipient_name : undefined,
       recipient_phone: 'recipient_phone' in record && typeof record.recipient_phone === 'string' ? record.recipient_phone : undefined,
@@ -134,6 +141,8 @@ export async function PATCH(request: NextRequest) {
       state: 'state' in record && typeof record.state === 'string' ? record.state : undefined,
       postal_code: 'postal_code' in record && typeof record.postal_code === 'string' ? record.postal_code : undefined,
       label: 'label' in record && typeof record.label === 'string' ? record.label : undefined,
+      delivery_instructions: 'delivery_instructions' in record && (typeof record.delivery_instructions === 'string' || record.delivery_instructions === null) ? record.delivery_instructions : undefined,
+      is_default: 'is_default' in record && typeof record.is_default === 'boolean' ? record.is_default : undefined,
     }).eq('id', id).eq('user_id', session.user.id).select('*').single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, address: data });

@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Truck, ShieldCheck, BadgeCheck, Check } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Check } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import BehavioralOffersBanner from '@/components/BehavioralOffersBanner';
+import ProductDetailPanel from '@/components/ProductDetailPanel';
 import type { FeedCarousel } from '@/app/api/v1/feed/personalized/route';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
@@ -34,6 +34,9 @@ interface ExploreFeedClientProps {
 /** Hide backend ranker internals (model names, versions) from shoppers. */
 function friendlySubtitle(subtitle?: string | null): string | null {
   if (!subtitle) return null;
+  if (subtitle.trim().toLowerCase() === 'diverse picks from your recent behavior') {
+    return null;
+  }
   if (/@|category_affinity|ltr|ranker/i.test(subtitle)) {
     return 'Handpicked from your recent browsing';
   }
@@ -54,6 +57,9 @@ export default function ExploreFeedClient({
   const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc' | 'rating' | 'newest'>('featured');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Three-pane selection — right detail panel (no page jump for specs)
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   // Listen for search from header
   useEffect(() => {
     const handleHeaderSearch = (e: any) => {
@@ -66,7 +72,6 @@ export default function ExploreFeedClient({
   // AI Personalized Feed State (summary banner intentionally not rendered)
   const [carousels, setCarousels] = useState<FeedCarousel[]>([]);
   const [feedLoading, setFeedLoading] = useState(true);
-  const [isPersonalized, setIsPersonalized] = useState(false);
   const [feedJustUpdated, setFeedJustUpdated] = useState(false);
 
   // Fetch Personalized Feed
@@ -77,7 +82,6 @@ export default function ExploreFeedClient({
       if (res.ok) {
         const data = await res.json();
         setCarousels(data.carousels || []);
-        setIsPersonalized(Boolean(data.personalized));
       }
     } catch (err) {
       console.error('Failed to load personalized feed:', err);
@@ -102,13 +106,17 @@ export default function ExploreFeedClient({
     };
   }, [fetchPersonalizedFeed]);
 
-  // Lock body scroll when mobile drawer is open
+  // Lock body scroll when a mobile overlay is open
   useEffect(() => {
-    document.body.style.overflow = mobileFiltersOpen ? 'hidden' : '';
+    const isMobile =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 1180px)').matches;
+    const lock = mobileFiltersOpen || (selectedId !== null && isMobile);
+    document.body.style.overflow = lock ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [mobileFiltersOpen]);
+  }, [mobileFiltersOpen, selectedId]);
 
   // Per-category counts for the sidebar list
   const categoryCounts = useMemo(() => {
@@ -223,6 +231,34 @@ export default function ExploreFeedClient({
 
     return result;
   }, [initialProducts, searchQuery, selectedCategory, minPrice, maxPrice, minRating, inStockOnly, sortBy]);
+
+  // Lookup across catalog + AI carousels so selection survives view switches
+  const productLookup = useMemo(() => {
+    const map = new Map<string, BaseProduct>();
+    for (const p of initialProducts) map.set(p.id, p);
+    for (const c of carousels) {
+      for (const p of c.products || []) {
+        if (!map.has(p.id)) map.set(p.id, p as BaseProduct);
+      }
+    }
+    return map;
+  }, [initialProducts, carousels]);
+
+  const selectedProduct = selectedId ? productLookup.get(selectedId) ?? null : null;
+
+  // Desktop: keep a selection alive (first visible product) so the pane never sits empty
+  const visiblePool = isFiltering ? filteredProducts : initialProducts;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!window.matchMedia('(min-width: 1181px)').matches) return;
+    if (visiblePool.length === 0) {
+      setSelectedId(null);
+      return;
+    }
+    if (!selectedId || !visiblePool.some((p) => p.id === selectedId)) {
+      setSelectedId(visiblePool[0].id);
+    }
+  }, [visiblePool, selectedId, isFiltering]);
 
   const filterPanel = (
     <div className="filter-panel">
@@ -484,10 +520,14 @@ export default function ExploreFeedClient({
                 </button>
               </div>
             ) : (
-              <div className="product-grid">
+              <div className="product-list">
                 {filteredProducts.map((product, i) => (
                   <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                    <ProductCard product={product} />
+                    <ProductCard
+                      product={product}
+                      onPreview={(p) => setSelectedId(p.id)}
+                      isSelected={product.id === selectedId}
+                    />
                   </div>
                 ))}
               </div>
@@ -528,10 +568,14 @@ export default function ExploreFeedClient({
                     <p className="section-subtitle">Browse curated products across all categories</p>
                   </div>
                 </div>
-                <div className="product-grid">
+                <div className="product-list">
                   {initialProducts.map((product, i) => (
                     <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                      <ProductCard product={product} />
+                      <ProductCard
+                        product={product}
+                        onPreview={(p) => setSelectedId(p.id)}
+                        isSelected={product.id === selectedId}
+                      />
                     </div>
                   ))}
                 </div>
@@ -539,20 +583,18 @@ export default function ExploreFeedClient({
             ) : (
               carousels.map((carousel) => {
                 const subtitle = friendlySubtitle(carousel.subtitle);
+                const badge =
+                  carousel.badge && !/^(ranked|for you)$/i.test(carousel.badge.trim())
+                    ? carousel.badge
+                    : null;
                 return (
                   <section key={carousel.id} style={{ marginBottom: '3rem' }}>
                     <div className="section-header">
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                           <h2 className="section-title">{carousel.title}</h2>
-                          {carousel.badge && (
-                            <span className="section-badge">{carousel.badge}</span>
-                          )}
-                          {isPersonalized && (
-                            <span className="section-badge explore-live-badge">
-                              <span className="explore-live-dot" aria-hidden />
-                              For you
-                            </span>
+                          {badge && (
+                            <span className="section-badge">{badge}</span>
                           )}
                         </div>
                         {subtitle && (
@@ -561,10 +603,14 @@ export default function ExploreFeedClient({
                       </div>
                     </div>
 
-                    <div className="product-grid">
+                    <div className="product-list">
                       {carousel.products.map((product, i) => (
                         <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                          <ProductCard product={product} />
+                          <ProductCard
+                            product={product}
+                            onPreview={(p: any) => setSelectedId(p.id)}
+                            isSelected={product.id === selectedId}
+                          />
                         </div>
                       ))}
                     </div>
@@ -576,35 +622,23 @@ export default function ExploreFeedClient({
         )}
       </div>
 
-      {/* RIGHT RAIL — sticky offers + trust panel (desktop) */}
-      <aside className="explore-rail explore-rail-right" aria-label="Offers and shopping benefits">
-        <BehavioralOffersBanner />
-        <div className="rail-card rail-perks">
-          <h4 className="rail-perks-title">Why shop with us</h4>
-          <ul className="rail-perks-list">
-            <li>
-              <span className="rail-perk-icon"><Truck size={15} /></span>
-              <span>
-                <strong>Free Express Delivery</strong>
-                <small>Across India · No hidden fees</small>
-              </span>
-            </li>
-            <li>
-              <span className="rail-perk-icon"><BadgeCheck size={15} /></span>
-              <span>
-                <strong>Verified Shops</strong>
-                <small>Quality-checked sellers only</small>
-              </span>
-            </li>
-            <li>
-              <span className="rail-perk-icon"><ShieldCheck size={15} /></span>
-              <span>
-                <strong>Secure UPI Checkout</strong>
-                <small>Protected payments &amp; easy returns</small>
-              </span>
-            </li>
-          </ul>
-        </div>
+      {/* RIGHT PANE — sticky detail panel (specs without page jumps) */}
+      {selectedProduct && (
+        <div
+          className="detail-backdrop"
+          onClick={() => setSelectedId(null)}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={`explore-detail ${selectedProduct ? 'open' : ''}`}
+        aria-label="Product details"
+      >
+        <ProductDetailPanel
+          key={selectedProduct?.id ?? 'empty'}
+          product={selectedProduct}
+          onClose={() => setSelectedId(null)}
+        />
       </aside>
 
       {/* Mobile filter drawer */}

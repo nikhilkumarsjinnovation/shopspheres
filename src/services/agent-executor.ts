@@ -8,13 +8,13 @@ function normalizeCategory(input?: string): string | null {
   if (!input || typeof input !== 'string') return null;
   const c = input.trim().toLowerCase();
   if (c === 'all') return null;
-  if (c.includes('elect') || c.includes('phone') || c.includes('mobile') || c.includes('gadget') || c.includes('laptop') || c.includes('smart') || c.includes('tech')) {
+  if (c.includes('elect') || c.includes('phone') || c.includes('mobile') || c.includes('gadget') || c.includes('laptop') || c.includes('tech')) {
     return 'Electronics';
   }
   if (c.includes('audio') || c.includes('earbud') || c.includes('headphone') || c.includes('speaker') || c.includes('sound')) {
     return 'Audio & Accessories';
   }
-  if (c.includes('cloth') || c.includes('fashion') || c.includes('apparel') || c.includes('shirt') || c.includes('kurta') || c.includes('wear') || c.includes('dress') || c.includes('watch')) {
+  if (c.includes('cloth') || c.includes('fashion') || c.includes('apparel') || c.includes('shirt') || c.includes('kurta') || c.includes('wear') || c.includes('dress') || c.includes('saree')) {
     return 'Fashion & Apparel';
   }
   if (c.includes('kitchen') || c.includes('home') || c.includes('cooker') || c.includes('mixer') || c.includes('appliance') || c.includes('jar')) {
@@ -23,13 +23,23 @@ function normalizeCategory(input?: string): string | null {
   if (c.includes('beauty') || c.includes('health') || c.includes('wash') || c.includes('cream') || c.includes('soap') || c.includes('skin') || c.includes('makeup')) {
     return 'Health & Beauty';
   }
-  if (c.includes('gourmet') || c.includes('grocer') || c.includes('food') || c.includes('snack') || c.includes('chocolate') || c.includes('sweet')) {
+  if (c.includes('gourmet') || c.includes('grocer') || c.includes('food') || c.includes('snack') || c.includes('chocolate') || c.includes('sweet') || c.includes('tea') || c.includes('coffee')) {
     return 'Gourmet & Groceries';
   }
-  if (c.includes('sport') || c.includes('fitness') || c.includes('exercis') || c.includes('gym')) {
+  if (c.includes('sport') || c.includes('fitness') || c.includes('exercis') || c.includes('gym') || c.includes('badminton')) {
     return 'Sports & Outdoors';
   }
   return input;
+}
+
+function stemWord(word: string): string {
+  const w = word.toLowerCase().trim();
+  if (w.endsWith('watches')) return w.slice(0, -2);
+  if (w.endsWith('smartwatches')) return w.slice(0, -2);
+  if (w.endsWith('ies') && w.length > 4) return w.slice(0, -3) + 'y';
+  if (w.endsWith('es') && w.length > 4) return w.slice(0, -2);
+  if (w.endsWith('s') && !w.endsWith('ss') && w.length > 3) return w.slice(0, -1);
+  return w;
 }
 
 export interface AgentExecutionResult {
@@ -59,101 +69,105 @@ export async function executeAgentTool(
     case 'search_catalog': {
       const { query = '', category, min_price, max_price, in_stock_only } = args;
 
-      // 1. Normalize and resolve canonical category
-      const normCat = normalizeCategory(category) || normalizeCategory(query);
+      // 1. Normalize category ONLY if explicitly provided
+      const normCat = normalizeCategory(category);
 
       // 2. Parse Keywords & Strip Stop Words
       const stopWords = new Set([
         'product', 'products', 'item', 'items', 'show', 'me', 'under', 'cheap', 'best',
         'good', 'from', 'category', 'in', 'the', 'for', 'buy', 'need', 'want', 'please',
-        'any', 'find', 'get', 'give', 'below', 'less', 'than', 'price', 'budget', 'with', 'and'
+        'any', 'find', 'get', 'give', 'below', 'less', 'than', 'price', 'budget', 'with', 'and',
+        'about', 'asked', 'you', 'some', 'randome', 'random', 'stuff', 'can', 'this', 'that',
+        'decent', 'a', 'an', 'to', 'of', 'i', 'my', 'would', 'like', 'there', 'is', 'are', 'purchase'
       ]);
 
       const rawWords = (query || '')
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
+        .map((w: string) => w.trim())
         .filter((w: string) => w.length > 2 && !stopWords.has(w));
 
-      // 3. Build Base Query with Strict Category and Price
-      let baseQ = adminDb
-        .from('products')
-        .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes')
-        .eq('approval_status', 'approved');
+      const stemmedWords = rawWords.map(stemWord).filter((w: string) => w.length > 2 && !stopWords.has(w));
+      const searchTerms = Array.from(new Set([...rawWords, ...stemmedWords]));
 
-      if (normCat) {
-        baseQ = baseQ.ilike('category', `%${normCat}%`);
-      }
-      if (min_price && !isNaN(Number(min_price))) {
-        baseQ = baseQ.gte('price', Number(min_price));
-      }
-      if (max_price && !isNaN(Number(max_price))) {
-        baseQ = baseQ.lte('price', Number(max_price));
-      }
-      if (in_stock_only) {
-        baseQ = baseQ.gt('stock', 0);
-      }
+      // 3. Helper to query products with or without category filter
+      const executeQuery = async (targetCategory: string | null) => {
+        let q = adminDb
+          .from('products')
+          .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes')
+          .eq('approval_status', 'approved');
 
-      // First attempt: search with extracted keywords if any
-      let matchedProducts: any[] = [];
-      if (rawWords.length > 0) {
-        let kwQ = baseQ;
-        const orClauses: string[] = [];
-        for (const w of rawWords.slice(0, 3)) {
-          orClauses.push(`title.ilike.%${w}%`);
-          orClauses.push(`description.ilike.%${w}%`);
+        if (targetCategory) {
+          q = q.ilike('category', `%${targetCategory}%`);
         }
-        kwQ = kwQ.or(orClauses.join(','));
-        const { data: kwMatches } = await kwQ.order('average_rating', { ascending: false }).limit(6);
-        if (kwMatches && kwMatches.length > 0) {
-          matchedProducts = kwMatches;
+        if (min_price && !isNaN(Number(min_price))) {
+          q = q.gte('price', Number(min_price));
+        }
+        if (max_price && !isNaN(Number(max_price))) {
+          q = q.lte('price', Number(max_price));
+        }
+        if (in_stock_only) {
+          q = q.gt('stock', 0);
+        }
+
+        if (searchTerms.length > 0) {
+          const orClauses: string[] = [];
+          for (const term of searchTerms.slice(0, 4)) {
+            orClauses.push(`title.ilike.%${term}%`);
+            orClauses.push(`description.ilike.%${term}%`);
+            orClauses.push(`sub_category.ilike.%${term}%`);
+          }
+          q = q.or(orClauses.join(','));
+        }
+
+        const { data } = await q.order('average_rating', { ascending: false }).limit(6);
+        return data || [];
+      };
+
+      let matchedProducts: any[] = await executeQuery(normCat);
+
+      // If category was specified but yielded 0 results and we have specific search terms (like 'watch'),
+      // try cross-category search because some items belong to multiple departments (e.g. smartwatches vs analog watches)
+      if (matchedProducts.length === 0 && normCat && searchTerms.length > 0) {
+        const crossCat = await executeQuery(null);
+        if (crossCat.length > 0) {
+          matchedProducts = crossCat;
         }
       }
 
-      // Second attempt: if keyword search yielded nothing, fetch top-rated products strictly within THAT category and price range
-      if (matchedProducts.length === 0) {
-        const { data: catMatches } = await baseQ.order('average_rating', { ascending: false }).limit(6);
-        if (catMatches && catMatches.length > 0) {
-          matchedProducts = catMatches;
+      // If no search keywords were provided, fetch top products strictly in that category
+      if (matchedProducts.length === 0 && searchTerms.length === 0 && normCat) {
+        let catQ = adminDb
+          .from('products')
+          .select('id, title, description, price, compare_at_price, category, sub_category, tags, image_urls, stock, average_rating, attributes')
+          .eq('approval_status', 'approved')
+          .ilike('category', `%${normCat}%`);
+        if (min_price && !isNaN(Number(min_price))) catQ = catQ.gte('price', Number(min_price));
+        if (max_price && !isNaN(Number(max_price))) catQ = catQ.lte('price', Number(max_price));
+        const { data: topCat } = await catQ.order('average_rating', { ascending: false }).limit(6);
+        if (topCat && topCat.length > 0) {
+          matchedProducts = topCat;
         }
       }
 
-      // Third attempt: If still 0 products found because budget was too low or category was very narrow:
+      // If still 0 products found: DO NOT dump random category products! Return honest 0 count.
       if (matchedProducts.length === 0) {
         let hintMessage = `No products found`;
-        if (normCat) hintMessage += ` in "${normCat}"`;
+        if (query) hintMessage += ` matching "${query}"`;
+        if (normCat) hintMessage += ` in ${normCat}`;
         if (max_price) hintMessage += ` under ₹${Number(max_price).toLocaleString('en-IN')}`;
-
-        let altProducts: any[] = [];
-        if (normCat) {
-          // Find the lowest-priced products within THAT SAME category so user sees actual prices
-          const { data: catOnly } = await adminDb
-            .from('products')
-            .select('id, title, price, compare_at_price, category, image_urls, stock, average_rating')
-            .eq('approval_status', 'approved')
-            .ilike('category', `%${normCat}%`)
-            .order('price', { ascending: true })
-            .limit(4);
-
-          if (catOnly && catOnly.length > 0) {
-            altProducts = catOnly;
-            hintMessage += `. The most affordable ${normCat} products start at ₹${catOnly[0].price.toLocaleString('en-IN')}.`;
-          }
-        }
+        hintMessage += `. Would you like to adjust your price filter or search for something else?`;
 
         return {
           toolName,
           output: {
-            count: altProducts.length,
-            products: altProducts,
+            count: 0,
+            products: [],
             message: hintMessage,
             appliedCategory: normCat || 'All',
             appliedMaxPrice: max_price || null,
           },
-          actionCard: altProducts.length > 0 ? {
-            type: 'PRODUCT_CAROUSEL',
-            data: { products: altProducts },
-          } : undefined,
         };
       }
 
@@ -575,7 +589,7 @@ export async function executeAgentTool(
     // -------------------------------------------------------------
     case 'prepare_wallet_checkout': {
       if (!userId) return { toolName, output: { error: 'Please log in to make purchases.' } };
-      const { product_id, quantity = 1 } = args;
+      const { product_id, product_title, quantity = 1, checkout_cart } = args;
 
       const wallet = await getWallet(userId);
 
@@ -586,8 +600,20 @@ export async function executeAgentTool(
         itemToBuy = prod;
       }
 
-      // If no product_id specified, inspect the user's active cart
-      if (!itemToBuy && userId) {
+      // If product_title or query was passed instead of product_id
+      if (!itemToBuy && product_title) {
+        const { data: prod } = await adminDb
+          .from('products')
+          .select('*')
+          .ilike('title', `%${product_title.trim()}%`)
+          .eq('approval_status', 'approved')
+          .limit(1)
+          .maybeSingle();
+        itemToBuy = prod;
+      }
+
+      // If user specifically requested checking out their entire cart
+      if (!itemToBuy && checkout_cart && userId) {
         try {
           const cartItems = await getCart(userId);
           if (Array.isArray(cartItems) && cartItems.length > 0) {
@@ -600,22 +626,12 @@ export async function executeAgentTool(
         }
       }
 
-      // If still no item, inspect user's recent wishlist
-      if (!itemToBuy && userId) {
-        try {
-          const favs = await getFavorites(userId);
-          if (favs.length > 0 && favs[0].product) {
-            itemToBuy = favs[0].product;
-          }
-        } catch {
-          // ignore favs fetch error
-        }
-      }
-
       if (!itemToBuy) {
         return {
           toolName,
-          output: { error: 'Please specify which product you would like to purchase (e.g. "Buy POCO X4 Pro 5G with wallet") or add an item to your bag first.' },
+          output: {
+            error: 'Please specify which product you would like to purchase (e.g. "Buy Noise ColorFit Smart Watch with wallet").',
+          },
         };
       }
 

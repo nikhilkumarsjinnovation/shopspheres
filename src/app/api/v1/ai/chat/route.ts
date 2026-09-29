@@ -14,6 +14,10 @@ const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty').max(2000),
   sessionId: z.string().optional(),
   persona: z.enum(['everyday', 'tech', 'fashion', 'gourmet', 'beauty', 'accessibility']).optional().default('everyday'),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'model']),
+    content: z.string(),
+  })).optional(),
 });
 
 type CatalogItem = {
@@ -153,9 +157,18 @@ export async function POST(request: NextRequest) {
         .order('created_at', { ascending: true })
         .limit(20);
 
-      if (!turnsError && turns) {
+      if (!turnsError && turns && turns.length > 0) {
         priorTurns = turns;
       }
+    }
+
+    const clientHistory = validatedBody.data.history || [];
+    let combinedHistory: Array<{ role: string; content: string }> = [];
+
+    if (priorTurns.length > 0) {
+      combinedHistory = priorTurns.map((t) => ({ role: t.role, content: t.content }));
+    } else if (clientHistory.length > 0) {
+      combinedHistory = clientHistory;
     }
 
     const validatedOutput = await chat({
@@ -168,7 +181,7 @@ export async function POST(request: NextRequest) {
         : undefined,
       apiKey,
       userId,
-      history: priorTurns,
+      history: combinedHistory,
     });
 
     let feedMutated = false;
@@ -198,6 +211,7 @@ export async function POST(request: NextRequest) {
           role: 'assistant',
           content: validatedOutput.reply,
           extracted_intents: intentsToJson(validatedOutput.extractedIntents),
+          recommended_product_ids: validatedOutput.recommendedProductIds || [],
         },
       ]);
 

@@ -20,18 +20,27 @@ import {
   ArrowRight,
   Zap,
   Bell,
+  Plus,
+  Trash2,
+  History,
+  MessageSquare,
 } from 'lucide-react';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import PersonaSelector from '@/components/ai/PersonaSelector';
 import type { PersonaConfig } from '@/lib/personas';
 import type { UserBehavioralProfile } from '@/services/agent-memory-service';
-import { useAgentBackground } from '@/context/AgentBackgroundContext';
+import { useAgentBackground, type AgentChatSession } from '@/context/AgentBackgroundContext';
 
 export default function AgentTasksPage() {
   const {
     messages,
     setMessages,
+    sessionId,
+    sessions,
+    switchSession,
+    createNewSession,
+    deleteSession,
     isWorking,
     activeTask,
     notificationPermission,
@@ -56,15 +65,6 @@ export default function AgentTasksPage() {
         const data = await res.json();
         if (data.profile) {
           setProfile(data.profile);
-        }
-        if (Array.isArray(data.conversations) && data.conversations.length > 0) {
-          const loaded = data.conversations.map((c: any) => ({
-            id: c.id,
-            role: c.role,
-            content: c.content,
-            createdAt: c.created_at,
-          }));
-          setMessages((prev) => (prev.length <= 1 ? [prev[0], ...loaded] : prev));
         }
       }
     } catch (err) {
@@ -126,6 +126,75 @@ export default function AgentTasksPage() {
     if (!text || isWorking) return;
     setInputMessage('');
     await submitBackgroundTask(text, persona);
+  };
+
+  const sessionGroups = React.useMemo(() => {
+    const today: AgentChatSession[] = [];
+    const yesterday: AgentChatSession[] = [];
+    const past7Days: AgentChatSession[] = [];
+    const older: AgentChatSession[] = [];
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+    const startOf7Days = startOfToday - 7 * 24 * 60 * 60 * 1000;
+
+    for (const s of sessions) {
+      const t = new Date(s.updatedAt || s.createdAt).getTime();
+      if (t >= startOfToday) {
+        today.push(s);
+      } else if (t >= startOfYesterday) {
+        yesterday.push(s);
+      } else if (t >= startOf7Days) {
+        past7Days.push(s);
+      } else {
+        older.push(s);
+      }
+    }
+
+    return { today, yesterday, past7Days, older };
+  }, [sessions]);
+
+  const renderSessionGroup = (label: string, list: AgentChatSession[]) => {
+    if (!list || list.length === 0) return null;
+    return (
+      <div className="session-group-section" key={label}>
+        <div className="session-group-title">{label}</div>
+        {list.map((s) => {
+          const isActive = s.id === sessionId;
+          return (
+            <div
+              key={s.id}
+              className={`session-item-row ${isActive ? 'active' : ''}`}
+              onClick={() => void switchSession(s.id)}
+              role="button"
+              tabIndex={0}
+              title={`Switch to "${s.title}"`}
+            >
+              <div className="session-item-main">
+                <span className="session-item-title">
+                  {s.title || 'Shopping Conversation'}
+                </span>
+                <span className="session-item-snippet">
+                  {s.lastMessage || 'Recent chat'}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="session-delete-btn"
+                title="Delete this chat"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void deleteSession(s.id);
+                }}
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -254,8 +323,65 @@ export default function AgentTasksPage() {
 
       {/* Main Two-Column Layout */}
       <div className="agent-split-layout">
-        {/* Left Column: Memory Deck & 1-Click Autonomous Presets */}
+        {/* Left Column: Chat History, Memory Deck & 1-Click Autonomous Presets */}
         <aside className="agent-sidebar-deck">
+          {/* ChatGPT / Gemini Style Chat History & Sessions */}
+          <div className="agent-history-card">
+            <button
+              type="button"
+              className="btn-new-chat"
+              onClick={createNewSession}
+              title="Start a fresh conversation thread"
+            >
+              <Plus size={16} />
+              <span>New Chat</span>
+            </button>
+
+            <div
+              className="sessions-header-row"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.2rem 0.25rem 0',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  color: 'var(--fg-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                <History size={13} />
+                <span>Chat History</span>
+              </span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--fg-muted)' }}>
+                {sessions.length} {sessions.length === 1 ? 'chat' : 'chats'}
+              </span>
+            </div>
+
+            <div className="sessions-scroll-container">
+              {sessions.length === 0 ? (
+                <div className="session-empty-state">
+                  <span>No past chat threads yet. Messages will be saved automatically as you chat!</span>
+                </div>
+              ) : (
+                <>
+                  {renderSessionGroup('Today', sessionGroups.today)}
+                  {renderSessionGroup('Yesterday', sessionGroups.yesterday)}
+                  {renderSessionGroup('Previous 7 Days', sessionGroups.past7Days)}
+                  {renderSessionGroup('Older', sessionGroups.older)}
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Persona Switcher */}
           <div className="sidebar-card">
             <h3 className="card-mini-title">
@@ -405,6 +531,60 @@ export default function AgentTasksPage() {
 
         {/* Right Column: High-Fidelity Agent Action Console */}
         <main className="agent-main-console">
+          {/* Thread Header */}
+          <div
+            className="console-thread-header"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.75rem 1.25rem',
+              borderBottom: '1px solid var(--border-subtle)',
+              background: 'var(--bg-canvas)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+              <MessageSquare size={16} className="text-electric" style={{ flexShrink: 0 }} />
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  color: 'var(--fg-primary)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '350px',
+                }}
+              >
+                {sessions.find((s) => s.id === sessionId)?.title || 'Current Shopping Session'}
+              </span>
+              <span className="status-live-pill" style={{ fontSize: '0.65rem', padding: '0.1rem 0.45rem' }}>
+                {messages.length - 1 <= 0 ? 'Fresh Thread' : `${messages.length - 1} turns`}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={createNewSession}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: 'var(--accent-electric)',
+                background: 'rgba(79, 70, 229, 0.08)',
+                border: '1px solid rgba(79, 70, 229, 0.25)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.3rem 0.65rem',
+                cursor: 'pointer',
+              }}
+              title="Start a new chat thread"
+            >
+              <Plus size={13} />
+              <span>New Chat</span>
+            </button>
+          </div>
+
           {/* Background Working Status Notice Bar */}
           {isWorking && (
             <div className="agent-working-notice-bar" role="status" aria-live="polite">

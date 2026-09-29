@@ -114,7 +114,6 @@ export async function fetchFeedFromDB(userId: string | null): Promise<FeedRespon
         id: `affinity-${topCategory.toLowerCase().replace(/\s+/g, '-')}`,
         title: `Trending in ${topCategory}`,
         subtitle: 'Selected based on your browsing and conversational preferences',
-        badge: 'For You',
         products: categoryProducts.slice(0, 8),
       });
       isPersonalized = true;

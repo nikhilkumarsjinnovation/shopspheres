@@ -176,7 +176,7 @@ export async function chat(input: {
   const personaConfig = resolvePersona(input.persona);
 
   if (!input.apiKey) {
-    return generateResilientFallback(safeMessage, input.catalog, input.userId);
+    return generateResilientFallback(safeMessage, input.catalog, input.userId, input.history);
   }
 
   const model = process.env.GEMINI_MODEL || 'gemini-flash-lite-latest';
@@ -189,6 +189,8 @@ export async function chat(input: {
     `- You are NOT just a conversational bot; you are a real working agent empowered to take actions on behalf of the customer.`,
     `- ALWAYS call tools when the user requests searching products, adding to cart, favoriting/wishlisting, gifting to friends, reviewing past purchases, checking or topping up in-app wallet, purchasing items, or modifying orders.`,
     `- When searching: call search_catalog.`,
+    `- When searching for products like a watch, shoes, bag, or accessories without an explicitly requested narrow department, search with query keywords (e.g. query: 'watch') rather than forcing a restrictive category, because items like watches can exist in both Electronics (smartwatches) and Fashion & Apparel (classic watches).`,
+    `- When the customer corrects you or refers to previous messages in the conversation (e.g. 'i asked you about watches'), pay strict attention to conversational context from previous messages, apologize for any error, and immediately show the requested products.`,
     `- When managing cart: call manage_cart (actions: add, remove, update, clear, view).`,
     `- When managing favorites/wishlist: call manage_favorites (actions: add, remove, list).`,
     `- When gifting: call get_friends_list or send_as_gift.`,
@@ -201,6 +203,7 @@ export async function chat(input: {
     `FORMATTING & STYLE GUIDELINES:`,
     `- Format your responses cleanly using GitHub-flavored Markdown: bold product names, bullet lists for options/features, and clear INR currency formatting (e.g. ₹1,499).`,
     `- When a user specifies category and budget (e.g. "smartphone under 50000"), NEVER recommend items outside that category or above their budget!`,
+    `- NEVER show completely unrelated items. If no products match, tell the user honestly and suggest adjusting filters.`,
     `- Keep replies crisp, actionable, and free of unnecessary fluff.`,
     input.accessibilityNote ? `ACCESSIBILITY: ${input.accessibilityNote}` : '',
     input.memories ? `CUSTOMER PROFILE & MEMORIES:\n${input.memories}` : '',
@@ -285,6 +288,27 @@ export async function chat(input: {
         });
       }
 
+      if (!res.ok && model !== 'gemini-flash-latest') {
+        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${input.apiKey}`;
+        const retryRes = await fetch(fallbackUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: systemInstructions }],
+            },
+            contents,
+            tools: SUPER_AGENT_TOOLS,
+            generationConfig: {
+              temperature: 0.2,
+            },
+          }),
+        });
+        if (retryRes.ok) {
+          res = retryRes;
+        }
+      }
+
       if (!res.ok) {
         const errorText = await res.text();
         console.warn(`[Super Agent] Gemini turn ${turnCount} failed (${res.status}): ${errorText}`);
@@ -367,7 +391,7 @@ export async function chat(input: {
           finalReply = `I've handled that for you! Here are the details:`;
         }
       } else {
-        return generateResilientFallback(safeMessage, input.catalog, input.userId);
+        return generateResilientFallback(safeMessage, input.catalog, input.userId, input.history);
       }
     }
 
@@ -381,7 +405,7 @@ export async function chat(input: {
     };
   } catch (error) {
     console.error('[Super Agent] Execution error:', error);
-    return generateResilientFallback(safeMessage, input.catalog, input.userId);
+    return generateResilientFallback(safeMessage, input.catalog, input.userId, input.history);
   }
 }
 
@@ -409,10 +433,57 @@ function extractIntentsFromQuery(message: string) {
   };
 }
 
+const FALLBACK_STOP_WORDS = new Set([
+  'product', 'products', 'item', 'items', 'show', 'me', 'under', 'cheap', 'best',
+  'good', 'from', 'category', 'in', 'the', 'for', 'buy', 'need', 'want', 'please',
+  'any', 'find', 'get', 'give', 'below', 'less', 'than', 'price', 'budget', 'with', 'and',
+  'about', 'asked', 'you', 'some', 'randome', 'random', 'stuff', 'can', 'this', 'that',
+  'decent', 'a', 'an', 'to', 'of', 'i', 'my', 'would', 'like', 'there', 'is', 'are', 'purchase',
+  'gave', 'what', 'not', 'wrong', 'hey', 'hello', 'hi', 'agent', 'bot', 'do', 'was', 'were',
+  'actually', 'earlier', 'previous', 'previously', 'tell', 'did', 'recommend', 'suggest'
+]);
+
+function fallbackStemWord(word: string): string {
+  const w = word.toLowerCase().trim();
+  if (w.endsWith('watches')) return w.slice(0, -2);
+  if (w.endsWith('smartwatches')) return w.slice(0, -2);
+  if (w.endsWith('ies') && w.length > 4) return w.slice(0, -3) + 'y';
+  if (w.endsWith('es') && w.length > 4) return w.slice(0, -2);
+  if (w.endsWith('s') && !w.endsWith('ss') && w.length > 3) return w.slice(0, -1);
+  return w;
+}
+
+function extractSubject(message: string, history: Array<{ role: string; content: string }> = []): string {
+  const patternMatch = message.match(/(?:asked\s+(?:you\s+)?about|looking\s+for|wanted|said|search\s+for)\s+([a-z0-9\s]+?)(?:[,.]|$|\s+you|\s+but)/i);
+  if (patternMatch && patternMatch[1].trim()) {
+    const raw = patternMatch[1].trim().toLowerCase().split(/\s+/).filter((w) => !FALLBACK_STOP_WORDS.has(w));
+    if (raw.length > 0) return Array.from(new Set(raw.map(fallbackStemWord))).join(' ');
+  }
+
+  const rawWords = message.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !FALLBACK_STOP_WORDS.has(w));
+  if (rawWords.length > 0) {
+    return Array.from(new Set(rawWords.map(fallbackStemWord))).join(' ');
+  }
+
+  if (history && history.length > 0) {
+    for (let i = history.length - 1; i >= 0; i--) {
+      const prev = history[i];
+      if (prev.role === 'user') {
+        const prevWords = prev.content.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !FALLBACK_STOP_WORDS.has(w));
+        if (prevWords.length > 0) {
+          return Array.from(new Set(prevWords.map(fallbackStemWord))).join(' ');
+        }
+      }
+    }
+  }
+  return '';
+}
+
 async function generateResilientFallback(
   message: string,
   catalog: CatalogItem[],
-  userId?: string | null
+  userId?: string | null,
+  history?: Array<{ role: string; content: string }>
 ): Promise<AiSuperAgentOutput> {
   const lower = message.toLowerCase();
 
@@ -465,27 +536,44 @@ async function generateResilientFallback(
     };
   }
 
-  // Catalog keyword match
-  const matched = catalog.filter((product) => {
-    const text = `${product.title} ${product.category} ${product.sub_category || ''} ${(product.tags || []).join(' ')}`.toLowerCase();
-    return lower.split(/\s+/).some((word) => word.length > 2 && text.includes(word));
-  });
+  const isCorrection =
+    lower.includes('asked') ||
+    lower.includes('random') ||
+    lower.includes('wrong') ||
+    lower.includes('not what') ||
+    lower.includes('gave me');
 
-  const displayList = matched.length > 0 ? matched.slice(0, 4) : catalog.slice(0, 4);
-  const reply = matched.length > 0
-    ? `Namaste! I found these verified products matching your search. You can ask me to add them to your cart, save to favorites, gift to a friend, or buy directly using your in-app wallet!`
-    : `Namaste! I'm your ShopSphere Super Agent. Tell me what product you'd like to find, your budget in ₹, or ask me to check your wallet balance, manage your cart, or send a surprise gift to a friend!`;
+  const subject = extractSubject(message, history);
+
+  if (subject) {
+    const searchRes = await executeAgentTool('search_catalog', { query: subject }, userId || null);
+    const products = searchRes.output?.products || [];
+
+    if (products.length > 0) {
+      const intro = isCorrection
+        ? `I sincerely apologize for the confusion earlier! Here are the actual **${subject}** options available in our store:`
+        : `Namaste! Here are verified products matching **${subject}** in our catalog:`;
+
+      return {
+        reply: intro,
+        recommendedProductIds: products.map((p: any) => p.id),
+        extractedIntents: { category: null, keywords: [subject], priceMax: null },
+        actionCards: searchRes.actionCard ? [searchRes.actionCard] : undefined,
+        toolExecutions: [
+          {
+            toolName: 'search_catalog',
+            args: { query: subject },
+            output: searchRes.output,
+          },
+        ],
+      };
+    }
+  }
 
   return {
-    reply,
-    recommendedProductIds: displayList.map((p) => p.id),
+    reply: `Namaste! I am your ShopSphere Super Agent. How can I assist you with your shopping today? Tell me what product you'd like to find, your budget in ₹, or ask me to check your wallet balance or orders!`,
+    recommendedProductIds: [],
     extractedIntents: extractIntentsFromQuery(message),
-    actionCards: [
-      {
-        type: 'PRODUCT_CAROUSEL',
-        data: { products: displayList },
-      },
-    ],
   };
 }
 

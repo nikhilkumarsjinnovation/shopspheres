@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { UserPlus, Users, Check, X, Clock, UserCheck } from 'lucide-react';
+import Link from 'next/link';
+import { UserPlus, Users, Check, X, Clock, UserCheck, ArrowRight } from 'lucide-react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
 interface FriendRow {
@@ -64,6 +65,46 @@ export default function FriendsPage() {
         <p style={{ color: 'var(--fg-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
           Connect with friends to send surprises, coordinate group gifts, and share favorite finds.
         </p>
+      </div>
+
+      {/* Moved to Profile Banner */}
+      <div style={{
+        padding: '1rem 1.25rem',
+        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08))',
+        border: '1px solid rgba(139, 92, 246, 0.3)',
+        borderRadius: 'var(--radius-lg)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+      }}>
+        <div>
+          <span style={{ fontWeight: 700, color: 'var(--fg-primary)', display: 'block', fontSize: '0.95rem' }}>
+            Friends is now unified under your Account Profile!
+          </span>
+          <span style={{ fontSize: '0.825rem', color: 'var(--fg-muted)' }}>
+            Manage friend requests, connections, addresses, and wallet balances all in one place.
+          </span>
+        </div>
+        <Link
+          href="/profile?tab=friends"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.5rem 1rem',
+            background: 'var(--accent-electric)',
+            color: '#fff',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          <span>Open in Profile</span>
+          <ArrowRight size={14} />
+        </Link>
       </div>
 
       {error && (
