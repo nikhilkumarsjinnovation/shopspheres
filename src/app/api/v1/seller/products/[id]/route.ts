@@ -71,3 +71,27 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const versionError = requireApiVersion(request);
+  if (versionError) return versionError;
+  const csrfError = csrfMiddleware(request);
+  if (csrfError) return csrfError;
+  const supabase = await createClient();
+  const session = await getAuthenticatedUser(supabase);
+  if (!session) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+  const { id } = await context.params;
+
+  try {
+    const { softDeleteProduct } = await import('@/services/rag-service');
+    const result = await softDeleteProduct(supabase, id, {
+      userId: session.user.id,
+      role: session.profile.role as 'admin' | 'seller',
+    });
+    return NextResponse.json(result);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to delete product.';
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+

@@ -10,6 +10,7 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const geminiKey = process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
 const openAiKey = process.env.OPENAI_API_KEY;
+const nvidiaKey = process.env.NVIDIA_API_KEY || process.env.NV_API_KEY;
 
 if (!url || !key) {
   console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
@@ -18,30 +19,65 @@ if (!url || !key) {
 
 const supabase = createClient(url, key);
 
+function normalizeL2(vector) {
+  const norm = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
+  return norm === 0 ? vector : vector.map((v) => v / norm);
+}
+
 async function embed(text) {
   if (geminiKey) {
-    const model = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001';
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${geminiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        content: { parts: [{ text }] },
-        outputDimensionality: 1536,
-      }),
-    });
-    if (!response.ok) throw new Error(`Gemini ${response.status}`);
-    const payload = await response.json();
-    return payload.embedding.values;
+    try {
+      const model = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001';
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: { parts: [{ text }] },
+          outputDimensionality: 1536,
+        }),
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        return payload.embedding.values;
+      }
+    } catch (e) {
+      console.warn('Gemini embedding failed, trying fallback...', e.message);
+    }
   }
-  if (!openAiKey) throw new Error('No embedding API key');
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openAiKey}` },
-    body: JSON.stringify({ model: 'text-embedding-3-small', input: text, dimensions: 1536 }),
-  });
-  if (!response.ok) throw new Error(`OpenAI ${response.status}`);
-  const payload = await response.json();
-  return payload.data[0].embedding;
+
+  if (openAiKey) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/embeddings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openAiKey}` },
+        body: JSON.stringify({ model: 'text-embedding-3-small', input: text, dimensions: 1536 }),
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        return payload.data[0].embedding;
+      }
+    } catch (e) {
+      console.warn('OpenAI embedding failed, trying fallback...', e.message);
+    }
+  }
+
+  if (nvidiaKey) {
+    const rawModel = process.env.EMBED_NVIDIA_MODEL || 'nemotron-3-embed-1b';
+    const model = rawModel.includes('/') ? rawModel : `nvidia/${rawModel}`;
+    const response = await fetch('https://integrate.api.nvidia.com/v1/embeddings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${nvidiaKey}` },
+      body: JSON.stringify({ input: [text], model, input_type: 'passage' }),
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      const rawVector = payload.data[0].embedding;
+      return normalizeL2(rawVector.slice(0, 1536));
+    }
+    throw new Error(`NVIDIA embedding failed: ${response.status}`);
+  }
+
+  throw new Error('No embedding API key available (Gemini, OpenAI, or NVIDIA).');
 }
 
 const { data: products, error } = await supabase
