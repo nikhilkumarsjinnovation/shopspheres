@@ -132,6 +132,41 @@ export function CartProvider({ children, userId: propUserId }: CartProviderProps
     }
   };
 
+  // Agent State Bridge: Synchronize real-time cart actions executed by the AI Super Agent
+  useEffect(() => {
+    const handleCartSync = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const detail = customEvent.detail;
+      if (!detail) return;
+
+      if (detail.action === 'add' && detail.product) {
+        setCart((prev) => {
+          let updated = addItem(prev, detail.product);
+          if (detail.quantity && detail.quantity > 1) {
+            updated = setItemQuantity(updated, detail.product.id, detail.quantity);
+          }
+          return updated;
+        });
+      } else if (detail.action === 'remove' && detail.productId) {
+        setCart((prev) => prev.filter((item) => item.id !== detail.productId));
+      } else if (detail.action === 'update' && detail.productId && typeof detail.quantity === 'number') {
+        setCart((prev) => setItemQuantity(prev, detail.productId, detail.quantity));
+      }
+    };
+
+    const handleCartClear = () => {
+      clearCart();
+    };
+
+    window.addEventListener('shopsphere:cart-update', handleCartSync);
+    window.addEventListener('shopsphere:cart-clear', handleCartClear);
+
+    return () => {
+      window.removeEventListener('shopsphere:cart-update', handleCartSync);
+      window.removeEventListener('shopsphere:cart-clear', handleCartClear);
+    };
+  }, [activeUserId]);
+
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 

@@ -16,12 +16,13 @@ export default async function OrdersPage() {
   }
 
   // Fetch orders placed by this customer, newest first
-  const { data: orders, error } = await supabase
+  let { data: orders, error } = await supabase
     .from('orders')
     .select(`
       id,
       total_amount,
       status,
+      placed_by,
       is_gift,
       recipient_email,
       gift_reveal_date,
@@ -42,6 +43,37 @@ export default async function OrdersPage() {
     `)
     .eq('customer_id', session.user.id)
     .order('created_at', { ascending: false });
+
+  if (error && error.message.includes('placed_by')) {
+    const fallback = await supabase
+      .from('orders')
+      .select(`
+        id,
+        total_amount,
+        status,
+        is_gift,
+        recipient_email,
+        gift_reveal_date,
+        shipping_address,
+        created_at,
+        order_items (
+          id,
+          quantity,
+          unit_price,
+          seller_id,
+          product:products (
+            id,
+            title,
+            category,
+            shop_id
+          )
+        )
+      `)
+      .eq('customer_id', session.user.id)
+      .order('created_at', { ascending: false });
+    orders = (fallback.data as any) || [];
+    error = fallback.error;
+  }
 
   const orderList = orders || [];
   const orderIds = orderList.map((order) => order.id);
@@ -103,14 +135,40 @@ export default async function OrdersPage() {
               day: 'numeric',
             });
 
+            const isAgent =
+              (order as any).placed_by === 'agent' ||
+              Boolean((order.shipping_address as any)?._metadata?.placed_by === 'agent');
+
             return (
               <div key={order.id} className="order-card">
                 {/* Header Row */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-subtle)' }}>
                   <div>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--fg-muted)' }}>
-                      Order #SS-{order.id.slice(0, 8).toUpperCase()}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--fg-muted)' }}>
+                        Order #SS-{order.id.slice(0, 8).toUpperCase()}
+                      </span>
+                      {isAgent && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.15rem 0.55rem',
+                            background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.12))',
+                            border: '1px solid rgba(79, 70, 229, 0.3)',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            color: 'var(--accent-electric)',
+                            letterSpacing: '0.02em',
+                          }}
+                          title="Autonomous purchase by Customer AI Super Agent · Protected by relaxed cancellation policy"
+                        >
+                          🤖 Agent Purchase
+                        </span>
+                      )}
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
                       <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>Placed on {dateStr}</span>
                       <span style={{ color: 'var(--fg-subtle)' }}>·</span>
@@ -133,7 +191,7 @@ export default async function OrdersPage() {
                     >
                       {order.status.replace(/_/g, ' ')}
                     </span>
-                    <CancelOrderButton orderId={order.id} status={order.status} />
+                    <CancelOrderButton orderId={order.id} status={order.status} placedBy={isAgent ? 'agent' : 'customer'} />
                   </div>
                 </div>
 
@@ -141,6 +199,15 @@ export default async function OrdersPage() {
                 <div style={{ padding: '1rem 0' }}>
                   <OrderTrack status={order.status} />
                 </div>
+
+                {isAgent && (
+                  <div style={{ padding: '0.6rem 0.85rem', background: 'rgba(79, 70, 229, 0.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(79, 70, 229, 0.18)', fontSize: '0.78rem', color: 'var(--accent-electric)', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <span>
+                      🤖 <strong>AI Super Agent Purchase:</strong> Relaxed cancellation policy applies. You can cancel with 100% wallet refund anytime before courier dispatch (through packed status).
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--fg-muted)' }}>100% Instant Wallet Refund</span>
+                  </div>
+                )}
 
                 {/* Seller & Dispatch Info */}
                 <div style={{ padding: '0.85rem 1rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', marginBottom: '1.25rem', fontSize: '0.825rem' }}>

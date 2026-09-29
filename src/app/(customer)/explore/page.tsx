@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import ExploreFeedClient from '@/components/ExploreFeedClient';
+import ExploreHeaderSearch from '@/components/ExploreHeaderSearch';
 
 export default async function ExplorePage() {
   const supabase = await createClient();
@@ -39,14 +40,12 @@ export default async function ExplorePage() {
 
   return (
     <div className="animate-slide-up">
-      <div className="section-header" style={{ marginBottom: '1.75rem' }}>
-        <div>
-          <h1 className="section-title" style={{ fontSize: '2rem', letterSpacing: '-0.03em' }}>
+      <div className="section-header explore-page-head" style={{ marginBottom: '1.5rem' }}>
+        <div className="explore-page-head-inner">
+          <h1 className="section-title explore-page-title">
             Explore Marketplace
           </h1>
-          <p className="section-subtitle">
-            Curated products from verified shops across India · Free Express Delivery · Zero Hidden Fees
-          </p>
+          <ExploreHeaderSearch />
         </div>
       </div>
 

@@ -29,23 +29,46 @@ flowchart TD
 
 ---
 
-## 2. Agent 1: The Personal AI Shopping Companion (Living Concierge)
+## 2. Agent 1: The Customer Super Agent (Autonomous ReAct Companion)
+
+> **Detailed Specification:** See the dedicated [`AGENT_ARCHITECTURE.md`](file:///home/batman/Pictures/shopsphere/AGENT_ARCHITECTURE.md) for full sequence diagrams, tool schemas, and reactive state flows.
 
 ### 2.1 Mission & Core Capabilities
-The Personal AI Companion is a continuous-learning conversational guide that understands each user's unique context, provides objective purchasing recommendations, answers complex compatibility questions, and **autonomously mutates the customer's home explore feed in real time**.
+The Customer Super Agent is an autonomous shopping companion powered by **Google Gemini** (`gemini-flash-lite-latest` / `gemini-3.1-flash-lite`, free-tier and non-deprecated). It moves beyond passive Q&A to execute real marketplace transactions across the platform:
+* **Catalog Exploration & Specs**: Semantic search with price bounds in ₹ and deep spec extraction.
+* **Autonomous Cart Management**: Adding, updating quantities, and clearing items in real time.
+* **Favorites / Wishlist Management**: Adding and removing saved items with instant heart icon synchronization.
+* **Social Gifting**: Finding friends and sending surprise gift packages with scheduled reveal dates.
+* **Verified Product Reviews**: Querying past purchases and submitting customer ratings & text reviews.
+* **In-App Wallet 1-Tap Checkout**: Atomic balance verification, top-up prompts, and 2-phase HITL checkout.
+* **Agent Purchase Protection**: Every order placed by the agent is labeled `🤖 Agent Purchase` and backed by a relaxed cancellation policy (cancellable through `packed` status with instant 100% wallet refunds).
 
-### 2.2 Living Memory & User Context Extraction
-* **Context Vector Stored in `ai_user_profiles`:**
-  * **Explicit Profile:** Budget limits, dietary restrictions (vegan, keto, gluten-free), clothing/shoe sizes, brand preferences.
-  * **Implicit Affinity Graph:** Top categories browsed, dwell time on listings, search keywords, price points, conversion history.
-  * **Conversational Intent Log:** Extracted entities from recent chat interactions.
+### 2.2 Native Gemini 13-Tool Calling Registry (`src/services/agent-tools.ts`)
+The Super Agent operates with 13 registered Gemini function declarations:
+1. `search_catalog`: Search approved catalog by query, category, price in ₹, and stock.
+2. `get_product_specs`: Detailed attributes, specifications, seller details, and reviews.
+3. `manage_cart`: Direct cart operations emitting `CART_SYNC` / `CART_CLEAR` client actions.
+4. `manage_favorites`: Manage customer wishlist items emitting `FAVORITES_SYNC` client actions.
+5. `get_friends_list`: Query user's social circle for gifting and sharing.
+6. `send_as_gift`: Configure surprise gift wraps with custom greetings and scheduled reveal.
+7. `get_reviewable_products`: Retrieve past delivered purchases eligible for reviews.
+8. `submit_product_review`: Post verified buyer reviews (1–5★) and feedback.
+9. `get_wallet_status`: Atomic query of in-app wallet balance in ₹ and transaction ledger.
+10. `topup_wallet`: Instant demo/prepaid deposit to the customer's in-app wallet.
+11. `prepare_wallet_checkout`: Phase 1 of HITL: validate balance, reserve stock, and generate `WALLET_PAY_AUTH` card.
+12. `confirm_wallet_payment`: Phase 2 of HITL: customer 1-tap confirmation, atomic debit, and order placement.
+13. `cancel_or_replace_order`: Relaxed cancellation engine through `packed` status with instant 100% refund.
 
-### 2.3 Tool-Calling Architecture (`/api/ai/chat`)
-The assistant interacts with platform data via structured tool definitions:
-1. `search_catalog(query, category?, max_price?, in_stock?, condition?)`: Queries the approved products database.
-2. `compare_products(product_ids)`: Generates side-by-side spec comparison highlighting differences and trade-offs.
-3. `check_local_availability(product_id, pincode)`: Checks whether an item is within 30 km for immediate hub/store pickup.
-4. `update_user_preference(category, weight_delta, intent_tag)`: Mutates `ai_user_profiles.feed_weights` to immediately personalize the customer's home feed.
+### 2.3 Two-Phase Human-in-the-Loop (HITL) Financial Safety Protocol
+To ensure strict financial security:
+* The agent never deducts money unilaterally.
+* `prepare_wallet_checkout` generates a secure `WALLET_PAY_AUTH` interactive card in the chat drawer.
+* The user must explicitly tap **"Authorize ₹[total] & Confirm Order"**, which executes `confirm_wallet_payment`.
+
+### 2.4 Client-Side Reactive State Bridge (DOM CustomEvent Bus)
+* `shopsphere:cart-update` & `shopsphere:cart-clear` -> Instantly updates the navbar bag badge and `CartContext`.
+* `shopsphere:favorites-update` -> Toggles the heart icons on `ProductCard` across explore feeds.
+* `shopsphere:wallet-update` -> Syncs in-app wallet balance across checkout and assistant drawers.
 
 ---
 

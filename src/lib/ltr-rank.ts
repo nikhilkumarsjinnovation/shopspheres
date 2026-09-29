@@ -53,15 +53,13 @@ export function buildLtrFeed(products: FeedProduct[], features: ComputedUserFeat
       id: 'ltr-affinity',
       title: `Because you browse ${topCategory}`,
       subtitle: `Ranked by ${modelName}`,
-      badge: 'For You',
       products: themed,
     });
   }
   carousels.push({
     id: 'ltr-ranked',
     title: 'Ranked for you',
-    subtitle: 'Diverse picks from your recent behavior',
-    badge: 'Ranked',
+    subtitle: '',
     products: ranked.slice(0, 8),
   });
   return {

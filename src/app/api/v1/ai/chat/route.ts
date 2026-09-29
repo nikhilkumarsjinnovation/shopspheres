@@ -7,12 +7,17 @@ import { csrfMiddleware } from '@/lib/csrf';
 import { chatLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { chat, getRecommendations, intentsToJson, mutateFeed, parseFeedWeights, summarizeConversation } from '@/services/ai-service';
 import { invalidatePersonalizedFeed } from '@/lib/cache';
+import { getUserBehavioralProfile, formatBehavioralMemoryPrompt, type UserBehavioralProfile } from '@/services/agent-memory-service';
 import type { AiUserProfile, UserAccessibilityProfile } from '@/types/database.types';
 
 const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty').max(2000),
   sessionId: z.string().optional(),
   persona: z.enum(['everyday', 'tech', 'fashion', 'gourmet', 'beauty', 'accessibility']).optional().default('everyday'),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'model']),
+    content: z.string(),
+  })).optional(),
 });
 
 type CatalogItem = {
@@ -134,17 +139,15 @@ export async function POST(request: NextRequest) {
 
     let memories = '';
     let priorTurns: Array<{ role: string; content: string; created_at: string }> = [];
+    let behavioralProfile: UserBehavioralProfile | null = null;
+
     if (userId) {
-      const { data: memoryRows, error: memoryError } = await supabase
-        .from('ai_agent_memory')
-        .select('content')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      if (memoryError) {
-        throw new Error(memoryError.message);
+      try {
+        behavioralProfile = await getUserBehavioralProfile(userId);
+        memories = formatBehavioralMemoryPrompt(behavioralProfile);
+      } catch (profileErr) {
+        console.warn('[Personal AI Assistant] Failed to load behavioral profile:', profileErr);
       }
-      memories = (memoryRows ?? []).map((row) => row.content).join('\n');
 
       const { data: turns, error: turnsError } = await supabase
         .from('ai_conversations')
@@ -153,10 +156,19 @@ export async function POST(request: NextRequest) {
         .eq('session_id', sessionId)
         .order('created_at', { ascending: true })
         .limit(20);
-      if (turnsError) {
-        throw new Error(turnsError.message);
+
+      if (!turnsError && turns && turns.length > 0) {
+        priorTurns = turns;
       }
-      priorTurns = turns ?? [];
+    }
+
+    const clientHistory = validatedBody.data.history || [];
+    let combinedHistory: Array<{ role: string; content: string }> = [];
+
+    if (priorTurns.length > 0) {
+      combinedHistory = priorTurns.map((t) => ({ role: t.role, content: t.content }));
+    } else if (clientHistory.length > 0) {
+      combinedHistory = clientHistory;
     }
 
     const validatedOutput = await chat({
@@ -168,6 +180,8 @@ export async function POST(request: NextRequest) {
         ? 'NOTE: User has simplified mode enabled. Keep your reply direct, clear, using bullet points and simple language.'
         : undefined,
       apiKey,
+      userId,
+      history: combinedHistory,
     });
 
     let feedMutated = false;
@@ -197,6 +211,7 @@ export async function POST(request: NextRequest) {
           role: 'assistant',
           content: validatedOutput.reply,
           extracted_intents: intentsToJson(validatedOutput.extractedIntents),
+          recommended_product_ids: validatedOutput.recommendedProductIds || [],
         },
       ]);
 
@@ -227,6 +242,10 @@ export async function POST(request: NextRequest) {
       recommendedProducts: recommendedProductDetails,
       feedUpdated: feedMutated,
       intents: validatedOutput.extractedIntents,
+      clientActions: validatedOutput.clientActions || [],
+      actionCards: validatedOutput.actionCards || [],
+      toolExecutions: validatedOutput.toolExecutions || [],
+      behavioralProfile,
       sessionId,
     });
   } catch (err: unknown) {
