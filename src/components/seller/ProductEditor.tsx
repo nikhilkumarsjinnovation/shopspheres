@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import { formatINR } from '@/lib/formatters';
 import type { Json } from '@/types/database.types';
-import { Save, Send, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Save, Send, AlertTriangle, CheckCircle2, Trash2, RotateCcw, Clock } from 'lucide-react';
 
 type AttributeItem = { id: string; key: string; value: string };
 
@@ -103,6 +103,57 @@ export default function ProductEditor({
     }
   };
 
+  const [isSoftDeleted, setIsSoftDeleted] = useState<boolean>((product.attributes as any)?.is_soft_deleted === true);
+  const [deleting, setDeleting] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to remove this product? It will be held in a 1-week grace period where you can restore it anytime with all RAG embeddings preserved.')) {
+      return;
+    }
+    setDeleting(true);
+    setMessage(null);
+    try {
+      const response = await fetchWithCsrf(`/api/v1/seller/products/${product.id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setIsSoftDeleted(true);
+        setMessage('Product soft-deleted. RAG embeddings will be retained for 1 week. You can restore this listing anytime.');
+      } else {
+        setMessage(data.error || 'Failed to delete product.');
+      }
+    } catch {
+      setMessage('Failed to delete product.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    setMessage(null);
+    try {
+      const response = await fetchWithCsrf('/api/v1/ai/rag/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setIsSoftDeleted(false);
+        setMessage('Product restored successfully! Existing RAG embeddings and knowledge nodes remain intact.');
+      } else {
+        setMessage(data.error || 'Failed to restore product.');
+      }
+    } catch {
+      setMessage('Failed to restore product.');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Moderation Status Banner */}
@@ -127,6 +178,24 @@ export default function ProductEditor({
           </div>
         )}
       </div>
+
+      {isSoftDeleted && (
+        <div style={{ padding: '0.95rem 1.15rem', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: 'var(--radius-md)', color: '#ef4444', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Clock size={16} />
+            <span><strong>1-Week Grace Period Active:</strong> This listing was removed, but its RAG knowledge nodes are retained for 7 days. You can recover it anytime before the deadline.</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleRestore}
+            disabled={restoring}
+            style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', fontWeight: 700, borderRadius: 'var(--radius-sm)', background: '#10b981', color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+          >
+            <RotateCcw size={13} className={restoring ? 'animate-spin' : ''} />
+            {restoring ? 'Restoring…' : 'Restore Listing'}
+          </button>
+        </div>
+      )}
 
       {locked && (
         <div style={{ padding: '0.85rem 1rem', background: 'var(--success-bg)', border: '1px solid var(--success-border)', borderRadius: 'var(--radius-md)', color: 'var(--success)', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -321,31 +390,82 @@ export default function ProductEditor({
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
-          {(product.approval_status === 'pending' || product.approval_status === 'rejected') && !locked && (
-            <button
-              type="submit"
-              className="btn-card-add"
-              style={{ padding: '0.65rem 1.5rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-              disabled={saving}
-            >
-              <Save size={15} />
-              <span>{saving ? 'Saving…' : 'Save Changes'}</span>
-            </button>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {(product.approval_status === 'pending' || product.approval_status === 'rejected') && !locked && (
+              <button
+                type="submit"
+                className="btn-card-add"
+                style={{ padding: '0.65rem 1.5rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                disabled={saving}
+              >
+                <Save size={15} />
+                <span>{saving ? 'Saving…' : 'Save Changes'}</span>
+              </button>
+            )}
 
-          {canResubmit && (
-            <button
-              type="button"
-              className="btn-card-toggle"
-              style={{ padding: '0.65rem 1.25rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-              disabled={saving}
-              onClick={() => { void save(true); }}
-            >
-              <Send size={14} />
-              <span>Resubmit for Approval</span>
-            </button>
-          )}
+            {canResubmit && (
+              <button
+                type="button"
+                className="btn-card-toggle"
+                style={{ padding: '0.65rem 1.25rem', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                disabled={saving}
+                onClick={() => { void save(true); }}
+              >
+                <Send size={14} />
+                <span>Resubmit for Approval</span>
+              </button>
+            )}
+          </div>
+
+          <div>
+            {isSoftDeleted ? (
+              <button
+                type="button"
+                onClick={handleRestore}
+                disabled={restoring}
+                style={{
+                  padding: '0.65rem 1.2rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  borderRadius: 'var(--radius-md)',
+                  background: '#10b981',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)',
+                }}
+              >
+                <RotateCcw size={14} className={restoring ? 'animate-spin' : ''} />
+                <span>{restoring ? 'Restoring Listing…' : 'Restore Listing'}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  padding: '0.65rem 1.2rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-md)',
+                  background: 'transparent',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <Trash2 size={14} />
+                <span>{deleting ? 'Removing…' : 'Delete Listing (7-Day Grace Period)'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {product.approval_status === 'rejected' && !canResubmit && (

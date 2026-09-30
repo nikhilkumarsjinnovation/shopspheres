@@ -506,6 +506,8 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
+          deleted_at?: string | null
+          is_published?: boolean
         }
         Insert: {
           ai_categorized?: boolean
@@ -534,6 +536,8 @@ export type Database = {
           tags?: string[]
           title: string
           updated_at?: string
+          deleted_at?: string | null
+          is_published?: boolean
         }
         Update: {
           ai_categorized?: boolean
@@ -562,6 +566,8 @@ export type Database = {
           tags?: string[]
           title?: string
           updated_at?: string
+          deleted_at?: string | null
+          is_published?: boolean
         }
         Relationships: [
           {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Users, Archive, FileText, Store, ShieldCheck } from 'lucide-react';
+import { Activity, Users, Archive, FileText, Store, ShieldCheck, Brain } from 'lucide-react';
 import SignOutButton from '@/components/SignOutButton';
 
 interface AdminSidebarProps {
@@ -12,6 +12,7 @@ interface AdminSidebarProps {
 
 const links = [
   { href: '/admin/dashboard', label: 'Pulse / Overview', icon: Activity, match: (p: string) => p === '/admin/dashboard' || p === '/dashboard' || p === '/admin' },
+  { href: '/admin/assistant', label: 'Platform RAG & AI', icon: Brain, match: (p: string) => p.startsWith('/admin/assistant') },
   { href: '/admin/users', label: 'User Directory', icon: Users, match: (p: string) => p === '/admin/users' },
   { href: '/admin/catalog', label: 'Catalog Approvals', icon: Archive, match: (p: string) => p.startsWith('/admin/catalog') },
   { href: '/admin/orders', label: 'Order Ledger', icon: FileText, match: (p: string) => p.startsWith('/admin/orders') },

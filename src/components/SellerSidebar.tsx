@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Store, Palette, PackageCheck, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, Store, Palette, PackageCheck, PlusCircle, Brain } from 'lucide-react';
 import SignOutButton from '@/components/SignOutButton';
 
 interface SellerSidebarProps {
@@ -11,6 +11,7 @@ interface SellerSidebarProps {
 
 const links = [
   { href: '/seller/dashboard', label: 'Overview', icon: LayoutDashboard, match: (p: string) => p === '/seller/dashboard' },
+  { href: '/seller/assistant', label: 'Store RAG & AI', icon: Brain, match: (p: string) => p.startsWith('/seller/assistant') },
   { href: '/seller/branding', label: 'Identity & Brand', icon: Palette, match: (p: string) => p === '/seller/branding' },
   { href: '/seller/shop', label: 'Storefront', icon: Store, match: (p: string) => p === '/seller/shop' },
   { href: '/seller/orders', label: 'Fulfillment & Orders', icon: PackageCheck, match: (p: string) => p.startsWith('/seller/orders') },
