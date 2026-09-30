@@ -647,6 +647,35 @@ export async function executeRagChat(params: {
       ? `Shop Owner (${userContext.shopName || 'Merchant Store'})`
       : (userContext.shopId ? `Admin auditing shop (${userContext.shopName || userContext.shopId})` : 'Platform Administrator (Global Store Access)');
 
+    // Enrich with dynamic store intelligence if relevant
+    let additionalIntelligence = '';
+    const lowerQuery = message.toLowerCase();
+    if (lowerQuery.includes('stock') || lowerQuery.includes('restock') || lowerQuery.includes('inventory') || lowerQuery.includes('deplet') || lowerQuery.includes('supply')) {
+      try {
+        const { getSellerRestockAlerts } = await import('@/services/stock-predictor-service');
+        const alerts = await getSellerRestockAlerts(supabase, userContext.userId);
+        if (alerts.length > 0) {
+          additionalIntelligence += `\n\nPROACTIVE RESTOCK PREDICTIONS (VELOCITY-BASED):\n` +
+            alerts.slice(0, 5).map((a) => `- "${a.productTitle}": Stock: ${a.currentStock} units | Velocity: ${a.dailyVelocity} units/day | Depletion in: ${a.daysUntilStockout} days (${a.urgency.toUpperCase()}) | Recommended Reorder: ${a.recommendedReorderQty} units`).join('\n');
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (lowerQuery.includes('digest') || lowerQuery.includes('weekly') || lowerQuery.includes('performance') || lowerQuery.includes('analytics') || lowerQuery.includes('sales') || lowerQuery.includes('revenue')) {
+      try {
+        const { getLatestStoreDigest } = await import('@/services/store-intelligence-service');
+        const digest = await getLatestStoreDigest(supabase, userContext.userId);
+        additionalIntelligence += `\n\nWEEKLY STORE INTELLIGENCE DIGEST:\n` +
+          `- Executive Summary: ${digest.executiveSummary}\n` +
+          `- 7-Day GMV: ₹${digest.metrics.totalRevenue7d} across ${digest.metrics.totalOrders7d} orders\n` +
+          `- AI Strategic Recommendations:\n${digest.actionableRecommendations.map((r) => `  * ${r}`).join('\n')}`;
+      } catch {
+        // ignore
+      }
+    }
+
     systemPrompt = `You are ShopSphere's Store Intelligence AI Copilot.
 User Scope: ${tenantLabel}
 PERSONALIZATION MODE: ON (Grounded RAG Store Embeddings Activated)
@@ -657,7 +686,7 @@ STORE KNOWLEDGE BASE (STRICTLY PRIVATE & TENANT-ISOLATED):
 ${stats.gracePeriodProducts > 0 ? `- Notice: ${stats.gracePeriodProducts} products are currently soft-deleted and held in 1-week recovery.` : ''}
 
 RETRIEVED GROUNDED KNOWLEDGE NODES FOR THIS QUERY:
-${nodesContext}
+${nodesContext}${additionalIntelligence}
 
 CRITICAL OPERATIONAL RULES:
 1. Base your answer strictly on the retrieved knowledge nodes and store data above.

@@ -249,15 +249,44 @@ export default function AddProductPage() {
         return;
       }
 
-      setSuccessMessage(
-        `🎉 Product "${insertedProduct.title}" submitted successfully! Current status: PENDING APPROVAL. An administrator will review your listing before it goes live to customers.`
-      );
+      // 3. Autonomous AI Catalog Moderation Gate
+      try {
+        const modResponse = await fetchWithCsrf('/api/v1/seller/products/moderate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: insertedProduct.id }),
+        });
+        if (modResponse.ok) {
+          const modData = await modResponse.json();
+          if (modData.moderation?.decision === 'approved') {
+            setSuccessMessage(
+              `✨ Product "${insertedProduct.title}" verified & AUTO-APPROVED by AI Quality Gate (${modData.moderation.score}% confidence)! Listing is live and indexed into RAG search.`
+            );
+          } else if (modData.moderation?.decision === 'rejected') {
+            setSuccessMessage(
+              `⚠️ Product submitted as PENDING. AI Quality Gate noted: ${modData.moderation.reasons?.[0] || 'Review required'}. Admin review scheduled.`
+            );
+          } else {
+            setSuccessMessage(
+              `🎉 Product "${insertedProduct.title}" submitted successfully! Current status: PENDING APPROVAL. Admin review scheduled.`
+            );
+          }
+        } else {
+          setSuccessMessage(
+            `🎉 Product "${insertedProduct.title}" submitted successfully! Current status: PENDING APPROVAL.`
+          );
+        }
+      } catch {
+        setSuccessMessage(
+          `🎉 Product "${insertedProduct.title}" submitted successfully! Current status: PENDING APPROVAL.`
+        );
+      }
 
       // Redirect to seller dashboard after short delay
       setTimeout(() => {
         router.push('/seller/dashboard');
         router.refresh();
-      }, 1800);
+      }, 2000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred while saving product.';
       setErrorMessage(msg);

@@ -850,10 +850,10 @@ What would you like to explore or analyze today?`,
             }}
           >
             {[
-              '📊 Summarize inventory & low-stock products',
-              '💰 What are my highest priced items?',
+              '📊 Generate Weekly Store Intelligence Digest',
+              '⚠️ Predict restock needs & stockout velocity',
               '🗑️ Check products in the 7-day grace period',
-              '✍️ Draft an offer announcement for my store',
+              '💰 What are my highest priced items?',
             ].map((promptText) => (
               <button
                 key={promptText}
