@@ -256,8 +256,16 @@ export default function LandingPage({ diveHref, diveLabel, signedIn }: Props) {
 
   return (
     <div style={{ background: '#12151c', color: '#f8fafc', minHeight: '100vh', position: 'relative' }}>
-      {/* Top Glass Navbar */}
-      <LandingNav />
+      {/* Navbar stays hidden through the film and fades in once the reveal beat finishes */}
+      <div
+        style={{
+          opacity: phase === 'reveal' ? 1 : 0,
+          pointerEvents: phase === 'reveal' ? 'auto' : 'none',
+          transition: 'opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+      >
+        <LandingNav />
+      </div>
 
       {/* Cinematic Hero Sticky Scrub Track (DO NOT REMOVE: Preserves video-image frame truck scroll scrub) */}
       <section
