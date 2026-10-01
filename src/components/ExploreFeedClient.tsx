@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Check } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import ProductDetailPanel from '@/components/ProductDetailPanel';
 import type { FeedCarousel } from '@/app/api/v1/feed/personalized/route';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
@@ -56,11 +56,16 @@ export default function ExploreFeedClient({
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc' | 'rating' | 'newest'>('featured');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
-  // Three-pane selection — right detail panel (no page jump for specs)
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   // Listen for search from header
+  useEffect(() => {
+    const q = searchParams.get('q');
+    const category = searchParams.get('category');
+    if (q) setSearchQuery(q);
+    if (category) setSelectedCategory(category);
+  }, [searchParams]);
+
   useEffect(() => {
     const handleHeaderSearch = (e: any) => {
       setSearchQuery(e.detail?.query || '');
@@ -108,15 +113,11 @@ export default function ExploreFeedClient({
 
   // Lock body scroll when a mobile overlay is open
   useEffect(() => {
-    const isMobile =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(max-width: 1180px)').matches;
-    const lock = mobileFiltersOpen || (selectedId !== null && isMobile);
-    document.body.style.overflow = lock ? 'hidden' : '';
+    document.body.style.overflow = mobileFiltersOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [mobileFiltersOpen, selectedId]);
+  }, [mobileFiltersOpen]);
 
   // Per-category counts for the sidebar list
   const categoryCounts = useMemo(() => {
@@ -231,34 +232,6 @@ export default function ExploreFeedClient({
 
     return result;
   }, [initialProducts, searchQuery, selectedCategory, minPrice, maxPrice, minRating, inStockOnly, sortBy]);
-
-  // Lookup across catalog + AI carousels so selection survives view switches
-  const productLookup = useMemo(() => {
-    const map = new Map<string, BaseProduct>();
-    for (const p of initialProducts) map.set(p.id, p);
-    for (const c of carousels) {
-      for (const p of c.products || []) {
-        if (!map.has(p.id)) map.set(p.id, p as BaseProduct);
-      }
-    }
-    return map;
-  }, [initialProducts, carousels]);
-
-  const selectedProduct = selectedId ? productLookup.get(selectedId) ?? null : null;
-
-  // Desktop: keep a selection alive (first visible product) so the pane never sits empty
-  const visiblePool = isFiltering ? filteredProducts : initialProducts;
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!window.matchMedia('(min-width: 1181px)').matches) return;
-    if (visiblePool.length === 0) {
-      setSelectedId(null);
-      return;
-    }
-    if (!selectedId || !visiblePool.some((p) => p.id === selectedId)) {
-      setSelectedId(visiblePool[0].id);
-    }
-  }, [visiblePool, selectedId, isFiltering]);
 
   const filterPanel = (
     <div className="filter-panel">
@@ -455,6 +428,31 @@ export default function ExploreFeedClient({
 
       {/* CENTER — search + feed */}
       <div className="explore-main">
+        <div className="catalog-toolbar">
+          <div>
+            <h2 className="section-title" style={{ fontSize: '1.35rem' }}>
+              {selectedCategory === 'All' ? 'Products' : selectedCategory}
+            </h2>
+            <p className="section-subtitle">
+              {isFiltering ? filteredProducts.length : initialProducts.length} items
+            </p>
+          </div>
+          <label className="catalog-sort">
+            Sort
+            <select
+              className="custom-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              aria-label="Sort products"
+            >
+              <option value="featured">Recommended</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="rating">Highest rating</option>
+              <option value="newest">Newest</option>
+            </select>
+          </label>
+        </div>
         {/* Real-time AI consultation update notice */}
         {feedJustUpdated && (
           <div className="feed-updated-notice">
@@ -523,11 +521,7 @@ export default function ExploreFeedClient({
               <div className="product-list">
                 {filteredProducts.map((product, i) => (
                   <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                    <ProductCard
-                      product={product}
-                      onPreview={(p) => setSelectedId(p.id)}
-                      isSelected={product.id === selectedId}
-                    />
+                    <ProductCard product={product} />
                   </div>
                 ))}
               </div>
@@ -571,11 +565,7 @@ export default function ExploreFeedClient({
                 <div className="product-list">
                   {initialProducts.map((product, i) => (
                     <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                      <ProductCard
-                        product={product}
-                        onPreview={(p) => setSelectedId(p.id)}
-                        isSelected={product.id === selectedId}
-                      />
+                      <ProductCard product={product} />
                     </div>
                   ))}
                 </div>
@@ -606,11 +596,7 @@ export default function ExploreFeedClient({
                     <div className="product-list">
                       {carousel.products.map((product, i) => (
                         <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                          <ProductCard
-                            product={product}
-                            onPreview={(p: any) => setSelectedId(p.id)}
-                            isSelected={product.id === selectedId}
-                          />
+                          <ProductCard product={product} />
                         </div>
                       ))}
                     </div>
@@ -621,25 +607,6 @@ export default function ExploreFeedClient({
           </div>
         )}
       </div>
-
-      {/* RIGHT PANE — sticky detail panel (specs without page jumps) */}
-      {selectedProduct && (
-        <div
-          className="detail-backdrop"
-          onClick={() => setSelectedId(null)}
-          aria-hidden="true"
-        />
-      )}
-      <aside
-        className={`explore-detail ${selectedProduct ? 'open' : ''}`}
-        aria-label="Product details"
-      >
-        <ProductDetailPanel
-          key={selectedProduct?.id ?? 'empty'}
-          product={selectedProduct}
-          onClose={() => setSelectedId(null)}
-        />
-      </aside>
 
       {/* Mobile filter drawer */}
       {mobileFiltersOpen && (

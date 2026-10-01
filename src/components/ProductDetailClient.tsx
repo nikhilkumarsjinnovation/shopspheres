@@ -29,6 +29,7 @@ export interface ProductDetailProps {
     created_at?: string;
   };
   merchant?: {
+    id?: string;
     name: string;
     description?: string | null;
     is_verified?: boolean;
@@ -75,6 +76,7 @@ export default function ProductDetailClient({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Purchasing State
+  const [detailTab, setDetailTab] = useState<'description' | 'specs' | 'reviews'>('description');
   const [quantity, setQuantity] = useState(1);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     variants.length > 0 ? variants[0]!.id : null
@@ -312,9 +314,20 @@ export default function ProductDetailClient({
               </p>
             )}
 
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, letterSpacing: '-0.03em', marginBottom: '0.75rem' }}>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1.25, letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>
               {product.title}
             </h1>
+
+            {merchant?.name && (
+              <p className="sold-by" style={{ fontSize: '0.95rem', color: 'var(--fg-secondary)', marginBottom: '0.75rem' }}>
+                Sold by{' '}
+                {merchant.id ? (
+                  <Link href={`/shops/${merchant.id}`}>{merchant.name}</Link>
+                ) : (
+                  <strong>{merchant.name}</strong>
+                )}
+              </p>
+            )}
 
             {false && <AudioDescriptionPlayer productId={product.id} />}
 
@@ -402,18 +415,24 @@ export default function ProductDetailClient({
               </span>
 
               {stock > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label htmlFor="qty-select" style={{ fontSize: '0.825rem', fontWeight: 600 }}>Qty:</label>
-                  <select
-                    id="qty-select"
-                    className="custom-select"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                <div className="qty-stepper" aria-label="Quantity">
+                  <button
+                    type="button"
+                    className="qty-stepper-btn"
+                    aria-label="Decrease quantity"
+                    onClick={() => setQuantity((value) => Math.max(1, value - 1))}
                   >
-                    {Array.from({ length: Math.min(stock, 10) }, (_, i) => i + 1).map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
+                    −
+                  </button>
+                  <span className="qty-stepper-val">{quantity}</span>
+                  <button
+                    type="button"
+                    className="qty-stepper-btn"
+                    aria-label="Increase quantity"
+                    onClick={() => setQuantity((value) => Math.min(stock, value + 1))}
+                  >
+                    +
+                  </button>
                 </div>
               )}
             </div>
@@ -421,17 +440,17 @@ export default function ProductDetailClient({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <button
                 type="button"
-                className="btn-card-toggle"
+                className="btn-card-add"
                 style={{ height: '3.1rem', justifyContent: 'center', fontSize: '0.95rem' }}
                 onClick={handleAddToCart}
                 disabled={isOutOfStock}
               >
-                {addedNotice ? <><Check size={18} /> Added</> : 'Add to Bag'}
+                {addedNotice ? <><Check size={18} /> Added</> : 'Add to Cart'}
               </button>
 
               <button
                 type="button"
-                className="btn-card-add"
+                className="btn-secondary"
                 style={{ height: '3.1rem', fontSize: '0.95rem' }}
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
@@ -444,9 +463,26 @@ export default function ProductDetailClient({
       </div>
 
       {/* Description & Technical Specifications Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', marginTop: '4rem', paddingTop: '2.5rem', borderTop: '1px solid var(--border-subtle)' }}>
-        <div>
-          <h2 style={{ fontSize: '1.35rem', marginBottom: '1rem' }}>Overview & Features</h2>
+      <div className="pdp-tabs" role="tablist" aria-label="Product information">
+        {([
+          ['description', 'Description'],
+          ['specs', 'Specifications'],
+          ['reviews', 'Reviews'],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={detailTab === id}
+            onClick={() => setDetailTab(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {detailTab === 'description' && (
+        <div style={{ marginTop: '1.5rem' }}>
           <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', color: 'var(--fg-secondary)', lineHeight: 1.6 }}>
             {descriptionBullets.length > 0 ? (
               descriptionBullets.map((bullet, idx) => <li key={idx}>{bullet}</li>)
@@ -455,9 +491,10 @@ export default function ProductDetailClient({
             )}
           </ul>
         </div>
+      )}
 
-        <div>
-          <h2 style={{ fontSize: '1.35rem', marginBottom: '1rem' }}>Technical Specifications</h2>
+      {detailTab === 'specs' && (
+        <div style={{ marginTop: '1.5rem' }}>
           <table className="pdp-specs-table">
             <tbody>
               {specList.map((spec, idx) => (
@@ -469,9 +506,9 @@ export default function ProductDetailClient({
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
-      {/* Verified Reviews Section */}
+      {detailTab === 'reviews' && (
       <section className="pdp-reviews-section">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
           <div>
@@ -626,6 +663,7 @@ export default function ProductDetailClient({
           </div>
         )}
       </section>
+      )}
     </div>
   );
 }

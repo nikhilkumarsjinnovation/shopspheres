@@ -1,144 +1,148 @@
 'use client';
 
+import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ShoppingBag, Sparkles, Compass, Store, ReceiptText, Gift, Bot, User } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Heart, Search, ShoppingBag, User, X } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { useAgentBackground } from '@/context/AgentBackgroundContext';
 import SignOutButton from '@/components/SignOutButton';
 
 interface CustomerNavbarProps {
   email?: string;
 }
 
+const browseLinks = [
+  { label: 'All products', href: '/explore' },
+  { label: 'Shops', href: '/shops' },
+  { label: 'Orders', href: '/orders' },
+  { label: 'Gifts', href: '/gifts' },
+  { label: 'Assistant', href: '/agent' },
+];
+
 export default function CustomerNavbar({ email }: CustomerNavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { totalItems } = useCart();
-  const { isWorking, lastCompletedTask } = useAgentBackground();
+  const [query, setQuery] = useState('');
+  const [openMenu, setOpenMenu] = useState<'categories' | 'account' | null>(null);
 
-  const navItems = [
-    { label: 'Explore', href: '/explore', icon: Compass },
-    { label: 'Agent Tasks', href: '/agent', icon: Bot, isAgent: true },
-    { label: 'Shops', href: '/shops', icon: Store },
-    { label: 'Orders', href: '/orders', icon: ReceiptText },
-    { label: 'Gifts', href: '/gifts', icon: Gift },
-    { label: 'Profile', href: '/profile', icon: User },
-  ];
+  useEffect(() => {
+    setOpenMenu(null);
+  }, [pathname]);
 
-  const handleOpenAI = () => {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('shopsphere:open-ai'));
+  const publishSearch = (value: string) => {
+    if (pathname?.startsWith('/explore')) {
+      window.dispatchEvent(new CustomEvent('shopsphere:header-search', { detail: { query: value } }));
     }
+  };
+
+  const onSearchChange = (value: string) => {
+    setQuery(value);
+    publishSearch(value);
+  };
+
+  const onSearchSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    const next = query.trim();
+    if (pathname?.startsWith('/explore')) {
+      publishSearch(next);
+      return;
+    }
+    router.push(next ? `/explore?q=${encodeURIComponent(next)}` : '/explore');
   };
 
   return (
     <header className="site-header">
       <div className="container site-header-inner">
-        {/* Brand Logo */}
-        <Link href="/explore" className="brand-logo" aria-label="ShopSphere Home">
+        <Link href="/explore" className="brand-logo" aria-label="ShopSphere home">
           <span className="brand-mark">S</span>
           <span>ShopSphere</span>
         </Link>
 
-        {/* Center Primary Nav */}
-        <nav className="nav-links" aria-label="Main Navigation">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href === '/explore' && pathname === '/') ||
-              (item.href !== '/explore' && pathname?.startsWith(item.href));
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-link-item ${item.isAgent ? 'agent-nav-link' : ''} ${isActive ? 'active' : ''}`}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {item.isAgent && <Bot size={15} style={{ marginRight: '0.35rem', verticalAlign: 'middle', color: 'var(--accent-electric)' }} />}
-                <span>{item.label}</span>
-                {item.isAgent && (
-                  isWorking ? (
-                    <span
-                      style={{
-                        marginLeft: '0.4rem',
-                        padding: '0.12rem 0.5rem',
-                        fontSize: '0.62rem',
-                        fontWeight: 800,
-                        borderRadius: 'var(--radius-full)',
-                        background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-                        color: '#ffffff',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                      }}
-                    >
-                      <span className="pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399' }} />
-                      Working
-                    </span>
-                  ) : (
-                    <span
-                      style={{
-                        marginLeft: '0.4rem',
-                        padding: '0.1rem 0.4rem',
-                        fontSize: '0.62rem',
-                        fontWeight: 800,
-                        borderRadius: 'var(--radius-full)',
-                        background: 'var(--accent-electric)',
-                        color: '#ffffff',
-                        letterSpacing: '0.04em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      AI
-                    </span>
-                  )
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right Actions */}
-        <div className="header-actions">
-          {/* Ask AI Trigger */}
+        <div className="header-menu">
           <button
             type="button"
-            className="btn-ai-guide"
-            onClick={handleOpenAI}
-            title="Personal AI Shopping Assistant"
-            aria-label="Open AI Shopping Assistant"
+            className="header-menu-btn"
+            aria-expanded={openMenu === 'categories'}
+            aria-haspopup="menu"
+            onClick={() => setOpenMenu((current) => (current === 'categories' ? null : 'categories'))}
           >
-            <Sparkles size={14} />
-            <span>Ask AI</span>
+            Categories
           </button>
+          {openMenu === 'categories' && (
+            <div className="header-menu-panel" role="menu">
+              {browseLinks.map((item) => (
+                <Link key={item.href} href={item.href} role="menuitem">
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {/* Shopping Bag Button */}
+        <form className="header-search" onSubmit={onSearchSubmit} role="search">
+          <div className="search-input-wrap">
+            <Search size={16} className="search-icon" />
+            <input
+              type="search"
+              className="search-input"
+              value={query}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Search products..."
+              aria-label="Search products"
+            />
+            {query && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                aria-label="Clear search"
+                onClick={() => onSearchChange('')}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        </form>
+
+        <div className="header-actions">
+          <Link href="/wishlist" className="icon-btn" aria-label="Wishlist">
+            <Heart size={16} />
+            <span className="user-email-chip" style={{ display: 'inline', maxWidth: 'none' }}>Wishlist</span>
+          </Link>
+
+          <div className="header-menu">
+            <button
+              type="button"
+              className="header-menu-btn"
+              aria-expanded={openMenu === 'account'}
+              aria-haspopup="menu"
+              onClick={() => setOpenMenu((current) => (current === 'account' ? null : 'account'))}
+            >
+              <User size={16} />
+              Account
+            </button>
+            {openMenu === 'account' && (
+              <div className="header-menu-panel align-end" role="menu">
+                {email && <p style={{ padding: '8px 10px', fontSize: '0.75rem', color: '#71717a' }}>{email}</p>}
+                <Link href="/profile" role="menuitem">Profile</Link>
+                <Link href="/orders" role="menuitem">Orders</Link>
+                <Link href="/gifts" role="menuitem">Gifts</Link>
+                <div style={{ padding: '6px 4px' }}>
+                  <SignOutButton />
+                </div>
+              </div>
+            )}
+          </div>
+
           <Link
             href="/checkout"
             className="bag-btn"
-            aria-label={totalItems > 0 ? `Shopping Bag with ${totalItems} items` : 'Shopping Bag, empty'}
+            aria-label={totalItems > 0 ? `Cart with ${totalItems} items` : 'Cart, empty'}
           >
             <ShoppingBag size={16} />
-            <span>Bag</span>
+            <span>Cart</span>
             {totalItems > 0 && <span className="bag-badge">{totalItems}</span>}
           </Link>
-
-          {/* User Account / Email */}
-          {email && (
-            <Link
-              href="/profile"
-              className="user-email-chip"
-              title={`Logged in as ${email} — View Profile`}
-              aria-label="User Profile"
-              style={{ textDecoration: 'none', cursor: 'pointer', transition: 'color 0.15s ease' }}
-            >
-              {email}
-            </Link>
-          )}
-
-          {/* Sign Out */}
-          <SignOutButton />
         </div>
       </div>
     </header>

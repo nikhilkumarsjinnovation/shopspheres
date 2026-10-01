@@ -29,7 +29,7 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
       {/* Brand Header */}
       <div style={{ marginBottom: '2.5rem' }}>
         <Link href="/admin/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div className="brand-mark" style={{ width: '28px', height: '28px', fontSize: '0.9rem', background: '#dc2626' }}>A</div>
+          <div className="brand-mark" style={{ width: '28px', height: '28px', fontSize: '0.9rem' }}>A</div>
           <div>
             <span style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', display: 'block' }}>ShopSphere</span>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg-muted)' }}>Admin Console</span>
@@ -47,21 +47,9 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
             <Link
               key={link.href}
               href={link.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.65rem 0.95rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.875rem',
-                fontWeight: active ? 700 : 500,
-                color: active ? 'var(--fg-primary)' : 'var(--fg-secondary)',
-                background: active ? 'var(--bg-canvas)' : 'transparent',
-                boxShadow: active ? 'var(--shadow-xs)' : 'none',
-                transition: 'all var(--transition-fast)',
-              }}
+              className={`portal-link${active ? ' is-active' : ''}`}
             >
-              <Icon size={16} style={{ color: active ? 'var(--fg-primary)' : 'var(--fg-muted)' }} />
+              <Icon size={16} />
               <span>{link.label}</span>
             </Link>
           );
@@ -82,7 +70,7 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.25rem' }}>
-          <Link href="/explore" style={{ fontSize: '0.8rem', color: 'var(--accent-electric)', fontWeight: 600 }}>
+          <Link href="/explore" className="portal-quiet" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
             Storefront
           </Link>
           <SignOutButton />
