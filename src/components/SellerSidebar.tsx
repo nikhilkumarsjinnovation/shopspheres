@@ -44,21 +44,9 @@ export default function SellerSidebar({ email }: SellerSidebarProps) {
             <Link
               key={link.href}
               href={link.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.65rem 0.95rem',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '0.875rem',
-                fontWeight: active ? 700 : 500,
-                color: active ? 'var(--fg-primary)' : 'var(--fg-secondary)',
-                background: active ? 'var(--bg-canvas)' : 'transparent',
-                boxShadow: active ? 'var(--shadow-xs)' : 'none',
-                transition: 'all var(--transition-fast)',
-              }}
+              className={`portal-link${active ? ' is-active' : ''}`}
             >
-              <Icon size={16} style={{ color: active ? 'var(--fg-primary)' : 'var(--fg-muted)' }} />
+              <Icon size={16} />
               <span>{link.label}</span>
             </Link>
           );
@@ -73,8 +61,8 @@ export default function SellerSidebar({ email }: SellerSidebarProps) {
           </div>
         )}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/explore" style={{ fontSize: '0.8rem', color: 'var(--accent-electric)', fontWeight: 600 }}>
-            Marketplace View
+          <Link href="/explore" className="portal-quiet" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+            Marketplace
           </Link>
           <SignOutButton />
         </div>

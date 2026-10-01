@@ -31,11 +31,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   // 2. Fetch Merchant / Shop Info
-  let merchantInfo: { name: string; description?: string | null; is_verified?: boolean } | null = null;
+  let merchantInfo: { id?: string; name: string; description?: string | null; is_verified?: boolean } | null = null;
   if (product.seller_id) {
     const { data: shop } = await adminDb
       .from('shops')
-      .select('name, description, is_verified')
+      .select('id, name, description, is_verified')
       .eq('seller_id', product.seller_id)
       .maybeSingle();
 

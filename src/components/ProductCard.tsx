@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ImageOff, Minus, Plus, ChevronDown, ChevronUp, Check, Sparkles, Layers, Heart, Eye, X } from 'lucide-react';
+import { ImageOff, Minus, Plus, ChevronDown, ChevronUp, Check, Sparkles, Layers, Heart, X } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
@@ -268,7 +268,7 @@ export default function ProductCard({ product, onPreview, isSelected }: ProductC
           onClick={handleQuickAdd}
           disabled={isOutOfStock}
         >
-          {isOutOfStock ? 'Sold out' : added ? '✓ Added' : 'Add to Bag'}
+          {isOutOfStock ? 'Sold out' : added ? 'Added' : 'Add to Cart'}
         </button>
       )}
 
@@ -408,22 +408,11 @@ export default function ProductCard({ product, onPreview, isSelected }: ProductC
             {product.compare_at_price && product.compare_at_price > product.price ? (
               <span className="price-compare">{formatINR(product.compare_at_price)}</span>
             ) : null}
+            {discountPercent !== null && (
+              <span className="price-off">{discountPercent}% OFF</span>
+            )}
           </div>
-
-          {onPreview ? (
-            <div className="card-action-btns">{actionsBlock}</div>
-          ) : (
-            <button
-              type="button"
-              className="btn-flip"
-              onClick={() => setFlipped(true)}
-              aria-label={`View details for ${product.title}`}
-              title="View details"
-            >
-              <Eye size={14} />
-              <span>Details</span>
-            </button>
-          )}
+          <div className="card-action-btns">{actionsBlock}</div>
         </div>
       </div>
           </div>

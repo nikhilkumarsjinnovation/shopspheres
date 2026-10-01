@@ -1,6 +1,6 @@
+import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import ExploreFeedClient from '@/components/ExploreFeedClient';
-import ExploreHeaderSearch from '@/components/ExploreHeaderSearch';
 
 export default async function ExplorePage() {
   const supabase = await createClient();
@@ -40,13 +40,8 @@ export default async function ExplorePage() {
 
   return (
     <div className="animate-slide-up">
-      <div className="section-header explore-page-head" style={{ marginBottom: '1.5rem' }}>
-        <div className="explore-page-head-inner">
-          <h1 className="section-title explore-page-title">
-            Explore Marketplace
-          </h1>
-          <ExploreHeaderSearch />
-        </div>
+      <div className="section-header explore-page-head" style={{ marginBottom: '1rem' }}>
+        <h1 className="section-title explore-page-title">Catalog</h1>
       </div>
 
       {error && (
@@ -55,10 +50,12 @@ export default async function ExplorePage() {
         </div>
       )}
 
-      <ExploreFeedClient
-        initialProducts={productList}
-        availableCategories={availableCategories}
-      />
+      <Suspense fallback={<p style={{ color: 'var(--fg-muted)' }}>Loading catalog…</p>}>
+        <ExploreFeedClient
+          initialProducts={productList}
+          availableCategories={availableCategories}
+        />
+      </Suspense>
     </div>
   );
 }

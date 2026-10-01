@@ -1,0 +1,43 @@
+{
+  "project": "ShopSphere - The Curated Canvas",
+  "theme": "warm-light",
+  "color": {
+    "canvas": "#FBFBFD",
+    "surface": "rgba(255, 255, 255, 0.72)",
+    "surfaceSolid": "#FFFFFF",
+    "border": "rgba(0, 0, 0, 0.06)",
+    "textPrimary": "#0F172A",
+    "textSecondary": "#64748B",
+    "accentSage": "#3B6B55",
+    "accentSageLight": "#E8F0EB",
+    "accentAmber": "#D97706",
+    "accentIris": "#6366F1",
+    "accentIrisSoft": "rgba(99, 102, 241, 0.12)"
+  },
+  "typography": {
+    "fontFamilyHeading": "Instrument Serif, Playfair Display, serif",
+    "fontFamilyBody": "Plus Jakarta Sans, Inter, sans-serif",
+    "fontSizeHero": "64px",
+    "fontSizeH2": "40px",
+    "fontSizeH3": "24px",
+    "fontSizeBody": "16px",
+    "fontSizeCaption": "13px",
+    "lineHeightRelaxed": 1.6
+  },
+  "radii": {
+    "card": "24px",
+    "pill": "9999px",
+    "modal": "32px",
+    "button": "9999px"
+  },
+  "shadows": {
+    "soft": "0 20px 40px -15px rgba(27, 31, 35, 0.05)",
+    "floating": "0 30px 60px -20px rgba(0, 0, 0, 0.08)",
+    "glass": "0 8px 32px 0 rgba(31, 38, 135, 0.07)"
+  },
+  "spacing": {
+    "sectionPaddingY": "120px",
+    "cardGap": "32px",
+    "containerMax": "1340px"
+  }
+}

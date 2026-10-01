@@ -10,6 +10,7 @@ interface ProfileRecord {
 }
 
 export async function middleware(request: NextRequest) {
+  request.headers.set('x-pathname', request.nextUrl.pathname);
   const { response, user, supabase } = await updateSession(request);
   ensureCsrfCookie(request, response);
   const path = request.nextUrl.pathname;
@@ -59,7 +60,8 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/product') ||
     path.startsWith('/shops') ||
     path.startsWith('/friends') ||
-    path.startsWith('/profile');
+    path.startsWith('/profile') ||
+    path === '/wishlist';
   const isSellerRoute = path.startsWith('/seller');
   const isAdminRoute = path.startsWith('/admin') || path === '/dashboard';
 

@@ -5566,4 +5566,21 @@ main:has(.explore-shell) {
 }
 
 
+/* --- Landing Page: 3D Canvas & Scroll Experience --- */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
+/* When the landing page canvas is mounted, disable body decorative bg */
+body:has(canvas) {
+  background: #000 !important;
+}
+
+/* Responsive helpers for the landing page 3D scenes */
+@media (max-width: 768px) {
+  /* Make feature grid stack on mobile */
+  .feature-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
