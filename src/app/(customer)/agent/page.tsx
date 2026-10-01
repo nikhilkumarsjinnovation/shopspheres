@@ -7,9 +7,6 @@ import {
   Sparkles,
   Send,
   Wallet,
-  Clock,
-  Heart,
-  TrendingUp,
   ShieldCheck,
   ShoppingBag,
   Star,
@@ -35,6 +32,7 @@ import PersonaSelector from '@/components/ai/PersonaSelector';
 import type { PersonaConfig } from '@/lib/personas';
 import type { UserBehavioralProfile } from '@/services/agent-memory-service';
 import { useAgentBackground, type AgentChatSession } from '@/context/AgentBackgroundContext';
+import FormattedMessage from '@/components/ui/FormattedMessage';
 
 export default function AgentTasksPage() {
   const {
@@ -205,51 +203,8 @@ export default function AgentTasksPage() {
 
   return (
     <div className="agent-workspace-container">
-      {/* Top Intelligence & Behavioral Status Bar */}
-      <section className="agent-top-radar">
-        <div className="radar-metric">
-          <div className="radar-icon-box">
-            <Bot size={22} className="text-electric" />
-          </div>
-          <div className="radar-content">
-            <span className="radar-label">Autonomous Super Agent</span>
-            <div className="radar-value-row">
-              <span className="radar-title">Gemini Multi-Turn ReAct</span>
-              <span className="status-live-pill">Live Memory Active</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="radar-metric">
-          <div className="radar-icon-box">
-            <Clock size={20} />
-          </div>
-          <div className="radar-content">
-            <span className="radar-label">App Usage Tracker</span>
-            <span className="radar-main-val">
-              {profile ? `~${profile.totalTimeSpentMinutes} mins` : 'Tracking...'}
-            </span>
-            <small className="radar-subtext">
-              {profile ? `${profile.totalSessionsEstimate} active sessions` : 'Measuring dwell time'}
-            </small>
-          </div>
-        </div>
-
-        <div className="radar-metric">
-          <div className="radar-icon-box">
-            <TrendingUp size={20} />
-          </div>
-          <div className="radar-content">
-            <span className="radar-label">Favorite Category</span>
-            <span className="radar-main-val">
-              {profile?.topCategories?.[0] ? `${profile.topCategories[0].category}` : 'Electronics'}
-            </span>
-            <small className="radar-subtext">
-              {profile?.topCategories?.[0] ? `${profile.topCategories[0].percentage}% of your browsing` : 'High affinity'}
-            </small>
-          </div>
-        </div>
-
+      {/* Compact status: wallet, taste, and alerts stay reachable without a tall dashboard */}
+      <section className="agent-top-radar agent-status-strip">
         <div className="radar-metric wallet-metric-box">
           <div className="radar-icon-box wallet-icon">
             <Wallet size={20} />
@@ -388,114 +343,12 @@ export default function AgentTasksPage() {
             </div>
           </div>
 
-          {/* Persona Switcher */}
-          <div className="sidebar-card">
+          <div className="sidebar-card agent-you-card">
             <h3 className="card-mini-title">
-              <Sparkles size={14} /> Agent Persona
+              <Sparkles size={14} /> Your agent
             </h3>
-            <PersonaSelector value={persona} onChange={setPersona} />
-          </div>
-
-          {/* 1-Click Autonomous Tasks */}
-          <div className="sidebar-card">
-            <h3 className="card-mini-title">
-              <Zap size={14} className="text-warning" /> 1-Click Autonomous Tasks
-            </h3>
-            <p className="card-helper-text">
-              Execute agent shopping actions instantly without repetitive typing or extra clicks:
-            </p>
-            <div className="preset-task-list">
-              <button
-                type="button"
-                className="btn-preset-task"
-                disabled={isWorking}
-                onClick={() => handleSendMessage('Search smartphones in Electronics under ₹20,000 for me')}
-              >
-                <span className="task-emoji">📱</span>
-                <div className="task-text">
-                  <strong>Phones Under ₹20,000</strong>
-                  <small>Strict Electronics filter</small>
-                </div>
-                <ArrowRight size={14} className="task-arrow" />
-              </button>
-
-              <button
-                type="button"
-                className="btn-preset-task"
-                disabled={isWorking}
-                onClick={() => handleSendMessage('Search audio accessories and wireless earbuds under ₹2,000')}
-              >
-                <span className="task-emoji">🎧</span>
-                <div className="task-text">
-                  <strong>Earbuds Under ₹2,000</strong>
-                  <small>Audio & Accessories category</small>
-                </div>
-                <ArrowRight size={14} className="task-arrow" />
-              </button>
-
-              <button
-                type="button"
-                className="btn-preset-task"
-                disabled={isWorking}
-                onClick={() => handleSendMessage('Show all my favorited products')}
-              >
-                <span className="task-emoji">❤️</span>
-                <div className="task-text">
-                  <strong>Inspect My Wishlist</strong>
-                  <small>List saved products</small>
-                </div>
-                <ArrowRight size={14} className="task-arrow" />
-              </button>
-
-              <button
-                type="button"
-                className="btn-preset-task"
-                disabled={isWorking}
-                onClick={() => handleSendMessage('What is my current wallet balance and recent activity?')}
-              >
-                <span className="task-emoji">💰</span>
-                <div className="task-text">
-                  <strong>Check In-App Wallet</strong>
-                  <small>Balance & 1-tap checkout status</small>
-                </div>
-                <ArrowRight size={14} className="task-arrow" />
-              </button>
-
-              <button
-                type="button"
-                className="btn-preset-task"
-                disabled={isWorking}
-                onClick={() => handleSendMessage('Review my delivered orders with verified 5-star ratings')}
-              >
-                <span className="task-emoji">⭐</span>
-                <div className="task-text">
-                  <strong>Review Past Purchases</strong>
-                  <small>Submit verified buyer reviews</small>
-                </div>
-                <ArrowRight size={14} className="task-arrow" />
-              </button>
-
-              <button
-                type="button"
-                className="btn-preset-task"
-                disabled={isWorking}
-                onClick={() => handleSendMessage('Show friends list so I can send a surprise gift')}
-              >
-                <span className="task-emoji">🎁</span>
-                <div className="task-text">
-                  <strong>Send Surprise Gift</strong>
-                  <small>Gifting flow with custom reveal</small>
-                </div>
-                <ArrowRight size={14} className="task-arrow" />
-              </button>
-            </div>
-          </div>
-
-          {/* Behavioral Memory Radar */}
-          <div className="sidebar-card">
-            <h3 className="card-mini-title">
-              <Bot size={14} className="text-electric" /> What Agent Knows About You
-            </h3>
+            <PersonaSelector variant="wrap" value={persona} onChange={setPersona} />
+            <div className="agent-you-divider" />
             {loadingProfile ? (
               <p className="card-helper-text">Loading behavioral memories...</p>
             ) : profile ? (
@@ -593,27 +446,6 @@ export default function AgentTasksPage() {
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={createNewSession}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: 'var(--accent-electric)',
-                background: 'rgba(79, 70, 229, 0.08)',
-                border: '1px solid rgba(79, 70, 229, 0.25)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.3rem 0.65rem',
-                cursor: 'pointer',
-              }}
-              title="Start a new chat thread"
-            >
-              <Plus size={13} />
-              <span>New Chat</span>
-            </button>
           </div>
 
           {/* Background Working Status Notice Bar */}
@@ -656,26 +488,7 @@ export default function AgentTasksPage() {
                 </div>
 
                 <div className="bubble-body-content">
-                  {/* Clean Formatted Message Renderer */}
-                  {m.content.split('\n').map((line, lIdx) => {
-                    if (line.startsWith('### ')) {
-                      return <h3 key={lIdx} className="fmt-h3">{line.replace('### ', '')}</h3>;
-                    }
-                    if (line.startsWith('## ')) {
-                      return <h2 key={lIdx} className="fmt-h2">{line.replace('## ', '')}</h2>;
-                    }
-                    if (line.startsWith('- ') || line.startsWith('• ')) {
-                      return (
-                        <li key={lIdx} className="fmt-li">
-                          {renderInlineFormatting(line.slice(2))}
-                        </li>
-                      );
-                    }
-                    if (!line.trim()) {
-                      return <div key={lIdx} className="fmt-spacer" />;
-                    }
-                    return <p key={lIdx} className="fmt-p">{renderInlineFormatting(line)}</p>;
-                  })}
+                  <FormattedMessage content={m.content} isUser={m.role === 'user'} />
                 </div>
 
                 {/* Interactive Quick Reply Suggestion Chips */}
@@ -729,6 +542,7 @@ export default function AgentTasksPage() {
             <div ref={messagesEndRef} />
           </div>
 
+          <div className="console-composer">
           {/* Quick Prompt Chips Row */}
           <div className="console-chips-bar">
             {[
@@ -780,27 +594,14 @@ export default function AgentTasksPage() {
               <span>Send Command</span>
             </button>
           </form>
+          </div>
         </main>
       </div>
     </div>
   );
 }
 
-/**
- * Inline formatting helper for markdown bold and code spans
- */
-function renderInlineFormatting(text: string) {
-  const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
-    }
-    if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={index} className="fmt-code">{part.slice(1, -1)}</code>;
-    }
-    return part;
-  });
-}
+
 
 /**
  * Workspace Action Card Component with 1-Tap Frictionless Actions

@@ -11,8 +11,8 @@ const nextConfig = {
           value: [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline'" + (process.env.NODE_ENV === 'production' ? '' : " 'unsafe-eval'"),
-            "style-src 'self' 'unsafe-inline'",
-            "font-src 'self' data:",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "font-src 'self' data: https://fonts.gstatic.com",
             "img-src 'self' data: blob: https:",
             "media-src 'self' data: blob:",
             "worker-src 'self' blob:",

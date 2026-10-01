@@ -14,19 +14,22 @@ const PERSONAS: Array<{ id: PersonaConfig['id']; label: string }> = [
 export default function PersonaSelector({
   value,
   onChange,
+  variant = 'bar',
 }: {
   value: PersonaConfig['id'];
   onChange: (persona: PersonaConfig['id']) => void;
+  variant?: 'bar' | 'wrap';
 }) {
   return (
     <div
       style={{
         display: 'flex',
+        flexWrap: variant === 'wrap' ? 'wrap' : 'nowrap',
         gap: '0.35rem',
-        padding: '0.65rem 1rem',
-        overflowX: 'auto',
-        background: 'var(--bg-subtle)',
-        borderBottom: '1px solid var(--border-subtle)',
+        padding: variant === 'wrap' ? 0 : '0.65rem 1rem',
+        overflowX: variant === 'wrap' ? 'visible' : 'auto',
+        background: variant === 'wrap' ? 'transparent' : 'var(--bg-subtle)',
+        borderBottom: variant === 'wrap' ? 'none' : '1px solid var(--border-subtle)',
         scrollbarWidth: 'none',
       }}
     >

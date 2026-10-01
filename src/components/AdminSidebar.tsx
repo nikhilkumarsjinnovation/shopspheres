@@ -27,7 +27,7 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
   return (
     <aside className="portal-sidebar">
       {/* Brand Header */}
-      <div style={{ marginBottom: '2.5rem' }}>
+      <div className="portal-sidebar-brand" style={{ marginBottom: '2.5rem', flexShrink: 0 }}>
         <Link href="/admin/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}>
           <div className="brand-mark" style={{ width: '28px', height: '28px', fontSize: '0.9rem' }}>A</div>
           <div>
@@ -38,7 +38,7 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
       </div>
 
       {/* Navigation */}
-      <nav aria-label="Admin Portal Navigation" style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
+      <nav aria-label="Admin Portal Navigation" className="portal-sidebar-nav" style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1, minHeight: 0, overflowY: 'auto' }}>
         {links.map((link) => {
           const active = link.match(pathname);
           const Icon = link.icon;
@@ -57,7 +57,7 @@ export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProp
       </nav>
 
       {/* Footer Profile & Sign out */}
-      <div style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="portal-sidebar-footer" style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '0.75rem', flexShrink: 0, marginTop: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <div style={{ width: '28px', height: '28px', borderRadius: 'var(--radius-full)', background: 'var(--fg-primary)', color: 'var(--fg-inverted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}>
             {avatarInitial}

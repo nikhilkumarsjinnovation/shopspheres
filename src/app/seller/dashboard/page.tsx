@@ -7,6 +7,7 @@ import { buildShopHealth } from '@/lib/seller-health';
 import { formatINR } from '@/lib/formatters';
 import type { Product } from '@/types/database.types';
 import PopulateProductsButton from '@/components/seller/PopulateProductsButton';
+import MetricBars, { bucketByDay } from '@/components/portal/MetricBars';
 
 export default async function SellerDashboardPage() {
   const supabase = await createClient();
@@ -25,7 +26,7 @@ export default async function SellerDashboardPage() {
     .eq('seller_id', session.user.id);
   const { data: sales } = await supabase
     .from('order_items')
-    .select('order_id, quantity, unit_price, product:products(category)')
+    .select('order_id, quantity, unit_price, created_at, product:products(category)')
     .eq('seller_id', session.user.id);
 
   const saleRows = (sales ?? []).map((item) => {
@@ -39,6 +40,7 @@ export default async function SellerDashboardPage() {
       quantity: item.quantity,
       revenue: Number(item.unit_price) * item.quantity,
       orderId: item.order_id,
+      createdAt: item.created_at,
     };
   });
   const health = buildShopHealth((products ?? []) as Product[], saleRows);
@@ -102,6 +104,22 @@ export default async function SellerDashboardPage() {
           <div className="stat-kpi-value" style={{ color: health.lowStock > 0 ? 'var(--danger)' : 'var(--fg-primary)' }}>{health.lowStock}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--fg-muted)' }}>Items low in stock (&lt; 5)</div>
         </div>
+      </div>
+
+      <div className="stat-cards-grid">
+        <MetricBars
+          title="Revenue by category"
+          items={health.categories.map((row) => ({ label: row.category, value: row.revenue }))}
+          formatValue={formatINR}
+          empty="No category sales yet. Revenue appears here after an order includes your listings."
+        />
+        <MetricBars
+          title="Daily sales"
+          caption="Order line totals grouped by day (IST)."
+          items={bucketByDay(saleRows.map((row) => ({ at: row.createdAt, amount: row.revenue })))}
+          formatValue={formatINR}
+          empty="No sales to chart yet."
+        />
       </div>
 
       {/* Category Performance Breakdown */}

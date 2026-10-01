@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { Heart, Search, ShoppingBag, User, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Heart, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import SignOutButton from '@/components/SignOutButton';
 
@@ -11,7 +11,7 @@ interface CustomerNavbarProps {
   email?: string;
 }
 
-const browseLinks = [
+const navLinks = [
   { label: 'All products', href: '/explore' },
   { label: 'Shops', href: '/shops' },
   { label: 'Orders', href: '/orders' },
@@ -21,35 +21,8 @@ const browseLinks = [
 
 export default function CustomerNavbar({ email }: CustomerNavbarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { totalItems } = useCart();
-  const [query, setQuery] = useState('');
-  const [openMenu, setOpenMenu] = useState<'categories' | 'account' | null>(null);
-
-  useEffect(() => {
-    setOpenMenu(null);
-  }, [pathname]);
-
-  const publishSearch = (value: string) => {
-    if (pathname?.startsWith('/explore')) {
-      window.dispatchEvent(new CustomEvent('shopsphere:header-search', { detail: { query: value } }));
-    }
-  };
-
-  const onSearchChange = (value: string) => {
-    setQuery(value);
-    publishSearch(value);
-  };
-
-  const onSearchSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const next = query.trim();
-    if (pathname?.startsWith('/explore')) {
-      publishSearch(next);
-      return;
-    }
-    router.push(next ? `/explore?q=${encodeURIComponent(next)}` : '/explore');
-  };
+  const [openMenu, setOpenMenu] = useState<'account' | null>(null);
 
   return (
     <header className="site-header">
@@ -59,50 +32,25 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
           <span>ShopSphere</span>
         </Link>
 
-        <div className="header-menu">
-          <button
-            type="button"
-            className="header-menu-btn"
-            aria-expanded={openMenu === 'categories'}
-            aria-haspopup="menu"
-            onClick={() => setOpenMenu((current) => (current === 'categories' ? null : 'categories'))}
-          >
-            Categories
-          </button>
-          {openMenu === 'categories' && (
-            <div className="header-menu-panel" role="menu">
-              {browseLinks.map((item) => (
-                <Link key={item.href} href={item.href} role="menuitem">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Primary Navigation Links in Navbar (Search bar moved below navbar) */}
+        <nav className="nav-links" aria-label="Main Navigation">
+          {navLinks.map((item) => {
+            const isActive =
+              item.href === '/explore'
+                ? pathname === '/explore' || pathname === '/'
+                : pathname?.startsWith(item.href);
 
-        <form className="header-search" onSubmit={onSearchSubmit} role="search">
-          <div className="search-input-wrap">
-            <Search size={16} className="search-icon" />
-            <input
-              type="search"
-              className="search-input"
-              value={query}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Search products..."
-              aria-label="Search products"
-            />
-            {query && (
-              <button
-                type="button"
-                className="search-clear-btn"
-                aria-label="Clear search"
-                onClick={() => onSearchChange('')}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-link-item ${isActive ? 'active' : ''}`}
               >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-        </form>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className="header-actions">
           <Link href="/wishlist" className="icon-btn" aria-label="Wishlist">
@@ -123,7 +71,7 @@ export default function CustomerNavbar({ email }: CustomerNavbarProps) {
             </button>
             {openMenu === 'account' && (
               <div className="header-menu-panel align-end" role="menu">
-                {email && <p style={{ padding: '8px 10px', fontSize: '0.75rem', color: '#71717a' }}>{email}</p>}
+                {email && <p style={{ padding: '8px 10px', fontSize: '0.75rem', color: 'var(--fg-muted)' }}>{email}</p>}
                 <Link href="/profile" role="menuitem">Profile</Link>
                 <Link href="/orders" role="menuitem">Orders</Link>
                 <Link href="/gifts" role="menuitem">Gifts</Link>

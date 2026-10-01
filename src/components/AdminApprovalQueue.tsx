@@ -7,7 +7,9 @@ import { fetchWithCsrf } from '@/lib/csrf-client';
 import { formatINR } from '@/lib/formatters';
 import type { Json } from '@/types/database.types';
 import ProductThumbnail from '@/components/ProductThumbnail';
-import { Check, X, ShieldCheck, ExternalLink } from 'lucide-react';
+import { readModerationResult, sellerSpecEntries } from '@/lib/moderation-display';
+import { recheckListing, recheckSummary, type RecheckModeration } from '@/lib/recheck-listing';
+import { Check, X, ShieldCheck, RefreshCw } from 'lucide-react';
 
 export type QueueProduct = {
   id: string;
@@ -26,6 +28,14 @@ interface AdminApprovalQueueProps {
   initialPendingProducts: QueueProduct[];
 }
 
+function mergeModeration(attributes: Json, moderation: RecheckModeration): Json {
+  const base =
+    attributes && typeof attributes === 'object' && !Array.isArray(attributes)
+      ? { ...attributes }
+      : {};
+  return { ...base, moderation_result: moderation };
+}
+
 export default function AdminApprovalQueue({
   initialPendingProducts,
 }: AdminApprovalQueueProps) {
@@ -34,6 +44,7 @@ export default function AdminApprovalQueue({
   const [pendingProducts, setPendingProducts] = useState<QueueProduct[]>(initialPendingProducts);
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [loadingKind, setLoadingKind] = useState<'status' | 'recheck' | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -48,6 +59,7 @@ export default function AdminApprovalQueue({
       return;
     }
     setLoadingId(productId);
+    setLoadingKind('status');
     setErrorMessage(null);
     setToastMessage(null);
 
@@ -76,6 +88,40 @@ export default function AdminApprovalQueue({
       setErrorMessage(msg);
     } finally {
       setLoadingId(null);
+      setLoadingKind(null);
+    }
+  };
+
+  const handleRecheck = async (productId: string, productTitle: string) => {
+    setLoadingId(productId);
+    setLoadingKind('recheck');
+    setErrorMessage(null);
+    setToastMessage(null);
+
+    try {
+      const moderation = await recheckListing(productId);
+      if (moderation.decision === 'pending') {
+        setPendingProducts((prev) =>
+          prev.map((product) =>
+            product.id === productId
+              ? {
+                  ...product,
+                  attributes: mergeModeration(product.attributes, moderation),
+                }
+              : product,
+          ),
+        );
+      } else {
+        setPendingProducts((prev) => prev.filter((product) => product.id !== productId));
+      }
+      setToastMessage(`${recheckSummary(moderation)} (${productTitle})`);
+      router.refresh();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'AI re-check failed.';
+      setErrorMessage(msg);
+    } finally {
+      setLoadingId(null);
+      setLoadingKind(null);
     }
   };
 
@@ -90,7 +136,7 @@ export default function AdminApprovalQueue({
             </span>
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
-            Marketplace compliance and catalog quality gate. Review seller submissions before publishing.
+            Listings at 90% AI confidence or higher are published automatically and do not appear here. This queue is the 70–89% band that still needs a person.
           </p>
         </div>
 
@@ -130,6 +176,7 @@ export default function AdminApprovalQueue({
                 <th>Category</th>
                 <th>Condition</th>
                 <th>Price & Stock</th>
+                <th>AI confidence</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -140,12 +187,8 @@ export default function AdminApprovalQueue({
                     ? product.image_urls[0]
                     : null;
 
-                const attributesObj =
-                  typeof product.attributes === 'object' && product.attributes !== null
-                    ? (product.attributes as Record<string, string>)
-                    : {};
-
-                const specCount = Object.keys(attributesObj).length;
+                const specs = sellerSpecEntries(product.attributes);
+                const moderation = readModerationResult(product.attributes);
                 const isOperating = loadingId === product.id;
 
                 return (
@@ -165,9 +208,9 @@ export default function AdminApprovalQueue({
                           {product.sub_category}
                         </div>
                       )}
-                      {specCount > 0 && (
+                      {specs.length > 0 && (
                         <div style={{ fontSize: '0.72rem', color: 'var(--accent-electric)', marginTop: '0.15rem', fontWeight: 500 }}>
-                          ⚡ {specCount} enterprise specs
+                          ⚡ {specs.length} enterprise specs
                         </div>
                       )}
                       <div style={{ marginTop: '0.35rem' }}>
@@ -199,7 +242,40 @@ export default function AdminApprovalQueue({
                     </td>
 
                     <td>
+                      {moderation ? (
+                        <div style={{ minWidth: '140px' }}>
+                          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: moderation.score >= 90 ? 'var(--success)' : 'var(--fg-primary)' }}>
+                            {moderation.score}%
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--fg-muted)', marginTop: '0.15rem' }}>
+                            {moderation.score >= 90
+                              ? '90%+ still pending — Re-check applies the auto-approve gate'
+                              : 'Below 90% — Re-check runs the gate again'}
+                          </div>
+                          {moderation.reasons[0] ? (
+                            <div style={{ fontSize: '0.72rem', color: 'var(--fg-secondary)', marginTop: '0.25rem' }}>
+                              {moderation.reasons[0]}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--fg-muted)' }}>No AI score stored</span>
+                      )}
+                    </td>
+
+                    <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '220px' }}>
+                        <button
+                          type="button"
+                          className="btn-card-toggle"
+                          style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', justifyContent: 'center' }}
+                          onClick={() => handleRecheck(product.id, product.title)}
+                          disabled={isOperating}
+                          title="Run the AI quality gate again. 90% or higher publishes the listing."
+                        >
+                          <RefreshCw size={14} />
+                          <span>{isOperating && loadingKind === 'recheck' ? 'Re-checking…' : 'Re-check'}</span>
+                        </button>
                         <button
                           type="button"
                           className="btn-card-add"
@@ -209,7 +285,7 @@ export default function AdminApprovalQueue({
                           title="Approve listing and make live to customers"
                         >
                           <Check size={14} />
-                          <span>{isOperating ? 'Saving…' : 'Approve & Publish'}</span>
+                          <span>{isOperating && loadingKind === 'status' ? 'Saving…' : 'Approve & Publish'}</span>
                         </button>
 
                         <div style={{ display: 'flex', gap: '0.35rem' }}>

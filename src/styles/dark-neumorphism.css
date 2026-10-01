@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Dark Neumorphism (Soft UI) Design System Tokens & Utilities
+   Monochromatic Deep Charcoal Slate (#12151C) with physical dual opposing shadows
+   ========================================================================== */
+
+:root {
+  /* Surface & Base (Monochromatic Discipline) */
+  --neu-bg: #12151c;
+  --neu-surface: #12151c;
+  --neu-surface-hover: #151922;
+
+  /* Typography Colors (WCAG AA Compliant) */
+  --neu-fg-primary: #f8fafc;
+  --neu-fg-secondary: #94a3b8;
+  --neu-fg-muted: #64748b;
+
+  /* Accents */
+  --neu-accent: #6c63ff;
+  --neu-accent-light: #8b84ff;
+  --neu-accent-emerald: #10b981;
+  --neu-accent-rose: #f43f5e;
+  --neu-accent-amber: #f59e0b;
+
+  /* Dual Opposing Shadows (Light from Top-Left, Dark Shadow Bottom-Right) */
+  --neu-shadow-extruded: 10px 10px 22px rgba(0, 0, 0, 0.75), -8px -8px 20px rgba(255, 255, 255, 0.04);
+  --neu-shadow-extruded-hover: 14px 14px 28px rgba(0, 0, 0, 0.85), -10px -10px 24px rgba(255, 255, 255, 0.06);
+  --neu-shadow-extruded-sm: 5px 5px 12px rgba(0, 0, 0, 0.7), -4px -4px 10px rgba(255, 255, 255, 0.04);
+  --neu-shadow-extruded-sm-hover: 7px 7px 16px rgba(0, 0, 0, 0.8), -5px -5px 12px rgba(255, 255, 255, 0.055);
+
+  --neu-shadow-inset: inset 6px 6px 14px rgba(0, 0, 0, 0.8), inset -5px -5px 12px rgba(255, 255, 255, 0.035);
+  --neu-shadow-inset-deep: inset 10px 10px 24px rgba(0, 0, 0, 0.9), inset -8px -8px 20px rgba(255, 255, 255, 0.04);
+  --neu-shadow-inset-sm: inset 3px 3px 8px rgba(0, 0, 0, 0.7), inset -3px -3px 8px rgba(255, 255, 255, 0.03);
+
+  /* Primary Accent Button Depth */
+  --neu-shadow-accent: 8px 8px 20px rgba(0, 0, 0, 0.6), -6px -6px 16px rgba(108, 99, 255, 0.25), 0 0 25px rgba(108, 99, 255, 0.35);
+  --neu-shadow-accent-hover: 10px 10px 24px rgba(0, 0, 0, 0.7), -8px -8px 20px rgba(108, 99, 255, 0.35), 0 0 32px rgba(108, 99, 255, 0.5);
+
+  /* Radii */
+  --neu-radius-card: 32px;
+  --neu-radius-btn: 16px;
+  --neu-radius-inner: 12px;
+  --neu-radius-pill: 9999px;
+
+  /* Calmer, Smoother Micro-interactions */
+  --neu-transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base Neumorphic Classes */
+.neu-bg {
+  background-color: var(--neu-bg) !important;
+  color: var(--neu-fg-primary);
+}
+
+/* Molded Extruded Card */
+.neu-card {
+  background: var(--neu-surface);
+  border-radius: var(--neu-radius-card);
+  box-shadow: var(--neu-shadow-extruded);
+  border: none !important;
+  transition: var(--neu-transition);
+}
+
+.neu-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--neu-shadow-extruded-hover);
+}
+
+/* Inset Deep Wells for Icons / Stages / Displays */
+.neu-well-deep {
+  background: var(--neu-surface);
+  border-radius: var(--neu-radius-btn);
+  box-shadow: var(--neu-shadow-inset-deep);
+  border: none !important;
+}
+
+/* Inset Standard Wells */
+.neu-well {
+  background: var(--neu-surface);
+  border-radius: var(--neu-radius-inner);
+  box-shadow: var(--neu-shadow-inset);
+  border: none !important;
+}
+
+/* Subtle Inset Well for Tracks and Micro-chips */
+.neu-well-sm {
+  background: var(--neu-surface);
+  border-radius: var(--neu-radius-pill);
+  box-shadow: var(--neu-shadow-inset-sm);
+  border: none !important;
+}
+
+/* Tactile Extruded Button */
+.neu-btn {
+  background: var(--neu-surface);
+  color: var(--neu-fg-primary);
+  border-radius: var(--neu-radius-btn);
+  box-shadow: var(--neu-shadow-extruded-sm);
+  border: none !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+  transition: var(--neu-transition);
+  min-height: 44px; /* WCAG 44px touch target */
+}
+
+.neu-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--neu-shadow-extruded-sm-hover);
+  color: #ffffff;
+}
+
+.neu-btn:active {
+  transform: translateY(0.5px);
+  box-shadow: var(--neu-shadow-inset-sm);
+}
+
+.neu-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--neu-shadow-extruded-sm), 0 0 0 2px var(--neu-accent);
+}
+
+/* Primary Hero Accent Button */
+.neu-btn-primary {
+  background: linear-gradient(135deg, #6c63ff 0%, #564bf5 100%);
+  color: #ffffff !important;
+  border-radius: var(--neu-radius-btn);
+  box-shadow: var(--neu-shadow-accent);
+  border: none !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 700;
+  transition: var(--neu-transition);
+  min-height: 44px;
+}
+
+.neu-btn-primary:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: var(--neu-shadow-accent-hover);
+}
+
+.neu-btn-primary:active {
+  transform: translateY(0.5px);
+  box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.6), inset -4px -4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.neu-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: var(--neu-shadow-accent), 0 0 0 2px #ffffff;
+}
+
+/* Calm, graceful ambient floating motion (6s duration) */
+@keyframes neuFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.neu-floating {
+  animation: neuFloat 6s ease-in-out infinite;
+}

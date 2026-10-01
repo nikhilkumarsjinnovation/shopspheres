@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 80);
+      setScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -19,12 +18,13 @@ export default function LandingNav() {
     <header
       style={{
         position: 'fixed',
-        top: '1rem',
+        top: '1.2rem',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 100,
-        width: 'min(1150px, calc(100vw - 2rem))',
-        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        width: 'min(1180px, calc(100vw - 2rem))',
+        transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+        pointerEvents: 'auto',
       }}
     >
       <div
@@ -32,121 +32,214 @@ export default function LandingNav() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0.75rem 1.5rem',
+          padding: '0.65rem 1.4rem',
           borderRadius: 999,
-          background: scrolled
-            ? 'rgba(10, 10, 15, 0.75)'
-            : 'rgba(15, 15, 22, 0.4)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
+          background: '#12151c',
+          border: 'none',
           boxShadow: scrolled
-            ? '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 20px rgba(139, 92, 246, 0.15)'
-            : 'none',
+            ? '12px 12px 26px rgba(0, 0, 0, 0.9), -8px -8px 20px rgba(255, 255, 255, 0.05)'
+            : '8px 8px 20px rgba(0, 0, 0, 0.8), -6px -6px 16px rgba(255, 255, 255, 0.035)',
         }}
       >
-        {/* Brand Logo */}
+        {/* Brand Logo with Molded Well */}
         <Link
           href="/"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.6rem',
+            gap: '0.75rem',
             textDecoration: 'none',
           }}
         >
           <div
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #10b981, #8b5cf6)',
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              background: '#12151c',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)',
+              boxShadow: 'inset 4px 4px 8px rgba(0, 0, 0, 0.8), inset -3px -3px 8px rgba(255, 255, 255, 0.05)',
             }}
           >
-            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff' }}>S</span>
+            <span
+              style={{
+                fontSize: '1.15rem',
+                fontWeight: 900,
+                color: '#6c63ff',
+                fontFamily: 'var(--font-display)',
+              }}
+            >
+              S
+            </span>
           </div>
           <span
             style={{
               fontSize: '1.25rem',
               fontWeight: 800,
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(135deg, #ffffff 40%, #c4b5fd 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.03em',
+              color: '#f8fafc',
+              fontFamily: 'var(--font-display)',
             }}
           >
             ShopSphere
           </span>
         </Link>
 
-        {/* Center Nav Links */}
+        {/* Center Nav Links in a Molded Shallow Track */}
         <nav
           style={{
             display: 'none',
             alignItems: 'center',
-            gap: '1.8rem',
+            gap: '0.4rem',
+            padding: '0.25rem 0.5rem',
+            borderRadius: 999,
+            background: '#12151c',
+            boxShadow: 'inset 3px 3px 7px rgba(0, 0, 0, 0.75), inset -3px -3px 7px rgba(255, 255, 255, 0.03)',
           }}
           className="desktop-nav"
         >
+          <a
+            href="#3d-studio"
+            style={{
+              color: '#94a3b8',
+              textDecoration: 'none',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              padding: '0.45rem 0.9rem',
+              borderRadius: 999,
+              transition: 'all 0.25s',
+              fontFamily: 'var(--font-body)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#f8fafc';
+              e.currentTarget.style.boxShadow = '5px 5px 10px rgba(0,0,0,0.6), -4px -4px 10px rgba(255,255,255,0.04)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            3D Studio
+          </a>
+          <a
+            href="#customers"
+            style={{
+              color: '#94a3b8',
+              textDecoration: 'none',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              padding: '0.45rem 0.9rem',
+              borderRadius: 999,
+              transition: 'all 0.25s',
+              fontFamily: 'var(--font-body)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#f8fafc';
+              e.currentTarget.style.boxShadow = '5px 5px 10px rgba(0,0,0,0.6), -4px -4px 10px rgba(255,255,255,0.04)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            For Shoppers
+          </a>
+          <a
+            href="#sellers"
+            style={{
+              color: '#94a3b8',
+              textDecoration: 'none',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              padding: '0.45rem 0.9rem',
+              borderRadius: 999,
+              transition: 'all 0.25s',
+              fontFamily: 'var(--font-body)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#f8fafc';
+              e.currentTarget.style.boxShadow = '5px 5px 10px rgba(0,0,0,0.6), -4px -4px 10px rgba(255,255,255,0.04)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            For Sellers
+          </a>
           <Link
             href="/products"
             style={{
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: '#94a3b8',
               textDecoration: 'none',
-              fontSize: '0.88rem',
-              fontWeight: 500,
-              transition: 'color 0.2s',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              padding: '0.45rem 0.9rem',
+              borderRadius: 999,
+              transition: 'all 0.25s',
+              fontFamily: 'var(--font-body)',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#f8fafc';
+              e.currentTarget.style.boxShadow = '5px 5px 10px rgba(0,0,0,0.6), -4px -4px 10px rgba(255,255,255,0.04)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
             Catalog
           </Link>
           <Link
-            href="/categories"
+            href="/agent"
             style={{
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: '#94a3b8',
               textDecoration: 'none',
-              fontSize: '0.88rem',
-              fontWeight: 500,
-              transition: 'color 0.2s',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              padding: '0.45rem 0.9rem',
+              borderRadius: 999,
+              transition: 'all 0.25s',
+              fontFamily: 'var(--font-body)',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
-          >
-            Categories
-          </Link>
-          <Link
-            href="/seller/onboarding"
-            style={{
-              color: 'rgba(255, 255, 255, 0.7)',
-              textDecoration: 'none',
-              fontSize: '0.88rem',
-              fontWeight: 500,
-              transition: 'color 0.2s',
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#6c63ff';
+              e.currentTarget.style.boxShadow = '5px 5px 10px rgba(0,0,0,0.6), -4px -4px 10px rgba(255,255,255,0.04)';
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)')}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
-            Sell on ShopSphere
+            AI Shopping
           </Link>
         </nav>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <Link
-            href="/auth/login"
+            href="/login"
             style={{
-              color: 'rgba(255, 255, 255, 0.8)',
+              color: '#94a3b8',
               textDecoration: 'none',
-              fontSize: '0.85rem',
+              fontSize: '0.84rem',
               fontWeight: 600,
-              padding: '0.5rem 1rem',
-              borderRadius: 999,
-              transition: 'all 0.2s',
+              padding: '0.55rem 1.1rem',
+              borderRadius: 14,
+              background: '#12151c',
+              boxShadow: '4px 4px 10px rgba(0,0,0,0.6), -3px -3px 8px rgba(255,255,255,0.035)',
+              transition: 'all 0.25s',
+              fontFamily: 'var(--font-body)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#f8fafc';
+              e.currentTarget.style.boxShadow = '6px 6px 14px rgba(0,0,0,0.7), -4px -4px 10px rgba(255,255,255,0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8';
+              e.currentTarget.style.boxShadow = '4px 4px 10px rgba(0,0,0,0.6), -3px -3px 8px rgba(255,255,255,0.035)';
             }}
           >
             Sign In
@@ -154,37 +247,25 @@ export default function LandingNav() {
 
           <Link
             href="/products"
+            className="neu-btn-primary"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: '#ffffff',
               textDecoration: 'none',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              padding: '0.5rem 1.25rem',
-              borderRadius: 999,
-              boxShadow: '0 4px 15px rgba(16, 185, 129, 0.35)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px) scale(1.02)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.35)';
+              fontSize: '0.84rem',
+              padding: '0.55rem 1.3rem',
+              borderRadius: 14,
             }}
           >
-            <span>Shop Now</span>
+            <span>Explore</span>
             <span>→</span>
           </Link>
         </div>
       </div>
 
       <style jsx>{`
-        @media (min-width: 768px) {
+        @media (min-width: 860px) {
           .desktop-nav {
             display: flex !important;
           }
