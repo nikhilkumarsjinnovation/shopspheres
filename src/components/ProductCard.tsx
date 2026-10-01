@@ -350,6 +350,7 @@ export default function ProductCard({ product, onPreview, isSelected }: ProductC
           onClick={toggleFavorite}
           title={isFav ? "Remove from wishlist" : "Save to wishlist"}
           aria-label="Toggle wishlist favorite"
+          className={`btn-wishlist-fav ${isFav ? 'is-fav' : ''}`}
           style={{
             position: 'absolute',
             top: '0.65rem',
@@ -358,16 +359,11 @@ export default function ProductCard({ product, onPreview, isSelected }: ProductC
             width: '32px',
             height: '32px',
             borderRadius: 'var(--radius-full)',
-            background: 'rgba(255, 255, 255, 0.88)',
-            backdropFilter: 'blur(6px)',
-            border: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: isFav ? 'var(--danger)' : 'var(--fg-muted)',
             transition: 'transform var(--transition-fast), color var(--transition-fast)',
-            boxShadow: 'var(--shadow-xs)',
           }}
         >
           <Heart size={16} fill={isFav ? 'currentColor' : 'none'} strokeWidth={isFav ? 2.5 : 1.75} />

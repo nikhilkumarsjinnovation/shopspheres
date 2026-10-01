@@ -4,6 +4,7 @@ import AdminApprovalQueue, { type QueueProduct } from '@/components/AdminApprova
 import { formatINR } from '@/lib/formatters';
 import { orderCode, parsePlatformStats } from '@/lib/platform-stats';
 import AdminPopulateControls from '@/components/admin/AdminPopulateControls';
+import MetricBars, { bucketByDay } from '@/components/portal/MetricBars';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -25,6 +26,12 @@ export default async function AdminDashboardPage() {
     .select('id, total_amount, status, created_at')
     .order('created_at', { ascending: false })
     .limit(10);
+
+  const { data: orderSeries } = await supabase
+    .from('orders')
+    .select('total_amount, created_at')
+    .order('created_at', { ascending: false })
+    .limit(500);
 
   const { data: adminShops } = await supabase
     .from('shops')
@@ -52,6 +59,49 @@ export default async function AdminDashboardPage() {
           <Metric label="Catalog Approved" value={String(stats.products_approved)} note={`${stats.products_pending} pending · ${stats.products_rejected} rejected`} />
           <Metric label="Verified Shops" value={String(stats.shop_count)} note={`${stats.low_stock} products under 5 stock`} />
           <Metric label="Pending Gifts" value={String(stats.gifts_pending)} note="Gifts awaiting reveal" />
+        </div>
+      )}
+
+      {stats && (
+        <div className="stat-cards-grid" style={{ marginBottom: '2.5rem' }}>
+          <MetricBars
+            title="Orders by status"
+            items={Object.entries(stats.orders_by_status).map(([label, value]) => ({
+              label: label.replace(/_/g, ' '),
+              value,
+            }))}
+            empty="No orders yet."
+          />
+          <MetricBars
+            title="Catalog moderation"
+            items={[
+              { label: 'Approved', value: stats.products_approved },
+              { label: 'Pending', value: stats.products_pending },
+              { label: 'Rejected', value: stats.products_rejected },
+            ]}
+            empty="No catalog listings yet."
+          />
+          <MetricBars
+            title="Accounts by role"
+            items={[
+              { label: 'Customers', value: stats.users_customer },
+              { label: 'Sellers', value: stats.users_seller },
+              { label: 'Admins', value: stats.users_admin },
+            ]}
+            empty="No accounts yet."
+          />
+          <MetricBars
+            title="Daily GMV"
+            caption={(orderSeries ?? []).length >= 500 ? 'Latest 500 orders, grouped by day (IST).' : 'Grouped by day (IST).'}
+            items={bucketByDay(
+              (orderSeries ?? []).map((order) => ({
+                at: order.created_at,
+                amount: Number(order.total_amount),
+              })),
+            )}
+            formatValue={formatINR}
+            empty="No order totals to chart yet."
+          />
         </div>
       )}
 

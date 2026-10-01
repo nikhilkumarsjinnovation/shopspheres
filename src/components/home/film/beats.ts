@@ -1,16 +1,20 @@
 export const FRAME_COUNT = 240;
-export const SCROLL_VH = 2800;
+export const HERO_SCROLL_VH = 1200;
+export const SCROLL_VH = 1200;
 export const FEATURE_COUNT = 6;
 
 export const RANGES = {
-  lights: [0, 0.2],
-  drive: [0.2, 0.4],
-  humanoid: [0.4, 0.7],
+  lights: [0, 0.25],
+  drive: [0.25, 0.55],
+  humanoid: [0.55, 0.85],
   features: [0.7, 0.82],
   catch: [0.82, 0.91],
   zip: [0.91, 0.985],
   dive: [0.985, 1],
+  reveal: [0.85, 1.0],
 } as const;
+
+export const HANDOFF = [0.66, 0.74] as const;
 
 export const FRAME_FOLDERS = [
   'scene-1-starting-black-screen',
@@ -33,39 +37,6 @@ export function smooth(p: number, span: readonly [number, number]): number {
   return x * x * (3 - 2 * x);
 }
 
-/** Last hero frame rides up, and the product section comes in from below. */
-export const HANDOFF = [0.66, 0.74] as const;
-
-export function sectionShift(p: number): number {
-  return smooth(p, HANDOFF);
-}
-
-export function featureIndex(p: number): number {
-  const t = range(p, [HANDOFF[1], RANGES.zip[0]]);
-  return Math.min(FEATURE_COUNT - 1, Math.floor(t * FEATURE_COUNT));
-}
-
-export function featureOpacity(p: number): number {
-  if (p < HANDOFF[0]) return 0;
-  const exit = 1 - smooth(p, [RANGES.zip[0] - 0.02, RANGES.zip[0] + 0.012]);
-  return exit;
-}
-
-/** The hero stays visible while it scrolls up, then leaves with the handoff. */
-export function frameOpacity(p: number): number {
-  return p <= HANDOFF[1] ? 1 : 0;
-}
-
-export function catchOpacity(p: number): number {
-  const enter = smooth(p, [RANGES.catch[0], RANGES.catch[0] + 0.025]);
-  const exit = 1 - smooth(p, [RANGES.catch[1] - 0.02, RANGES.zip[0] + 0.03]);
-  return enter * exit;
-}
-
-export function zipOpen(p: number): number {
-  return smooth(p, RANGES.zip);
-}
-
 export type HeroFrame = { seq: FrameSeq; index: number };
 
 export function heroFrame(p: number): HeroFrame | null {
@@ -75,18 +46,16 @@ export function heroFrame(p: number): HeroFrame | null {
   if (p <= RANGES.drive[1]) {
     return { seq: 1, index: Math.round(range(p, RANGES.drive) * (FRAME_COUNT - 1)) };
   }
-  if (p <= HANDOFF[0]) {
-    return { seq: 2, index: Math.round(range(p, [RANGES.humanoid[0], HANDOFF[0]]) * (FRAME_COUNT - 1)) };
+  if (p <= RANGES.humanoid[1]) {
+    return { seq: 2, index: Math.round(range(p, RANGES.humanoid) * (FRAME_COUNT - 1)) };
   }
-  return null;
+  return { seq: 2, index: FRAME_COUNT - 1 };
 }
 
-export type FilmPhase = 'loading' | 'lights' | 'drive' | 'humanoid' | 'features' | 'catch' | 'zip' | 'dive';
+export type FilmPhase = 'loading' | 'lights' | 'drive' | 'humanoid' | 'features' | 'catch' | 'zip' | 'dive' | 'reveal';
 
 export function scrollPhase(p: number): FilmPhase {
-  if (p >= RANGES.dive[0]) return 'dive';
-  if (p >= RANGES.zip[0]) return 'zip';
-  if (p >= HANDOFF[0]) return 'features';
+  if (p >= RANGES.reveal[0]) return 'reveal';
   if (p >= RANGES.humanoid[0]) return 'humanoid';
   if (p >= RANGES.drive[0]) return 'drive';
   return 'lights';

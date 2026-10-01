@@ -834,7 +834,7 @@ function ProfileContent() {
           { id: 'addresses', label: `Address Book (${addresses.length})`, icon: MapPin },
           { id: 'friends', label: `Friends Circle (${friends.length})`, icon: Users },
           { id: 'wallet', label: 'In-App Wallet', icon: Wallet },
-          { id: 'accessibility', label: 'Saksham Inclusive', icon: Accessibility },
+          { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
           { id: 'ai', label: 'AI Persona & Memory', icon: Sparkles },
         ].map((t) => {
           const Icon = t.icon;
@@ -1568,7 +1568,7 @@ function ProfileContent() {
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '2rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Accessibility size={22} style={{ color: '#0284c7' }} />
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Saksham Inclusive Accessibility Hub</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Accessibility Preferences Hub</h2>
           </div>
           <p style={{ fontSize: '0.875rem', color: 'var(--fg-muted)', marginBottom: '1.5rem' }}>
             Customize ShopSphere to match your motor, visual, auditory, and cognitive requirements (WCAG 2.2 AAA Compliant).

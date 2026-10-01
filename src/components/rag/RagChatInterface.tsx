@@ -27,6 +27,7 @@ import {
 import { formatINR } from '@/lib/formatters';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 import type { TenantLearningStats, ProductKnowledgeNode, GracePeriodItem } from '@/services/rag-service';
+import FormattedMessage from '@/components/ui/FormattedMessage';
 
 export interface RagChatInterfaceProps {
   role: 'admin' | 'seller';
@@ -738,6 +739,7 @@ What would you like to explore or analyze today?`,
 
                   {/* Message Bubble */}
                   <div
+                    className={isUser ? 'user-formatted' : 'assistant-formatted'}
                     style={{
                       maxWidth: '85%',
                       padding: '0.9rem 1.15rem',
@@ -747,11 +749,10 @@ What would you like to explore or analyze today?`,
                       fontSize: '0.9rem',
                       lineHeight: 1.6,
                       wordBreak: 'break-word',
-                      whiteSpace: 'pre-wrap',
                       boxShadow: 'var(--shadow-xs)',
                     }}
                   >
-                    {msg.content}
+                    <FormattedMessage content={msg.content} isUser={isUser} />
                   </div>
 
                   {/* Grounded Product Nodes Citation Card (When RAG matched products) */}

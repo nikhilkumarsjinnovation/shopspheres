@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Check } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, RefreshCw, RotateCcw, Check, Search, X } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
+import ProductDetailPanel from '@/components/ProductDetailPanel';
 import type { FeedCarousel } from '@/app/api/v1/feed/personalized/route';
 import { fetchWithCsrf } from '@/lib/csrf-client';
 
@@ -56,6 +57,9 @@ export default function ExploreFeedClient({
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc' | 'rating' | 'newest'>('featured');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<BaseProduct | null>(() => {
+    return initialProducts && initialProducts.length > 0 ? initialProducts[0] : null;
+  });
   const searchParams = useSearchParams();
 
   // Listen for search from header
@@ -233,6 +237,15 @@ export default function ExploreFeedClient({
     return result;
   }, [initialProducts, searchQuery, selectedCategory, minPrice, maxPrice, minRating, inStockOnly, sortBy]);
 
+  // Synchronize selected product if current one is filtered out
+  useEffect(() => {
+    if (isFiltering && filteredProducts.length > 0) {
+      if (!selectedProduct || !filteredProducts.some((p) => p.id === selectedProduct.id)) {
+        setSelectedProduct(filteredProducts[0]);
+      }
+    }
+  }, [filteredProducts, isFiltering, selectedProduct]);
+
   const filterPanel = (
     <div className="filter-panel">
       <div className="filter-panel-head">
@@ -385,7 +398,33 @@ export default function ExploreFeedClient({
   );
 
   return (
-    <div className="explore-shell animate-slide-up">
+    <div className="explore-dashboard-wrap">
+      {/* Subnav Search Bar (Positioned directly below navbar) */}
+      <div className="subnav-search-bar-wrap">
+        <div className="subnav-search-inner">
+          <Search size={18} className="subnav-search-icon" aria-hidden="true" />
+          <input
+            type="search"
+            className="subnav-search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search products by title, category, tags, or description..."
+            aria-label="Search catalog"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="subnav-search-clear"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="explore-shell animate-slide-up">
       {/* Mobile filter trigger */}
       <div className="explore-mobile-bar">
         <button
@@ -437,10 +476,11 @@ export default function ExploreFeedClient({
               {isFiltering ? filteredProducts.length : initialProducts.length} items
             </p>
           </div>
-          <label className="catalog-sort">
-            Sort
+          <div className="catalog-sort">
+            <label htmlFor="catalog-sort-select" className="catalog-sort-label">Sort:</label>
             <select
-              className="custom-select"
+              id="catalog-sort-select"
+              className="custom-select catalog-sort-select"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               aria-label="Sort products"
@@ -451,7 +491,7 @@ export default function ExploreFeedClient({
               <option value="rating">Highest rating</option>
               <option value="newest">Newest</option>
             </select>
-          </label>
+          </div>
         </div>
         {/* Real-time AI consultation update notice */}
         {feedJustUpdated && (
@@ -521,7 +561,11 @@ export default function ExploreFeedClient({
               <div className="product-list">
                 {filteredProducts.map((product, i) => (
                   <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                    <ProductCard product={product} />
+                    <ProductCard
+                      product={product}
+                      onPreview={(p) => setSelectedProduct(p as BaseProduct)}
+                      isSelected={selectedProduct?.id === product.id}
+                    />
                   </div>
                 ))}
               </div>
@@ -565,7 +609,11 @@ export default function ExploreFeedClient({
                 <div className="product-list">
                   {initialProducts.map((product, i) => (
                     <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                      <ProductCard product={product} />
+                      <ProductCard
+                        product={product}
+                        onPreview={(p) => setSelectedProduct(p as BaseProduct)}
+                        isSelected={selectedProduct?.id === product.id}
+                      />
                     </div>
                   ))}
                 </div>
@@ -596,7 +644,11 @@ export default function ExploreFeedClient({
                     <div className="product-list">
                       {carousel.products.map((product, i) => (
                         <div key={product.id} className="explore-card-enter" style={{ animationDelay: `${Math.min(i * 35, 350)}ms` }}>
-                          <ProductCard product={product} />
+                          <ProductCard
+                            product={product}
+                            onPreview={(p) => setSelectedProduct(p as BaseProduct)}
+                            isSelected={selectedProduct?.id === product.id}
+                          />
                         </div>
                       ))}
                     </div>
@@ -607,6 +659,14 @@ export default function ExploreFeedClient({
           </div>
         )}
       </div>
+
+      {/* RIGHT PANE — sticky product detail panel */}
+      <aside className="explore-detail-pane" aria-label="Product detailed view">
+        <ProductDetailPanel
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      </aside>
 
       {/* Mobile filter drawer */}
       {mobileFiltersOpen && (
@@ -631,6 +691,7 @@ export default function ExploreFeedClient({
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

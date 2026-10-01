@@ -30,6 +30,7 @@ import VoiceInterface from '@/components/ai/VoiceInterface';
 import VisualSearch from '@/components/ai/VisualSearch';
 import type { PersonaConfig } from '@/lib/personas';
 import { useAgentBackground } from '@/context/AgentBackgroundContext';
+import FormattedMessage from '@/components/ui/FormattedMessage';
 
 export interface RecommendedProduct {
   id: string;
@@ -660,75 +661,7 @@ function ActionCardRenderer({
   return null;
 }
 
-function renderInlineText(text: string) {
-  const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
-    }
-    if (part.startsWith('`') && part.endsWith('`')) {
-      return (
-        <code
-          key={index}
-          style={{
-            background: 'var(--bg-subtle)',
-            padding: '0.1rem 0.3rem',
-            borderRadius: '4px',
-            fontSize: '0.78rem',
-            fontFamily: 'monospace',
-          }}
-        >
-          {part.slice(1, -1)}
-        </code>
-      );
-    }
-    return part;
-  });
-}
 
-function renderFormattedMessage(content: string) {
-  return content.split('\n').map((line, idx) => {
-    if (line.startsWith('### ')) {
-      return (
-        <h4 key={idx} style={{ margin: '0.4rem 0 0.2rem', fontSize: '0.88rem', fontWeight: 800 }}>
-          {line.replace('### ', '')}
-        </h4>
-      );
-    }
-    if (line.startsWith('## ')) {
-      return (
-        <h3 key={idx} style={{ margin: '0.45rem 0 0.25rem', fontSize: '0.92rem', fontWeight: 800 }}>
-          {line.replace('## ', '')}
-        </h3>
-      );
-    }
-    if (line.startsWith('- ') || line.startsWith('• ')) {
-      const text = line.replace(/^[-•]\s*/, '');
-      return (
-        <li
-          key={idx}
-          style={{
-            marginLeft: '1rem',
-            listStyleType: 'disc',
-            fontSize: '0.82rem',
-            marginBottom: '0.2rem',
-            lineHeight: 1.45,
-          }}
-        >
-          {renderInlineText(text)}
-        </li>
-      );
-    }
-    if (!line.trim()) {
-      return <div key={idx} style={{ height: '0.35rem' }} />;
-    }
-    return (
-      <p key={idx} style={{ margin: '0 0 0.35rem', fontSize: '0.84rem', lineHeight: 1.45 }}>
-        {renderInlineText(line)}
-      </p>
-    );
-  });
-}
 
 export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssistantProps) {
   const {
@@ -915,7 +848,9 @@ export default function PersonalAiAssistant({ onFeedUpdated }: PersonalAiAssista
                 key={m.id}
                 className={m.role === 'assistant' ? 'ai-bubble-assistant' : 'ai-bubble-user'}
               >
-                <div className="ai-bubble-formatted">{renderFormattedMessage(m.content)}</div>
+                <div className="ai-bubble-formatted">
+                  <FormattedMessage content={m.content} isUser={m.role === 'user'} />
+                </div>
 
                 {/* Mode Indicator & Provenance Badge */}
                 {m.role === 'assistant' && (

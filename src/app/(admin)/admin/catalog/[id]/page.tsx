@@ -4,16 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import ProductDecision from '@/components/admin/ProductDecision';
 import ProductThumbnail from '@/components/ProductThumbnail';
 import { formatINR } from '@/lib/formatters';
-import type { Json } from '@/types/database.types';
-
-function asRecord(value: Json): Record<string, string> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-  const out: Record<string, string> = {};
-  for (const [key, entry] of Object.entries(value)) {
-    out[key] = entry == null ? '' : String(entry);
-  }
-  return out;
-}
+import { readModerationResult, sellerSpecEntries } from '@/lib/moderation-display';
 
 export default async function AdminProductDetailPage({
   params,
@@ -65,7 +56,8 @@ export default async function AdminProductDetailPage({
     ? await supabase.from('shops').select('name, city').eq('id', product.shop_id).maybeSingle()
     : { data: null };
 
-  const attributes = asRecord(product.attributes);
+  const attributes = sellerSpecEntries(product.attributes);
+  const moderation = readModerationResult(product.attributes);
   const images = product.image_urls ?? [];
 
   return (
@@ -115,6 +107,26 @@ export default async function AdminProductDetailPage({
               <p style={{ fontSize: '0.85rem', color: 'var(--danger)', margin: 0 }}>Rejection Reason: {product.rejection_reason}</p>
             ) : null}
             <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>Resubmits used: {product.resubmit_count}</span>
+            <div style={{ marginTop: '0.45rem', fontSize: '0.85rem' }}>
+              {moderation ? (
+                <>
+                  <strong>AI confidence {moderation.score}%</strong>
+                  <span style={{ color: 'var(--fg-muted)' }}>
+                    {' '}· {moderation.score >= 90
+                      ? product.approval_status === 'approved'
+                        ? 'meets the 90% auto-approve gate'
+                        : `score is at the 90% gate, status is still ${product.approval_status}`
+                      : 'below the 90% auto-approve gate'}
+                    {moderation.model ? ` · ${moderation.model}` : ''}
+                  </span>
+                  {moderation.reasons[0] ? (
+                    <div style={{ color: 'var(--fg-secondary)', marginTop: '0.2rem' }}>{moderation.reasons[0]}</div>
+                  ) : null}
+                </>
+              ) : (
+                <span style={{ color: 'var(--fg-muted)' }}>No AI confidence score stored for this listing.</span>
+              )}
+            </div>
           </div>
           <ProductDecision productId={product.id} status={product.approval_status} />
         </div>
@@ -156,7 +168,7 @@ export default async function AdminProductDetailPage({
 
       <div className="checkout-card">
         <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>Technical Specifications</h2>
-        {Object.keys(attributes).length === 0 ? (
+        {attributes.length === 0 ? (
           <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem' }}>No technical specifications specified.</p>
         ) : (
           <table className="portal-table">
@@ -167,7 +179,7 @@ export default async function AdminProductDetailPage({
               </tr>
             </thead>
             <tbody>
-              {Object.entries(attributes).map(([key, value]) => (
+              {attributes.map(([key, value]) => (
                 <tr key={key}>
                   <td style={{ fontWeight: 600, width: '200px' }}>{key}</td>
                   <td>{value}</td>

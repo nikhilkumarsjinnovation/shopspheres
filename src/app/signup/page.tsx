@@ -361,18 +361,17 @@ export default function SignupPage() {
             <span className="auth-label">Select Your Account Role</span>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.35rem' }}>
               <label
+                className={`auth-role-option ${role === 'customer' ? 'selected' : ''}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.75rem 1rem',
-                  background: role === 'customer' ? 'var(--bg-surface-hover)' : 'var(--bg-canvas)',
-                  border: `2px solid ${role === 'customer' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
                   borderRadius: 'var(--radius-md)',
                   cursor: 'pointer',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  transition: 'all var(--transition-fast)',
+                  transition: 'all 300ms ease-out',
                 }}
               >
                 <input
@@ -381,24 +380,23 @@ export default function SignupPage() {
                   value="customer"
                   checked={role === 'customer'}
                   onChange={() => setRole('customer')}
-                  style={{ accentColor: 'var(--fg-primary)' }}
+                  style={{ accentColor: 'var(--accent)' }}
                 />
                 Customer
               </label>
 
               <label
+                className={`auth-role-option ${role === 'seller' ? 'selected' : ''}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
                   padding: '0.75rem 1rem',
-                  background: role === 'seller' ? 'var(--bg-surface-hover)' : 'var(--bg-canvas)',
-                  border: `2px solid ${role === 'seller' ? 'var(--fg-primary)' : 'var(--border-subtle)'}`,
                   borderRadius: 'var(--radius-md)',
                   cursor: 'pointer',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  transition: 'all var(--transition-fast)',
+                  transition: 'all 300ms ease-out',
                 }}
               >
                 <input
@@ -407,7 +405,7 @@ export default function SignupPage() {
                   value="seller"
                   checked={role === 'seller'}
                   onChange={() => setRole('seller')}
-                  style={{ accentColor: 'var(--fg-primary)' }}
+                  style={{ accentColor: 'var(--accent)' }}
                 />
                 Seller
               </label>

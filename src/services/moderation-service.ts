@@ -100,6 +100,20 @@ function heuristicEvaluate(input: ModerationInput): { score: number; reasons: st
   };
 }
 
+/** Score gate: >= 90 auto-approves, < 70 rejects, otherwise stays pending. */
+export function decisionFromScore(score: number): 'approved' | 'rejected' | 'pending' {
+  if (score >= 90) return 'approved';
+  if (score < 70) return 'rejected';
+  return 'pending';
+}
+
+/** Models sometimes return 0.93 instead of 93. Values strictly between 0 and 1 are fractions. */
+export function normalizeModerationScore(raw: number, fallback: number): number {
+  if (!Number.isFinite(raw)) return fallback;
+  const scaled = raw > 0 && raw < 1 ? raw * 100 : raw;
+  return Math.max(0, Math.min(100, Math.round(scaled)));
+}
+
 /**
  * Evaluates listing using Gemini if API key is present, with heuristic safety net.
  */
@@ -123,7 +137,7 @@ export async function evaluateListing(input: ModerationInput): Promise<Moderatio
   }
 
   if (!apiKey) {
-    const decision = heuristic.score >= 90 ? 'approved' : heuristic.score < 70 ? 'rejected' : 'pending';
+    const decision = decisionFromScore(heuristic.score);
     return {
       automated: true,
       score: heuristic.score,
@@ -184,11 +198,11 @@ Guideline: If score >= 90, decision MUST be "approved". If score < 70, decision 
       const rawText = payload.candidates?.[0]?.content?.parts?.[0]?.text;
       if (rawText) {
         const parsed = JSON.parse(rawText);
-        const score = typeof parsed.score === 'number' ? Math.max(0, Math.min(100, Math.round(parsed.score))) : heuristic.score;
-        let decision: 'approved' | 'rejected' | 'pending' = parsed.decision;
-        if (!['approved', 'rejected', 'pending'].includes(decision)) {
-          decision = score >= 90 ? 'approved' : score < 70 ? 'rejected' : 'pending';
-        }
+        const score = typeof parsed.score === 'number'
+          ? normalizeModerationScore(parsed.score, heuristic.score)
+          : heuristic.score;
+        // Model text can return "pending" with a score >= 90. The score gate wins.
+        const decision = decisionFromScore(score);
 
         return {
           automated: true,
@@ -205,7 +219,7 @@ Guideline: If score >= 90, decision MUST be "approved". If score < 70, decision 
     console.warn('[Moderation Service] Gemini evaluation fallback to heuristic:', err);
   }
 
-  const decision = heuristic.score >= 90 ? 'approved' : heuristic.score < 70 ? 'rejected' : 'pending';
+  const decision = decisionFromScore(heuristic.score);
   return {
     automated: true,
     score: heuristic.score,
@@ -272,7 +286,7 @@ export async function evaluateAndApplyModeration(
     .eq('id', productId);
 
   if (error) {
-    console.error(`[Moderation] Failed to update product ${productId}:`, error.message);
+    throw new Error(`[Moderation] Failed to update product ${productId}: ${error.message}`);
   }
 
   return result;
