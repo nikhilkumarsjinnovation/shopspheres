@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { generateEmbedding, toVectorLiteral } from '@/lib/embeddings';
+import { retrieveProducts, type RetrievalMode } from '@/services/hybrid-retriever';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
 
@@ -530,78 +531,16 @@ export async function retrieveTenantProducts(
   supabase: SupabaseClient<Database>,
   queryText: string,
   userContext: RagUserContext,
-  limit = 6
+  limit = 6,
+  mode: RetrievalMode = 'hybrid'
 ): Promise<ProductKnowledgeNode[]> {
-  // 1. Generate query embedding vector
-  const queryVector = await generateEmbedding(queryText);
-
-  // 2. Fetch candidate products for the scoped tenant
-  let dbQuery = supabase
-    .from('products')
-    .select('id, seller_id, shop_id, title, description, price, compare_at_price, stock, category, sub_category, tags, attributes, image_urls, approval_status, embedding');
-
-  if (userContext.role === 'seller') {
-    // AIRTIGHT PRIVACY: strictly scoped to seller
-    dbQuery = dbQuery.eq('seller_id', userContext.userId);
-  } else if (userContext.role === 'admin' && userContext.shopId) {
-    dbQuery = dbQuery.eq('shop_id', userContext.shopId);
-  }
-
-  const { data: candidates, error } = await dbQuery;
-
-  if (error || !candidates || candidates.length === 0) {
-    return [];
-  }
-
-  // 3. Filter out soft-deleted products and calculate cosine similarity
-  const ranked: Array<ProductKnowledgeNode & { similarity: number }> = [];
-
-  for (const p of candidates) {
-    if (isProductSoftDeleted(p)) {
-      continue;
-    }
-
-    let similarity = 0;
-    if (p.embedding) {
-      const prodVector = parseVectorLiteral(p.embedding);
-      if (prodVector) {
-        similarity = cosineSimilarity(queryVector, prodVector);
-      }
-    } else {
-      // Fallback text match heuristic if unindexed
-      const qLower = queryText.toLowerCase();
-      const titleLower = p.title.toLowerCase();
-      const catLower = p.category.toLowerCase();
-      if (titleLower.includes(qLower) || qLower.includes(titleLower)) {
-        similarity = 0.75;
-      } else if (catLower.includes(qLower) || qLower.includes(catLower)) {
-        similarity = 0.55;
-      }
-    }
-
-    ranked.push({
-      id: p.id,
-      seller_id: p.seller_id,
-      shop_id: p.shop_id,
-      title: p.title,
-      description: p.description,
-      price: p.price,
-      compare_at_price: p.compare_at_price,
-      stock: p.stock,
-      category: p.category,
-      sub_category: p.sub_category,
-      tags: p.tags || [],
-      attributes: (p.attributes as any) || {},
-      image_urls: p.image_urls || [],
-      approval_status: p.approval_status,
-      similarity,
-    });
-  }
-
-  // Sort descending by similarity
-  ranked.sort((a, b) => b.similarity - a.similarity);
-
-  return ranked.slice(0, limit);
+  return retrieveProducts({
+    mode,
+    query: queryText,
+    supabase,
+    userContext,
+    limit,
+  });
 }
 
 /**
