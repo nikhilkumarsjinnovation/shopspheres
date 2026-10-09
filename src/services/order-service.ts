@@ -1,6 +1,6 @@
 import { createClient as createUserClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { queueNotification } from '@/services/notification-service';
+import { queueNotification, sendEmailToAddress } from '@/services/notification-service';
 import { getWallet, debitWallet } from '@/services/wallet-service';
 
 export interface OrderItemInput {
@@ -261,6 +261,9 @@ export async function createOrder(input: CreateOrderInput, userId: string): Prom
     template: 'order_placed',
     payload: { orderId: newOrder.id, total: totals.total },
   });
+  if (input.isGift && input.giftRecipientEmail) {
+    await sendEmailToAddress(input.giftRecipientEmail, 'gift_incoming', { orderId: newOrder.id });
+  }
 
   return {
     id: newOrder.id,
