@@ -13,7 +13,7 @@ Saved so the branch stack stays the source of truth. Status below is updated as 
 | 1 | `feat/a3-integrations` | merged to main (PR #20) | 20 |
 | 2 | `feat/a3-campaigns` | implemented locally, not committed | 15 |
 | 3 | `feat/a3-agents` | not started | 20 |
-| 4 | `feat/a3-eval-hybrid` | not started | 15 |
+| 4 | `feat/a3-eval-hybrid` | implemented locally, not committed | 15 |
 | 5 | `feat/a3-churn` | not started | 10 |
 | 6 | `feat/a3-platform` | not started | 15 |
 | 7 | `feat/a3-demo` | not started | 5 |
