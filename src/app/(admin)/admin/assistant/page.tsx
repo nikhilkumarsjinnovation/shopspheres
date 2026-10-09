@@ -26,7 +26,8 @@ export default async function AdminAssistantPage() {
           Platform RAG Intelligence & Moderation
         </h1>
         <p style={{ color: 'var(--fg-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-          Platform-wide RAG embeddings or store-specific audits with 7-day grace period tracking and multi-turn conversational memory.
+          Platform-wide RAG embeddings and store Q&amp;A. This page does not schedule email campaigns —
+          use Admin → Email Campaigns → Marketing AI agent for that.
         </p>
       </div>
 
