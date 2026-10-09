@@ -10,7 +10,7 @@ export interface NotificationInput {
 export interface NotificationResult {
   queued: boolean;
   channel: NotificationInput['channel'];
-  reason: 'provider_not_configured';
+  reason: 'sent' | 'provider_not_configured' | 'provider_rejected' | 'missing_address';
 }
 
 function result(input: NotificationInput): NotificationResult {
@@ -22,7 +22,45 @@ export async function sendPush(input: NotificationInput): Promise<NotificationRe
 }
 
 export async function sendEmail(input: NotificationInput): Promise<NotificationResult> {
-  return result({ ...input, channel: 'email' });
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const { renderShopEmail, sendAppEmail } = await import('@/services/resend-mail');
+    const admin = createAdminClient();
+    const { data: user, error } = await admin.from('users').select('email, full_name').eq('id', input.userId).maybeSingle();
+    if (error || !user?.email) {
+      return { queued: false, channel: 'email', reason: 'missing_address' };
+    }
+    const message = renderShopEmail(input.template, input.payload ?? {}, user.full_name);
+    const sent = await sendAppEmail({ to: user.email, ...message });
+    if (!sent.ok) {
+      console.error('[resend]', input.template, sent.status);
+      return { queued: false, channel: 'email', reason: sent.status === 501 ? 'provider_not_configured' : 'provider_rejected' };
+    }
+    return { queued: true, channel: 'email', reason: 'sent' };
+  } catch {
+    console.error('[resend] send failed for', input.template);
+    return { queued: false, channel: 'email', reason: 'provider_rejected' };
+  }
+}
+
+export async function sendEmailToAddress(
+  to: string,
+  template: string,
+  payload: NotificationInput['payload'],
+): Promise<NotificationResult> {
+  try {
+    const { renderShopEmail, sendAppEmail } = await import('@/services/resend-mail');
+    const message = renderShopEmail(template, payload ?? {}, null);
+    const sent = await sendAppEmail({ to, ...message });
+    if (!sent.ok) {
+      console.error('[resend]', template, sent.status);
+      return { queued: false, channel: 'email', reason: sent.status === 501 ? 'provider_not_configured' : 'provider_rejected' };
+    }
+    return { queued: true, channel: 'email', reason: 'sent' };
+  } catch {
+    console.error('[resend] address send failed for', template);
+    return { queued: false, channel: 'email', reason: 'provider_rejected' };
+  }
 }
 
 export async function sendSMS(input: NotificationInput): Promise<NotificationResult> {
@@ -30,6 +68,9 @@ export async function sendSMS(input: NotificationInput): Promise<NotificationRes
 }
 
 export async function queueNotification(input: NotificationInput): Promise<NotificationResult> {
+  if (input.channel === 'email') {
+    return sendEmail(input);
+  }
   return result(input);
 }
 

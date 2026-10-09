@@ -212,6 +212,8 @@ export default function CheckoutPage() {
       setPaymentReady(true);
     } else if (paymentMethod === 'cod') {
       setPaymentReady(codInput.trim() === codCaptcha);
+    } else if (paymentMethod === 'stripe') {
+      setPaymentReady(true);
     }
   }, [paymentMethod, walletBalance, finalTotalINR, codInput, codCaptcha]);
 
@@ -1115,6 +1117,39 @@ export default function CheckoutPage() {
                     </div>
                   </label>
 
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.85rem',
+                      padding: '1.1rem 1.25rem',
+                      borderRadius: 'var(--radius-lg)',
+                      border: `2px solid ${paymentMethod === 'stripe' ? 'var(--accent-electric)' : 'var(--border-subtle)'}`,
+                      background: paymentMethod === 'stripe' ? 'linear-gradient(135deg, rgba(79, 70, 229, 0.05), var(--bg-surface))' : 'var(--bg-canvas)',
+                      cursor: 'pointer',
+                      transition: 'all var(--transition-fast)',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethodSelector"
+                      value="stripe"
+                      checked={paymentMethod === 'stripe'}
+                      onChange={() => setPaymentMethod('stripe')}
+                      style={{ accentColor: 'var(--accent-electric)', width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                        <CreditCard size={18} style={{ color: 'var(--accent-electric)' }} />
+                        <strong style={{ fontSize: '0.95rem' }}>International Card (Stripe test)</strong>
+                        <span className="section-badge" style={{ fontSize: '0.68rem', padding: '0.1rem 0.45rem' }}>Test mode</span>
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--fg-muted)', marginTop: '0.2rem' }}>
+                        Pay on Stripe Checkout. Use card 4242 4242 4242 4242. No real charge.
+                      </p>
+                    </div>
+                  </label>
+
                   {/* Net Banking */}
                   <label
                     style={{
@@ -1651,6 +1686,30 @@ export default function CheckoutPage() {
             </div>
           )}
 
+          {paymentMethod === 'stripe' && (
+            <div className="checkout-card">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
+                <CreditCard size={22} style={{ color: 'var(--accent-electric)' }} />
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Stripe test checkout</h2>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>
+                    The next step opens Stripe. The order stays pending until Stripe reports the payment.
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)' }}>
+                <button
+                  type="button"
+                  className="btn-card-add"
+                  onClick={handleProceedToConfirmation}
+                  style={{ padding: '0.65rem 1.75rem', fontSize: '0.88rem' }}
+                >
+                  Review &amp; continue to Stripe →
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* DEDICATED WIDGET: CASH ON DELIVERY */}
           {paymentMethod === 'cod' && (
             <div className="checkout-card">
@@ -1825,6 +1884,7 @@ export default function CheckoutPage() {
                     {paymentMethod === 'card' && <CreditCard size={20} />}
                     {paymentMethod === 'netbanking' && <Building2 size={20} />}
                     {paymentMethod === 'cod' && <Truck size={20} />}
+                    {paymentMethod === 'stripe' && <CreditCard size={20} style={{ color: 'var(--accent-electric)' }} />}
                   </div>
                   <div>
                     <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
@@ -1836,6 +1896,7 @@ export default function CheckoutPage() {
                       {paymentMethod === 'card' && 'Practice Card 3DS OTP Verified.'}
                       {paymentMethod === 'netbanking' && 'Practice Net Banking OTP Verified.'}
                       {paymentMethod === 'cod' && 'Doorstep Cash / QR settlement verified with code.'}
+                      {paymentMethod === 'stripe' && 'You will pay on Stripe Checkout. The order confirms after payment.'}
                     </div>
                   </div>
                 </div>
@@ -1960,7 +2021,11 @@ export default function CheckoutPage() {
                   ) : (
                     <>
                       <span>
-                        {paymentMethod === 'cod' ? '📦 Confirm Cash on Delivery Order' : `🚀 Authorize & Pay ${formatINR(finalTotalINR)}`}
+                        {paymentMethod === 'cod'
+                          ? '📦 Confirm Cash on Delivery Order'
+                          : paymentMethod === 'stripe'
+                            ? `Pay ${formatINR(finalTotalINR)} on Stripe`
+                            : `🚀 Authorize & Pay ${formatINR(finalTotalINR)}`}
                       </span>
                       <ArrowRight size={20} />
                     </>

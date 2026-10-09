@@ -1,5 +1,7 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import StripeOrderNotice from '@/components/StripeOrderNotice';
 import { Package, Store, Clock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
@@ -97,6 +99,9 @@ export default async function OrdersPage() {
 
   return (
     <div className="animate-slide-up" style={{ paddingBottom: '3rem' }}>
+      <Suspense fallback={null}>
+        <StripeOrderNotice />
+      </Suspense>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Order History & Tracking</h1>

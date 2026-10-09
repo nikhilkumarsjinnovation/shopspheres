@@ -83,6 +83,8 @@ function createLimiter(tokens: number, prefix: string): ShopRateLimiter {
 export const chatLimiter = createLimiter(10, 'shopsphere:chat');
 export const categorizeLimiter = createLimiter(5, 'shopsphere:categorize');
 export const visualSearchLimiter = createLimiter(5, 'shopsphere:visual-search');
+export const integrationsLimiter = createLimiter(10, 'shopsphere:integrations');
+export const stripeWebhookLimiter = createLimiter(120, 'shopsphere:stripe-webhook');
 
 export async function rateLimitKey(request: NextRequest): Promise<string> {
   const supabase = await createClient();

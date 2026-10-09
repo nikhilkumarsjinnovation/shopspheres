@@ -1385,6 +1385,91 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_sync_state: {
+        Row: {
+          created_at: string
+          email: string
+          hubspot_contact_id: string | null
+          id: string
+          last_error: string | null
+          last_status: string
+          last_synced_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          hubspot_contact_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_status?: string
+          last_synced_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          hubspot_contact_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_status?: string
+          last_synced_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sync_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stripe_webhook_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          livemode: boolean
+          order_id: string | null
+          payload_sha256: string
+          processed_at: string
+          stripe_event_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          livemode?: boolean
+          order_id?: string | null
+          payload_sha256: string
+          processed_at?: string
+          stripe_event_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          livemode?: boolean
+          order_id?: string | null
+          payload_sha256?: string
+          processed_at?: string
+          stripe_event_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_webhook_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

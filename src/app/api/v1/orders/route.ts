@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
 import { createOrder, type CreateOrderInput } from '@/services/order-service';
+import { sendEmail } from '@/services/notification-service';
 import { refundWallet } from '@/services/wallet-service';
 
 export async function POST(request: NextRequest) {
@@ -185,6 +186,13 @@ export async function PATCH(request: NextRequest) {
 
   const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId).eq('customer_id', session.user.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await sendEmail({
+    channel: 'email',
+    userId: session.user.id,
+    template: 'order_cancelled',
+    payload: { orderId },
+  });
 
   await supabase.from('order_tracking_events').insert({
     order_id: orderId,
