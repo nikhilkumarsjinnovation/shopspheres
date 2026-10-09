@@ -13,7 +13,7 @@ interface AdminSidebarProps {
 const links = [
   { href: '/admin/dashboard', label: 'Pulse / Overview', icon: Activity, match: (p: string) => p === '/admin/dashboard' || p === '/dashboard' || p === '/admin' },
   { href: '/admin/assistant', label: 'Platform RAG & AI', icon: Brain, match: (p: string) => p.startsWith('/admin/assistant') },
-  { href: '/admin/campaigns', label: 'Email Campaigns', icon: Megaphone, match: (p: string) => p.startsWith('/admin/campaigns') },
+  { href: '/admin/campaigns', label: 'Email Campaigns + AI', icon: Megaphone, match: (p: string) => p.startsWith('/admin/campaigns') },
   { href: '/admin/users', label: 'User Directory', icon: Users, match: (p: string) => p === '/admin/users' },
   { href: '/admin/catalog', label: 'Catalog Approvals', icon: Archive, match: (p: string) => p.startsWith('/admin/catalog') },
   { href: '/admin/orders', label: 'Order Ledger', icon: FileText, match: (p: string) => p.startsWith('/admin/orders') },

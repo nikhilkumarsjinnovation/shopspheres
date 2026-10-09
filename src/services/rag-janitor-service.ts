@@ -179,7 +179,7 @@ export async function runRagJanitorAndSync(
 
   const [janitorResult, learnerResult] = await Promise.all([
     runGracePeriodJanitor(supabase),
-    runIncrementalRagLearner(supabase, 40),
+    runIncrementalRagLearner(supabase, 80),
   ]);
 
   const durationMs = Date.now() - startTime;

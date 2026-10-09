@@ -8,12 +8,33 @@ import { MAX_PROMO_DISCOUNT_PERCENT } from '@/services/resend-mail';
 
 type SegmentCounts = Record<CampaignSegment, number>;
 
-type Props = {
-  initialCounts?: SegmentCounts | null;
+export type CampaignHistoryRow = {
+  id: string;
+  name: string;
+  segment: string;
+  discountPercent: number;
+  promoCode: string | null;
+  status: string;
+  createdAt: string;
+  source: 'ai' | 'manual';
+  sent: number;
+  total: number;
 };
 
-export default function CampaignPanel({ initialCounts = null }: Props) {
+type Props = {
+  initialCounts?: SegmentCounts | null;
+  initialCampaigns?: CampaignHistoryRow[];
+  /** Increment to force a client refetch (e.g. after AI schedule). */
+  refreshSignal?: number;
+};
+
+export default function CampaignPanel({
+  initialCounts = null,
+  initialCampaigns = [],
+  refreshSignal = 0,
+}: Props) {
   const [counts, setCounts] = useState<SegmentCounts | null>(initialCounts);
+  const [campaigns, setCampaigns] = useState<CampaignHistoryRow[]>(initialCampaigns);
   const [segment, setSegment] = useState<CampaignSegment>('new');
   const [discountPercent, setDiscountPercent] = useState('15');
   const [name, setName] = useState('');
@@ -25,12 +46,24 @@ export default function CampaignPanel({ initialCounts = null }: Props) {
     setLoadingCounts(true);
     setMessage(null);
     try {
-      const res = await fetchWithCsrf('/api/v1/campaigns/segments');
-      const data = (await res.json()) as { ok?: boolean; counts?: SegmentCounts; error?: string };
-      if (!res.ok || !data.counts) {
-        throw new Error(data.error || 'Failed to load segment counts.');
+      const [segRes, listRes] = await Promise.all([
+        fetchWithCsrf('/api/v1/campaigns/segments'),
+        fetchWithCsrf('/api/v1/campaigns'),
+      ]);
+      const segData = (await segRes.json()) as { ok?: boolean; counts?: SegmentCounts; error?: string };
+      if (!segRes.ok || !segData.counts) {
+        throw new Error(segData.error || 'Failed to load segment counts.');
       }
-      setCounts(data.counts);
+      setCounts(segData.counts);
+
+      const listData = (await listRes.json()) as {
+        ok?: boolean;
+        campaigns?: CampaignHistoryRow[];
+        error?: string;
+      };
+      if (listRes.ok && listData.campaigns) {
+        setCampaigns(listData.campaigns);
+      }
     } catch (err: unknown) {
       setMessage({
         text: err instanceof Error ? err.message : 'Failed to load segments.',
@@ -46,6 +79,12 @@ export default function CampaignPanel({ initialCounts = null }: Props) {
       void refreshCounts();
     }
   }, [initialCounts, refreshCounts]);
+
+  useEffect(() => {
+    if (refreshSignal > 0) {
+      void refreshCounts();
+    }
+  }, [refreshSignal, refreshCounts]);
 
   const handleSend = (event: React.FormEvent) => {
     event.preventDefault();
@@ -97,9 +136,7 @@ export default function CampaignPanel({ initialCounts = null }: Props) {
           text: `Campaign ${data.campaignId?.slice(0, 8)} — in-app ${data.sent ?? 0}/${data.attempted ?? 0}, emailed ${emailed}.${codeHint}${failHint}`,
           isError: emailed === 0 && (data.attempted ?? 0) > 0,
         });
-        setTimeout(() => {
-          window.location.reload();
-        }, emailed === 0 ? 4000 : 1200);
+        await refreshCounts();
       } catch (err: unknown) {
         setMessage({
           text: err instanceof Error ? err.message : 'Campaign send failed.',
@@ -146,7 +183,7 @@ export default function CampaignPanel({ initialCounts = null }: Props) {
           }}
         >
           {loadingCounts ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-          Refresh counts
+          Refresh
         </button>
       </div>
 
@@ -280,6 +317,74 @@ export default function CampaignPanel({ initialCounts = null }: Props) {
           {message.text}
         </div>
       ) : null}
+
+      <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.25rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>Recent campaigns</h3>
+        <p style={{ margin: '0 0 1rem', fontSize: '0.8rem', color: 'var(--fg-muted)' }}>
+          Manual sends and AI marketing agent schedules ([AI] prefix) both appear here.
+        </p>
+        {campaigns.length === 0 ? (
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.9rem', margin: 0 }}>
+            No campaigns yet. Send one above, or ask the admin AI assistant to schedule a segment promo.
+          </p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="portal-table" style={{ width: '100%' }}>
+              <thead>
+                <tr>
+                  <th>Created</th>
+                  <th>Source</th>
+                  <th>Name</th>
+                  <th>Code</th>
+                  <th>Segment</th>
+                  <th>Discount</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Sends</th>
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.map((campaign) => (
+                  <tr key={campaign.id}>
+                    <td style={{ color: 'var(--fg-muted)', whiteSpace: 'nowrap' }}>
+                      {new Date(campaign.createdAt).toLocaleString('en-IN')}
+                    </td>
+                    <td>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: campaign.source === 'ai' ? 'var(--accent-electric)' : 'var(--bg-subtle)',
+                          color: campaign.source === 'ai' ? 'var(--fg-inverted)' : 'var(--fg-primary)',
+                        }}
+                      >
+                        {campaign.source === 'ai' ? 'AI' : 'Manual'}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{campaign.name}</td>
+                    <td>
+                      <code style={{ fontSize: '0.85rem', fontWeight: 700 }}>
+                        {campaign.promoCode ?? '—'}
+                      </code>
+                    </td>
+                    <td style={{ textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: 600 }}>
+                      {campaign.segment}
+                    </td>
+                    <td>{campaign.discountPercent}%</td>
+                    <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{campaign.status}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      {campaign.sent}/{campaign.total}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
