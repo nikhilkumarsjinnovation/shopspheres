@@ -14,7 +14,7 @@ Saved so the branch stack stays the source of truth. Status below is updated as 
 | 2 | `feat/a3-campaigns` | implemented locally, not committed | 15 |
 | 3 | `feat/a3-agents` | not started | 20 |
 | 4 | `feat/a3-eval-hybrid` | implemented locally, not committed | 15 |
-| 5 | `feat/a3-churn` | not started | 10 |
+| 5 | `feat/a3-churn` | implemented locally, not committed | 10 |
 | 6 | `feat/a3-platform` | not started | 15 |
 | 7 | `feat/a3-demo` | not started | 5 |
 
@@ -85,7 +85,11 @@ Labelled gift and checkout scenarios. First run writes `scripts/eval/baseline-a2
 
 ## Branch 5 — `feat/a3-churn`
 
-Repeat-purchase and churn from order history. Precision, recall, and F1 for the existing `ml_models` rows `next_purchase_predictor` and `churn_scorer` (`pending://not-trained` today). Optional Ollama `Modelfile` only. If F1 is under 0.80, the measured number is what gets recorded.
+Repeat-purchase and churn from order history. Precision, recall, and F1 for the existing `ml_models` rows `next_purchase_predictor` and `churn_scorer`. Pure-TypeScript RFM logistic models (`inline://rfm-logistic-*`); optional Ollama `Modelfile` only (not in the request path). If F1 is under 0.80, the measured number is what gets recorded.
+
+**Files:** `src/services/rfm-features.ts`, `src/services/ml-logistic.ts`, `src/services/churn-models.ts`, `src/services/churn-model-artifacts.ts`, `src/services/ml-registry.ts`, `src/services/churn-order-loader.ts`, `src/app/api/v1/ml/models/churn/route.ts`, `src/app/api/v1/ml/models/churn/score/route.ts`, `scripts/fixtures/a3-churn-orders.json`, `scripts/test_a3_churn.ts`, `scripts/gen_a3_churn_artifacts.ts`, `ml/Modelfile.churn`.
+
+**Done when:** `npx tsx scripts/test_a3_churn.ts` (or `npm run test:a3-churn`) prints precision/recall/F1 for both models from the fixture and leaves `pending://not-trained`.
 
 **Depends on:** branch 4.
 

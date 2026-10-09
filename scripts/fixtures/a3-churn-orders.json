@@ -1,0 +1,1805 @@
+{
+  "asOf": "2025-07-01T00:00:00.000Z",
+  "orders": [
+    {
+      "id": "ord_001",
+      "customer_id": "cust_churn_01",
+      "status": "delivered",
+      "total_amount": 43,
+      "created_at": "2025-03-02T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 43
+        }
+      ]
+    },
+    {
+      "id": "ord_002",
+      "customer_id": "cust_churn_02",
+      "status": "delivered",
+      "total_amount": 46,
+      "created_at": "2025-03-01T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_02_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 46
+        }
+      ]
+    },
+    {
+      "id": "ord_003",
+      "customer_id": "cust_churn_03",
+      "status": "delivered",
+      "total_amount": 49,
+      "created_at": "2025-02-28T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_03_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 49
+        }
+      ]
+    },
+    {
+      "id": "ord_004",
+      "customer_id": "cust_churn_03",
+      "status": "confirmed",
+      "total_amount": 23,
+      "created_at": "2025-01-29T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_03_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 23
+        }
+      ]
+    },
+    {
+      "id": "ord_005",
+      "customer_id": "cust_churn_04",
+      "status": "delivered",
+      "total_amount": 52,
+      "created_at": "2025-02-27T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_04_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 52
+        }
+      ]
+    },
+    {
+      "id": "ord_006",
+      "customer_id": "cust_churn_05",
+      "status": "delivered",
+      "total_amount": 55,
+      "created_at": "2025-02-26T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_05_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 55
+        }
+      ]
+    },
+    {
+      "id": "ord_007",
+      "customer_id": "cust_churn_06",
+      "status": "delivered",
+      "total_amount": 58,
+      "created_at": "2025-02-25T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 58
+        }
+      ]
+    },
+    {
+      "id": "ord_008",
+      "customer_id": "cust_churn_06",
+      "status": "confirmed",
+      "total_amount": 26,
+      "created_at": "2025-01-26T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 26
+        }
+      ]
+    },
+    {
+      "id": "ord_009",
+      "customer_id": "cust_churn_07",
+      "status": "delivered",
+      "total_amount": 61,
+      "created_at": "2025-02-24T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_07_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 61
+        }
+      ]
+    },
+    {
+      "id": "ord_010",
+      "customer_id": "cust_churn_08",
+      "status": "delivered",
+      "total_amount": 64,
+      "created_at": "2025-02-23T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_08_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 64
+        }
+      ]
+    },
+    {
+      "id": "ord_011",
+      "customer_id": "cust_churn_09",
+      "status": "delivered",
+      "total_amount": 67,
+      "created_at": "2025-02-22T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_09_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 67
+        }
+      ]
+    },
+    {
+      "id": "ord_012",
+      "customer_id": "cust_churn_09",
+      "status": "confirmed",
+      "total_amount": 29,
+      "created_at": "2025-01-23T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_09_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 29
+        }
+      ]
+    },
+    {
+      "id": "ord_013",
+      "customer_id": "cust_churn_10",
+      "status": "delivered",
+      "total_amount": 70,
+      "created_at": "2025-02-21T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_10_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_014",
+      "customer_id": "cust_churn_11",
+      "status": "delivered",
+      "total_amount": 73,
+      "created_at": "2025-02-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_11_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 73
+        }
+      ]
+    },
+    {
+      "id": "ord_015",
+      "customer_id": "cust_churn_12",
+      "status": "delivered",
+      "total_amount": 76,
+      "created_at": "2025-02-19T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_12_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 76
+        }
+      ]
+    },
+    {
+      "id": "ord_016",
+      "customer_id": "cust_churn_12",
+      "status": "confirmed",
+      "total_amount": 32,
+      "created_at": "2025-01-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_12_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 32
+        }
+      ]
+    },
+    {
+      "id": "ord_017",
+      "customer_id": "cust_churn_13",
+      "status": "delivered",
+      "total_amount": 79,
+      "created_at": "2025-02-18T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_13_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 79
+        }
+      ]
+    },
+    {
+      "id": "ord_018",
+      "customer_id": "cust_churn_14",
+      "status": "delivered",
+      "total_amount": 82,
+      "created_at": "2025-02-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_14_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 82
+        }
+      ]
+    },
+    {
+      "id": "ord_019",
+      "customer_id": "cust_churn_15",
+      "status": "delivered",
+      "total_amount": 85,
+      "created_at": "2025-02-16T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_15_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 85
+        }
+      ]
+    },
+    {
+      "id": "ord_020",
+      "customer_id": "cust_churn_15",
+      "status": "confirmed",
+      "total_amount": 35,
+      "created_at": "2025-01-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_15_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 35
+        }
+      ]
+    },
+    {
+      "id": "ord_021",
+      "customer_id": "cust_churn_16",
+      "status": "delivered",
+      "total_amount": 88,
+      "created_at": "2025-02-15T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_16_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 88
+        }
+      ]
+    },
+    {
+      "id": "ord_022",
+      "customer_id": "cust_churn_17",
+      "status": "delivered",
+      "total_amount": 91,
+      "created_at": "2025-02-14T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_17_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 91
+        }
+      ]
+    },
+    {
+      "id": "ord_023",
+      "customer_id": "cust_churn_18",
+      "status": "delivered",
+      "total_amount": 94,
+      "created_at": "2025-02-13T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_18_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 94
+        }
+      ]
+    },
+    {
+      "id": "ord_024",
+      "customer_id": "cust_churn_18",
+      "status": "confirmed",
+      "total_amount": 38,
+      "created_at": "2025-01-14T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_churn_18_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 38
+        }
+      ]
+    },
+    {
+      "id": "ord_025",
+      "customer_id": "cust_active_01",
+      "status": "delivered",
+      "total_amount": 85,
+      "created_at": "2025-06-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 28
+        },
+        {
+          "product_id": "p_cust_active_01_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 28
+        },
+        {
+          "product_id": "p_cust_active_01_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 28
+        }
+      ]
+    },
+    {
+      "id": "ord_026",
+      "customer_id": "cust_active_01",
+      "status": "shipped",
+      "total_amount": 52,
+      "created_at": "2025-05-21T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 52
+        }
+      ]
+    },
+    {
+      "id": "ord_027",
+      "customer_id": "cust_active_01",
+      "status": "confirmed",
+      "total_amount": 64,
+      "created_at": "2025-07-07T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 32
+        },
+        {
+          "product_id": "p_cust_active_01_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 32
+        }
+      ]
+    },
+    {
+      "id": "ord_028",
+      "customer_id": "cust_active_02",
+      "status": "delivered",
+      "total_amount": 90,
+      "created_at": "2025-06-19T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_02_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 23
+        },
+        {
+          "product_id": "p_cust_active_02_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 23
+        },
+        {
+          "product_id": "p_cust_active_02_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 23
+        },
+        {
+          "product_id": "p_cust_active_02_3",
+          "category": "grocery",
+          "quantity": 1,
+          "unit_price": 23
+        }
+      ]
+    },
+    {
+      "id": "ord_029",
+      "customer_id": "cust_active_02",
+      "status": "shipped",
+      "total_amount": 54,
+      "created_at": "2025-05-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_02_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 54
+        }
+      ]
+    },
+    {
+      "id": "ord_030",
+      "customer_id": "cust_active_02",
+      "status": "confirmed",
+      "total_amount": 68,
+      "created_at": "2025-07-08T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_02_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 34
+        },
+        {
+          "product_id": "p_cust_active_02_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 34
+        }
+      ]
+    },
+    {
+      "id": "ord_031",
+      "customer_id": "cust_active_03",
+      "status": "delivered",
+      "total_amount": 95,
+      "created_at": "2025-06-18T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_03_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 48
+        },
+        {
+          "product_id": "p_cust_active_03_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 48
+        }
+      ]
+    },
+    {
+      "id": "ord_032",
+      "customer_id": "cust_active_03",
+      "status": "shipped",
+      "total_amount": 56,
+      "created_at": "2025-05-19T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_03_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 56
+        }
+      ]
+    },
+    {
+      "id": "ord_033",
+      "customer_id": "cust_active_03",
+      "status": "confirmed",
+      "total_amount": 72,
+      "created_at": "2025-07-09T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_03_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 36
+        },
+        {
+          "product_id": "p_cust_active_03_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 36
+        }
+      ]
+    },
+    {
+      "id": "ord_034",
+      "customer_id": "cust_active_04",
+      "status": "delivered",
+      "total_amount": 100,
+      "created_at": "2025-06-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_04_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 33
+        },
+        {
+          "product_id": "p_cust_active_04_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 33
+        },
+        {
+          "product_id": "p_cust_active_04_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 33
+        }
+      ]
+    },
+    {
+      "id": "ord_035",
+      "customer_id": "cust_active_04",
+      "status": "shipped",
+      "total_amount": 58,
+      "created_at": "2025-05-18T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_04_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 58
+        }
+      ]
+    },
+    {
+      "id": "ord_036",
+      "customer_id": "cust_active_04",
+      "status": "confirmed",
+      "total_amount": 76,
+      "created_at": "2025-07-10T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_04_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 38
+        },
+        {
+          "product_id": "p_cust_active_04_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 38
+        }
+      ]
+    },
+    {
+      "id": "ord_037",
+      "customer_id": "cust_active_05",
+      "status": "delivered",
+      "total_amount": 105,
+      "created_at": "2025-06-16T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_05_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 26
+        },
+        {
+          "product_id": "p_cust_active_05_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 26
+        },
+        {
+          "product_id": "p_cust_active_05_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 26
+        },
+        {
+          "product_id": "p_cust_active_05_3",
+          "category": "grocery",
+          "quantity": 1,
+          "unit_price": 26
+        }
+      ]
+    },
+    {
+      "id": "ord_038",
+      "customer_id": "cust_active_05",
+      "status": "shipped",
+      "total_amount": 60,
+      "created_at": "2025-05-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_05_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 60
+        }
+      ]
+    },
+    {
+      "id": "ord_039",
+      "customer_id": "cust_active_05",
+      "status": "confirmed",
+      "total_amount": 80,
+      "created_at": "2025-07-11T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_05_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 40
+        },
+        {
+          "product_id": "p_cust_active_05_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 40
+        }
+      ]
+    },
+    {
+      "id": "ord_040",
+      "customer_id": "cust_active_06",
+      "status": "delivered",
+      "total_amount": 110,
+      "created_at": "2025-06-15T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 55
+        },
+        {
+          "product_id": "p_cust_active_06_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 55
+        }
+      ]
+    },
+    {
+      "id": "ord_041",
+      "customer_id": "cust_active_06",
+      "status": "shipped",
+      "total_amount": 62,
+      "created_at": "2025-05-16T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 62
+        }
+      ]
+    },
+    {
+      "id": "ord_042",
+      "customer_id": "cust_active_06",
+      "status": "confirmed",
+      "total_amount": 84,
+      "created_at": "2025-07-12T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 42
+        },
+        {
+          "product_id": "p_cust_active_06_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 42
+        }
+      ]
+    },
+    {
+      "id": "ord_043",
+      "customer_id": "cust_active_07",
+      "status": "delivered",
+      "total_amount": 115,
+      "created_at": "2025-06-14T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_07_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 38
+        },
+        {
+          "product_id": "p_cust_active_07_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 38
+        },
+        {
+          "product_id": "p_cust_active_07_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 38
+        }
+      ]
+    },
+    {
+      "id": "ord_044",
+      "customer_id": "cust_active_07",
+      "status": "shipped",
+      "total_amount": 64,
+      "created_at": "2025-05-15T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_07_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 64
+        }
+      ]
+    },
+    {
+      "id": "ord_045",
+      "customer_id": "cust_active_07",
+      "status": "confirmed",
+      "total_amount": 88,
+      "created_at": "2025-07-13T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_07_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 44
+        },
+        {
+          "product_id": "p_cust_active_07_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 44
+        }
+      ]
+    },
+    {
+      "id": "ord_046",
+      "customer_id": "cust_active_08",
+      "status": "delivered",
+      "total_amount": 120,
+      "created_at": "2025-06-13T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_08_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 30
+        },
+        {
+          "product_id": "p_cust_active_08_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 30
+        },
+        {
+          "product_id": "p_cust_active_08_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 30
+        },
+        {
+          "product_id": "p_cust_active_08_3",
+          "category": "grocery",
+          "quantity": 1,
+          "unit_price": 30
+        }
+      ]
+    },
+    {
+      "id": "ord_047",
+      "customer_id": "cust_active_08",
+      "status": "shipped",
+      "total_amount": 66,
+      "created_at": "2025-05-14T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_08_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 66
+        }
+      ]
+    },
+    {
+      "id": "ord_048",
+      "customer_id": "cust_active_08",
+      "status": "confirmed",
+      "total_amount": 92,
+      "created_at": "2025-07-14T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_08_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 46
+        },
+        {
+          "product_id": "p_cust_active_08_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 46
+        }
+      ]
+    },
+    {
+      "id": "ord_049",
+      "customer_id": "cust_active_09",
+      "status": "delivered",
+      "total_amount": 125,
+      "created_at": "2025-06-12T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_09_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 63
+        },
+        {
+          "product_id": "p_cust_active_09_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 63
+        }
+      ]
+    },
+    {
+      "id": "ord_050",
+      "customer_id": "cust_active_09",
+      "status": "shipped",
+      "total_amount": 68,
+      "created_at": "2025-05-13T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_09_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 68
+        }
+      ]
+    },
+    {
+      "id": "ord_051",
+      "customer_id": "cust_active_09",
+      "status": "confirmed",
+      "total_amount": 96,
+      "created_at": "2025-07-15T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_09_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 48
+        },
+        {
+          "product_id": "p_cust_active_09_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 48
+        }
+      ]
+    },
+    {
+      "id": "ord_052",
+      "customer_id": "cust_active_10",
+      "status": "delivered",
+      "total_amount": 130,
+      "created_at": "2025-06-11T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_10_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 43
+        },
+        {
+          "product_id": "p_cust_active_10_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 43
+        },
+        {
+          "product_id": "p_cust_active_10_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 43
+        }
+      ]
+    },
+    {
+      "id": "ord_053",
+      "customer_id": "cust_active_10",
+      "status": "shipped",
+      "total_amount": 70,
+      "created_at": "2025-05-12T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_10_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_054",
+      "customer_id": "cust_active_10",
+      "status": "confirmed",
+      "total_amount": 100,
+      "created_at": "2025-07-16T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_10_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 50
+        },
+        {
+          "product_id": "p_cust_active_10_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 50
+        }
+      ]
+    },
+    {
+      "id": "ord_055",
+      "customer_id": "cust_active_11",
+      "status": "delivered",
+      "total_amount": 135,
+      "created_at": "2025-06-10T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_11_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 34
+        },
+        {
+          "product_id": "p_cust_active_11_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 34
+        },
+        {
+          "product_id": "p_cust_active_11_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 34
+        },
+        {
+          "product_id": "p_cust_active_11_3",
+          "category": "grocery",
+          "quantity": 1,
+          "unit_price": 34
+        }
+      ]
+    },
+    {
+      "id": "ord_056",
+      "customer_id": "cust_active_11",
+      "status": "shipped",
+      "total_amount": 72,
+      "created_at": "2025-05-11T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_11_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 72
+        }
+      ]
+    },
+    {
+      "id": "ord_057",
+      "customer_id": "cust_active_11",
+      "status": "confirmed",
+      "total_amount": 104,
+      "created_at": "2025-07-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_11_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 52
+        },
+        {
+          "product_id": "p_cust_active_11_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 52
+        }
+      ]
+    },
+    {
+      "id": "ord_058",
+      "customer_id": "cust_active_12",
+      "status": "delivered",
+      "total_amount": 140,
+      "created_at": "2025-06-09T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_12_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        },
+        {
+          "product_id": "p_cust_active_12_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_059",
+      "customer_id": "cust_active_12",
+      "status": "shipped",
+      "total_amount": 74,
+      "created_at": "2025-05-10T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_12_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 74
+        }
+      ]
+    },
+    {
+      "id": "ord_060",
+      "customer_id": "cust_active_12",
+      "status": "confirmed",
+      "total_amount": 108,
+      "created_at": "2025-07-18T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_12_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 54
+        },
+        {
+          "product_id": "p_cust_active_12_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 54
+        }
+      ]
+    },
+    {
+      "id": "ord_061",
+      "customer_id": "cust_active_13",
+      "status": "delivered",
+      "total_amount": 145,
+      "created_at": "2025-06-08T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_13_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 48
+        },
+        {
+          "product_id": "p_cust_active_13_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 48
+        },
+        {
+          "product_id": "p_cust_active_13_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 48
+        }
+      ]
+    },
+    {
+      "id": "ord_062",
+      "customer_id": "cust_active_13",
+      "status": "shipped",
+      "total_amount": 76,
+      "created_at": "2025-05-09T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_13_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 76
+        }
+      ]
+    },
+    {
+      "id": "ord_063",
+      "customer_id": "cust_active_13",
+      "status": "confirmed",
+      "total_amount": 112,
+      "created_at": "2025-07-19T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_13_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 56
+        },
+        {
+          "product_id": "p_cust_active_13_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 56
+        }
+      ]
+    },
+    {
+      "id": "ord_064",
+      "customer_id": "cust_active_14",
+      "status": "delivered",
+      "total_amount": 150,
+      "created_at": "2025-06-07T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_14_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 38
+        },
+        {
+          "product_id": "p_cust_active_14_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 38
+        },
+        {
+          "product_id": "p_cust_active_14_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 38
+        },
+        {
+          "product_id": "p_cust_active_14_3",
+          "category": "grocery",
+          "quantity": 1,
+          "unit_price": 38
+        }
+      ]
+    },
+    {
+      "id": "ord_065",
+      "customer_id": "cust_active_14",
+      "status": "shipped",
+      "total_amount": 78,
+      "created_at": "2025-05-08T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_14_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 78
+        }
+      ]
+    },
+    {
+      "id": "ord_066",
+      "customer_id": "cust_active_14",
+      "status": "confirmed",
+      "total_amount": 116,
+      "created_at": "2025-07-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_14_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 58
+        },
+        {
+          "product_id": "p_cust_active_14_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 58
+        }
+      ]
+    },
+    {
+      "id": "ord_067",
+      "customer_id": "cust_active_15",
+      "status": "delivered",
+      "total_amount": 155,
+      "created_at": "2025-06-06T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_15_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 78
+        },
+        {
+          "product_id": "p_cust_active_15_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 78
+        }
+      ]
+    },
+    {
+      "id": "ord_068",
+      "customer_id": "cust_active_15",
+      "status": "shipped",
+      "total_amount": 80,
+      "created_at": "2025-05-22T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_15_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 80
+        }
+      ]
+    },
+    {
+      "id": "ord_069",
+      "customer_id": "cust_active_15",
+      "status": "confirmed",
+      "total_amount": 120,
+      "created_at": "2025-07-21T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_15_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 60
+        },
+        {
+          "product_id": "p_cust_active_15_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 60
+        }
+      ]
+    },
+    {
+      "id": "ord_070",
+      "customer_id": "cust_active_16",
+      "status": "delivered",
+      "total_amount": 160,
+      "created_at": "2025-06-05T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_16_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 53
+        },
+        {
+          "product_id": "p_cust_active_16_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 53
+        },
+        {
+          "product_id": "p_cust_active_16_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 53
+        }
+      ]
+    },
+    {
+      "id": "ord_071",
+      "customer_id": "cust_active_16",
+      "status": "shipped",
+      "total_amount": 82,
+      "created_at": "2025-05-21T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_16_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 82
+        }
+      ]
+    },
+    {
+      "id": "ord_072",
+      "customer_id": "cust_active_16",
+      "status": "confirmed",
+      "total_amount": 124,
+      "created_at": "2025-07-22T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_16_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 62
+        },
+        {
+          "product_id": "p_cust_active_16_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 62
+        }
+      ]
+    },
+    {
+      "id": "ord_073",
+      "customer_id": "cust_active_17",
+      "status": "delivered",
+      "total_amount": 165,
+      "created_at": "2025-06-04T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_17_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 41
+        },
+        {
+          "product_id": "p_cust_active_17_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 41
+        },
+        {
+          "product_id": "p_cust_active_17_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 41
+        },
+        {
+          "product_id": "p_cust_active_17_3",
+          "category": "grocery",
+          "quantity": 1,
+          "unit_price": 41
+        }
+      ]
+    },
+    {
+      "id": "ord_074",
+      "customer_id": "cust_active_17",
+      "status": "shipped",
+      "total_amount": 84,
+      "created_at": "2025-05-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_17_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 84
+        }
+      ]
+    },
+    {
+      "id": "ord_075",
+      "customer_id": "cust_active_17",
+      "status": "confirmed",
+      "total_amount": 128,
+      "created_at": "2025-07-23T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_17_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 64
+        },
+        {
+          "product_id": "p_cust_active_17_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 64
+        }
+      ]
+    },
+    {
+      "id": "ord_076",
+      "customer_id": "cust_active_18",
+      "status": "delivered",
+      "total_amount": 170,
+      "created_at": "2025-06-03T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_18_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 85
+        },
+        {
+          "product_id": "p_cust_active_18_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 85
+        }
+      ]
+    },
+    {
+      "id": "ord_077",
+      "customer_id": "cust_active_18",
+      "status": "shipped",
+      "total_amount": 86,
+      "created_at": "2025-05-19T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_18_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 86
+        }
+      ]
+    },
+    {
+      "id": "ord_078",
+      "customer_id": "cust_active_18",
+      "status": "confirmed",
+      "total_amount": 132,
+      "created_at": "2025-07-24T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_active_18_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 66
+        },
+        {
+          "product_id": "p_cust_active_18_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 66
+        }
+      ]
+    },
+    {
+      "id": "ord_079",
+      "customer_id": "cust_quiet_01",
+      "status": "delivered",
+      "total_amount": 130,
+      "created_at": "2025-06-23T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 43
+        },
+        {
+          "product_id": "p_cust_quiet_01_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 43
+        },
+        {
+          "product_id": "p_cust_quiet_01_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 43
+        }
+      ]
+    },
+    {
+      "id": "ord_080",
+      "customer_id": "cust_quiet_02",
+      "status": "delivered",
+      "total_amount": 140,
+      "created_at": "2025-06-20T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_02_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 47
+        },
+        {
+          "product_id": "p_cust_quiet_02_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 47
+        },
+        {
+          "product_id": "p_cust_quiet_02_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 47
+        }
+      ]
+    },
+    {
+      "id": "ord_081",
+      "customer_id": "cust_quiet_02",
+      "status": "delivered",
+      "total_amount": 70,
+      "created_at": "2025-10-11T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_02_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_082",
+      "customer_id": "cust_quiet_03",
+      "status": "delivered",
+      "total_amount": 150,
+      "created_at": "2025-06-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_03_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 50
+        },
+        {
+          "product_id": "p_cust_quiet_03_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 50
+        },
+        {
+          "product_id": "p_cust_quiet_03_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 50
+        }
+      ]
+    },
+    {
+      "id": "ord_083",
+      "customer_id": "cust_quiet_04",
+      "status": "delivered",
+      "total_amount": 160,
+      "created_at": "2025-06-14T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_04_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 53
+        },
+        {
+          "product_id": "p_cust_quiet_04_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 53
+        },
+        {
+          "product_id": "p_cust_quiet_04_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 53
+        }
+      ]
+    },
+    {
+      "id": "ord_084",
+      "customer_id": "cust_quiet_04",
+      "status": "delivered",
+      "total_amount": 70,
+      "created_at": "2025-10-13T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_04_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_085",
+      "customer_id": "cust_quiet_05",
+      "status": "delivered",
+      "total_amount": 170,
+      "created_at": "2025-06-11T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_05_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 57
+        },
+        {
+          "product_id": "p_cust_quiet_05_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 57
+        },
+        {
+          "product_id": "p_cust_quiet_05_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 57
+        }
+      ]
+    },
+    {
+      "id": "ord_086",
+      "customer_id": "cust_quiet_06",
+      "status": "delivered",
+      "total_amount": 180,
+      "created_at": "2025-06-08T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 60
+        },
+        {
+          "product_id": "p_cust_quiet_06_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 60
+        },
+        {
+          "product_id": "p_cust_quiet_06_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 60
+        }
+      ]
+    },
+    {
+      "id": "ord_087",
+      "customer_id": "cust_quiet_06",
+      "status": "delivered",
+      "total_amount": 70,
+      "created_at": "2025-10-15T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_06_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_088",
+      "customer_id": "cust_quiet_07",
+      "status": "delivered",
+      "total_amount": 190,
+      "created_at": "2025-06-05T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_07_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 63
+        },
+        {
+          "product_id": "p_cust_quiet_07_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 63
+        },
+        {
+          "product_id": "p_cust_quiet_07_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 63
+        }
+      ]
+    },
+    {
+      "id": "ord_089",
+      "customer_id": "cust_quiet_08",
+      "status": "delivered",
+      "total_amount": 200,
+      "created_at": "2025-06-02T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_08_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 67
+        },
+        {
+          "product_id": "p_cust_quiet_08_1",
+          "category": "fashion",
+          "quantity": 1,
+          "unit_price": 67
+        },
+        {
+          "product_id": "p_cust_quiet_08_2",
+          "category": "home",
+          "quantity": 1,
+          "unit_price": 67
+        }
+      ]
+    },
+    {
+      "id": "ord_090",
+      "customer_id": "cust_quiet_08",
+      "status": "delivered",
+      "total_amount": 70,
+      "created_at": "2025-10-17T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_quiet_08_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 70
+        }
+      ]
+    },
+    {
+      "id": "ord_091",
+      "customer_id": "cust_noise_01",
+      "status": "pending",
+      "total_amount": 999,
+      "created_at": "2025-06-28T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_noise_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 999
+        }
+      ]
+    },
+    {
+      "id": "ord_092",
+      "customer_id": "cust_noise_01",
+      "status": "cancelled",
+      "total_amount": 999,
+      "created_at": "2025-06-29T00:00:00.000Z",
+      "items": [
+        {
+          "product_id": "p_cust_noise_01_0",
+          "category": "electronics",
+          "quantity": 1,
+          "unit_price": 999
+        }
+      ]
+    }
+  ]
+}
