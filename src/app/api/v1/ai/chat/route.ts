@@ -187,6 +187,9 @@ export async function POST(request: NextRequest) {
       history: combinedHistory,
       mode,
       sessionId,
+      isAdmin: Boolean(
+        session && session.profile.role === 'admin' && session.profile.is_active,
+      ),
     });
 
     let feedMutated = false;

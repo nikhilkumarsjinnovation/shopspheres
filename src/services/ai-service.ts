@@ -18,6 +18,15 @@ import {
   recordSessionIntent,
   getSessionIntent,
 } from '@/services/agent-cache';
+import {
+  guardrailRefuseToOutput,
+  refuseIfLowConfidence,
+} from '@/services/agent-guardrails';
+import {
+  classifySpecialist,
+  shouldRunMarketingSpecialist,
+} from '@/services/agent-supervisor';
+import { runMarketingAgent } from '@/services/marketing-agent';
 
 export interface AiSuperAgentOutput {
   reply: string;
@@ -197,11 +206,69 @@ export async function chat(input: {
   history?: Array<{ role: string; content: string }>;
   mode?: AgentInteractionMode;
   sessionId?: string;
+  isAdmin?: boolean;
 }): Promise<AiSuperAgentOutput> {
   const safeMessage = sanitizeInput(input.message);
   const activeMode: AgentInteractionMode = input.mode === 'chat' ? 'chat' : 'agent';
   const personaConfig = resolvePersona(input.persona);
   const sessionId = input.sessionId || `sess_active`;
+  const isAdmin = Boolean(input.isAdmin);
+
+  // -----------------------------------------------------------------
+  // 0. SUPERVISOR — customer tool loop vs marketing specialist
+  // -----------------------------------------------------------------
+  const specialistDecision = classifySpecialist(safeMessage, { isAdmin });
+  const marketingGate = shouldRunMarketingSpecialist(specialistDecision, isAdmin);
+
+  if (specialistDecision.specialist === 'marketing' && marketingGate.run === false) {
+    if (marketingGate.reason === 'low_confidence') {
+      const low = refuseIfLowConfidence(specialistDecision.confidence);
+      if (low) {
+        return { ...guardrailRefuseToOutput(low), mode: activeMode };
+      }
+    }
+    if (marketingGate.reason === 'not_admin') {
+      return {
+        ...guardrailRefuseToOutput({
+          refused: true,
+          reply:
+            'Campaign drafting is limited to active admins. Switch to an admin account, or ask a shopping / gift / checkout question instead.',
+          provenance: {
+            verifiedAt: new Date().toISOString(),
+            source: 'ShopSphere Agent Supervisor (Admin Gate)',
+            rowCount: 0,
+            confidence: 'qualified',
+          },
+        }),
+        mode: activeMode,
+      };
+    }
+  }
+
+  if (marketingGate.run === true) {
+    if (!input.userId) {
+      return {
+        ...guardrailRefuseToOutput({
+          refused: true,
+          reply: 'Sign in as an admin to draft and schedule a marketing campaign.',
+          provenance: {
+            verifiedAt: new Date().toISOString(),
+            source: 'ShopSphere Agent Supervisor',
+            rowCount: 0,
+            confidence: 'qualified',
+          },
+        }),
+        mode: activeMode,
+      };
+    }
+    const marketingOut = await runMarketingAgent({
+      message: safeMessage,
+      userId: input.userId,
+      sessionId,
+      apiKey: input.apiKey,
+    });
+    return { ...marketingOut, mode: activeMode };
+  }
 
   // -----------------------------------------------------------------
   // 1. QUESTION ROUTER & CROSS-QUESTIONING LAYER

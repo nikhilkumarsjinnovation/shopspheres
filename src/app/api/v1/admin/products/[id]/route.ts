@@ -3,6 +3,7 @@ import { requireApiVersion } from '@/lib/api-version';
 import { csrfMiddleware } from '@/lib/csrf';
 import { requireActiveAdmin, writeAdminAudit } from '@/lib/admin-guard';
 import { createClient } from '@/lib/supabase/server';
+import { indexProductEmbedding } from '@/services/rag-index';
 import type { ApprovalStatus } from '@/types/database.types';
 
 const STATUSES: ApprovalStatus[] = ['pending', 'approved', 'rejected'];
@@ -32,7 +33,13 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ error: 'A rejection reason is required.' }, { status: 400 });
   }
 
-  const { data: product, error: readError } = await supabase.from('products').select('id').eq('id', id).maybeSingle();
+  const { data: product, error: readError } = await supabase
+    .from('products')
+    .select(
+      'id, title, description, category, sub_category, price, compare_at_price, stock, condition, tags, attributes, image_urls, embedding',
+    )
+    .eq('id', id)
+    .maybeSingle();
   if (readError) return NextResponse.json({ error: readError.message }, { status: 500 });
   if (!product) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
 
@@ -45,8 +52,19 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     .eq('id', id);
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 400 });
 
+  let ragIndexed = false;
+  let ragError: string | null = null;
+  if (status === 'approved' && !product.embedding) {
+    const indexed = await indexProductEmbedding(supabase, product);
+    ragIndexed = indexed.ok;
+    ragError = indexed.ok ? null : indexed.error;
+    if (!indexed.ok) {
+      console.warn(`[Admin Approve] RAG index failed for ${id}:`, indexed.error);
+    }
+  }
+
   const action = status === 'approved' ? 'product_approve' : status === 'rejected' ? 'product_reject' : 'product_pending';
   const { error: auditError } = await writeAdminAudit(supabase, gate.session.user.id, action, 'products', id);
   if (auditError) return NextResponse.json({ error: auditError.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, ragIndexed, ragError });
 }
