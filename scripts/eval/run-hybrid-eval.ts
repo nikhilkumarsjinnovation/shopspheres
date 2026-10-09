@@ -135,7 +135,7 @@ function faithfulnessScore(answer: string, nodes: ProductKnowledgeNode[]): numbe
   // Every cited title must be from retrieved set; score = cited/min(3, titles) when citing, else 1 if no title tokens claimed
   const answerHasAnyTitle = titles.some((t) => lower.includes(t.toLowerCase().split(/\s+/)[0] ?? ''));
   if (!answerHasAnyTitle) return 1;
-  return cited.length / Math.min(3, titles.length);
+  return Math.min(1, cited.length / Math.min(3, titles.length));
 }
 
 function answerRelevanceScore(answer: string, gold: string[], query: string): number {

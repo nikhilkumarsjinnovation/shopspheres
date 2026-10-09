@@ -1,9 +1,9 @@
 # Assessment 3 — Hybrid retrieval eval report
 
-Measured at: 2026-10-09T13:31:18.747Z
+Measured at: 2026-10-09T15:11:31.203Z
 Scenarios: 12 labelled gift/checkout cases (k=5)
 Baseline mode: cosine (frozen in baseline-a2.json at 2026-10-09T13:29:44.300Z)
-Compare mode: hybrid (FTS available: NO — pending migration apply)
+Compare mode: hybrid (FTS available: yes)
 
 | Metric | Baseline (cosine A2) | Hybrid + re-rank |
 | --- | ---: | ---: |
@@ -19,4 +19,4 @@ Compare mode: hybrid (FTS available: NO — pending migration apply)
 - Baseline was produced with `mode=cosine` only (pre-hybrid retriever behaviour).
 - Hybrid uses Postgres FTS ∪ cosine RRF then weighted re-ranker (0.45 cosine + 0.35 ts_rank + 0.20 title overlap).
 - Faithfulness / answer-relevance use grounded catalog stubs over retrieved titles (not a live LLM chat loop).
-- FTS RPC missing or errored → hybrid fell back toward cosine for lexical ranks. **NOT VERIFIED (pending apply)** of `*_product_fts_hybrid.sql`.
+- FTS RPC `match_products_fts` responded successfully.
