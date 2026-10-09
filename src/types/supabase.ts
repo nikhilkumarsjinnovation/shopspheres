@@ -507,6 +507,7 @@ export type Database = {
           title: string
           updated_at: string
           deleted_at: string | null
+          search_tsv: string | null
         }
         Insert: {
           ai_categorized?: boolean
@@ -536,6 +537,7 @@ export type Database = {
           title: string
           updated_at?: string
           deleted_at?: string | null
+          search_tsv?: never
         }
         Update: {
           ai_categorized?: boolean
@@ -565,6 +567,7 @@ export type Database = {
           title?: string
           updated_at?: string
           deleted_at?: string | null
+          search_tsv?: never
         }
         Relationships: [
           {
@@ -1592,6 +1595,30 @@ export type Database = {
           category: string
           image_urls: string[]
           similarity: number
+        }[]
+      }
+      match_products_fts: {
+        Args: {
+          query_text: string
+          match_count?: number
+          p_seller_id?: string | null
+          p_shop_id?: string | null
+        }
+        Returns: {
+          id: string
+          seller_id: string
+          shop_id: string | null
+          title: string
+          description: string
+          price: number
+          stock: number
+          category: string
+          sub_category: string | null
+          tags: string[]
+          image_urls: string[]
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          deleted_at: string | null
+          ts_rank: number
         }[]
       }
       seller_owns_order: {

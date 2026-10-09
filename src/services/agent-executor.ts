@@ -10,6 +10,9 @@ import {
   AppliedOfferInfo,
   WalletAvailableOffer,
 } from '@/lib/offer-eligibility';
+import { retrieveProducts } from '@/services/hybrid-retriever';
+import type { Database } from '@/types/database.types';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 function normalizeCategory(input?: string): string | null {
   if (!input || typeof input !== 'string') return null;
@@ -143,7 +146,67 @@ export async function executeAgentTool(
       const stemmedWords = rawWords.map(stemWord).filter((w: string) => w.length > 2 && !stopWords.has(w));
       const searchTerms = Array.from(new Set([...rawWords, ...stemmedWords]));
 
-      // 3. Helper to query products with or without category filter
+      // Hybrid retrieval first (FTS ∪ cosine + re-rank); ILIKE fallback if empty.
+      if ((query || '').trim().length > 0) {
+        try {
+          const hybridNodes = await retrieveProducts({
+            mode: 'hybrid',
+            query: String(query),
+            supabase: adminDb as unknown as SupabaseClient<Database>,
+            limit: 6,
+            filters: {
+              approvedOnly: true,
+              categoryIlike: normCat,
+              minPrice: min_price && !isNaN(Number(min_price)) ? Number(min_price) : undefined,
+              maxPrice: max_price && !isNaN(Number(max_price)) ? Number(max_price) : undefined,
+              inStockOnly: Boolean(in_stock_only),
+            },
+          });
+
+          if (hybridNodes.length > 0) {
+            const matchedProducts = hybridNodes.map((n) => ({
+              id: n.id,
+              title: n.title,
+              description: n.description,
+              price: n.price,
+              compare_at_price: n.compare_at_price,
+              category: n.category,
+              sub_category: n.sub_category,
+              tags: n.tags,
+              image_urls: n.image_urls,
+              stock: n.stock,
+              average_rating: 0,
+              attributes: n.attributes,
+            }));
+
+            return {
+              toolName,
+              output: {
+                count: matchedProducts.length,
+                categoryFilter: normCat || 'All',
+                maxPriceFilter: max_price || null,
+                retrieval: 'hybrid',
+                products: matchedProducts.map((p) => ({
+                  id: p.id,
+                  title: p.title,
+                  price: p.price,
+                  category: p.category,
+                  stock: p.stock,
+                  rating: p.average_rating,
+                })),
+              },
+              actionCard: {
+                type: 'PRODUCT_CAROUSEL',
+                data: { products: matchedProducts },
+              },
+            };
+          }
+        } catch (hybridErr) {
+          console.warn('[search_catalog] hybrid retrieval failed, falling back to ILIKE:', hybridErr);
+        }
+      }
+
+      // 3. Helper to query products with or without category filter (ILIKE fallback)
       const executeQuery = async (targetCategory: string | null) => {
         const buildBase = () => {
           let b = adminDb

@@ -1,0 +1,218 @@
+{
+  "mode": "cosine",
+  "measuredAt": "2026-10-09T13:29:44.300Z",
+  "scenarioCount": 12,
+  "ftsAvailable": false,
+  "taskSuccessPct": 0.75,
+  "hitRate": 0.5833333333333334,
+  "precisionAtK": 0.3666666666666667,
+  "faithfulness": 1,
+  "answerRelevance": 0.8665674603174605,
+  "noiseHitRate": 0.5833333333333334,
+  "perScenario": [
+    {
+      "id": "gift-exploratory-perfume",
+      "task": "gift",
+      "hit": true,
+      "precisionAtK": 1,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 1,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Fragrance-Free Charcoal Moisturizer",
+        "Fragrance-Free Jojoba Serum",
+        "Fragrance-Free Rosehip Serum",
+        "Fragrance-Free Jojoba Conditioner",
+        "Fragrance-Free Charcoal Hand Cream"
+      ]
+    },
+    {
+      "id": "gift-ambiguous-him",
+      "task": "gift",
+      "hit": true,
+      "precisionAtK": 0.4,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 0.7,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Ergonomic Graphite Speaker",
+        "High-Definition Polycarbonate Speaker",
+        "Compact Graphite Earbuds",
+        "Small-Batch Truffle Hot Sauce",
+        "Compact Silicone Charger"
+      ]
+    },
+    {
+      "id": "gift-bella-vita-search",
+      "task": "gift",
+      "hit": false,
+      "precisionAtK": 0,
+      "taskSuccess": false,
+      "faithfulness": 1,
+      "answerRelevance": 0.8333333333333334,
+      "noiseHit": false,
+      "retrievedTitles": [
+        "Revitalizing Aloe Vera Body Lotion",
+        "Fragrance-Free Jojoba Serum",
+        "Botanical Shea Butter Hand Cream",
+        "Fragrance-Free Rosehip Serum",
+        "Fragrance-Free Jojoba Conditioner"
+      ]
+    },
+    {
+      "id": "gift-health-beauty-suggest",
+      "task": "gift",
+      "hit": true,
+      "precisionAtK": 0.4,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 1,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Fragrance-Free Charcoal Moisturizer",
+        "Gentle Aloe Vera Lip Balm",
+        "Hydrating Rosehip Moisturizer",
+        "Fragrance-Free Jojoba Serum",
+        "Fragrance-Free Rosehip Serum"
+      ]
+    },
+    {
+      "id": "gift-speaker-product",
+      "task": "gift",
+      "hit": true,
+      "precisionAtK": 0.4,
+      "taskSuccess": false,
+      "faithfulness": 1,
+      "answerRelevance": 1,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Ergonomic Graphite Speaker",
+        "High-Definition Polycarbonate Speaker",
+        "Rugged Graphite Earbuds",
+        "Wireless Titanium Earbuds",
+        "Compact Graphite Earbuds"
+      ]
+    },
+    {
+      "id": "gift-confirm-with-history",
+      "task": "gift",
+      "hit": false,
+      "precisionAtK": 0,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 0.875,
+      "noiseHit": false,
+      "retrievedTitles": [
+        "Gentle Aloe Vera Lip Balm",
+        "Cozy Cotton Scarf",
+        "Fragrance-Free Charcoal Moisturizer",
+        "Fragrance-Free Jojoba Serum",
+        "Modern Ceramic Area Rug"
+      ]
+    },
+    {
+      "id": "checkout-buy-smartwatch",
+      "task": "checkout",
+      "hit": true,
+      "precisionAtK": 0.8,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 0.6666666666666666,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Compact Graphite Smartwatch",
+        "Noise-Cancelling Carbon-Fiber Smartwatch",
+        "Rugged Aluminum Smartwatch",
+        "Noise ColorFit Pulse 2 Max 1.85\" Display Smart Watch",
+        "Compact Silicone Charger"
+      ]
+    },
+    {
+      "id": "checkout-purchase-headphones",
+      "task": "checkout",
+      "hit": true,
+      "precisionAtK": 1,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 0.6666666666666666,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Wireless Graphite Headphones",
+        "Wireless Titanium Earbuds",
+        "Wireless Titanium Earbuds",
+        "Smart Polycarbonate Earbuds",
+        "Compact Graphite Earbuds"
+      ]
+    },
+    {
+      "id": "checkout-order-laptop",
+      "task": "checkout",
+      "hit": false,
+      "precisionAtK": 0,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 1,
+      "noiseHit": false,
+      "retrievedTitles": [
+        "Handcrafted Walnut Armchair",
+        "High-Definition Polycarbonate Speaker",
+        "Rugged Aluminum Smartwatch",
+        "High-Definition Graphite Charger",
+        "Rugged Graphite Earbuds"
+      ]
+    },
+    {
+      "id": "checkout-buy-perfume",
+      "task": "checkout",
+      "hit": false,
+      "precisionAtK": 0,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 0.8571428571428571,
+      "noiseHit": false,
+      "retrievedTitles": [
+        "Revitalizing Aloe Vera Body Lotion",
+        "Fragrance-Free Rosehip Serum",
+        "Botanical Shea Butter Hand Cream",
+        "Fragrance-Free Jojoba Conditioner",
+        "Revitalizing Charcoal Hand Cream"
+      ]
+    },
+    {
+      "id": "checkout-phone-budget",
+      "task": "checkout",
+      "hit": false,
+      "precisionAtK": 0,
+      "taskSuccess": false,
+      "faithfulness": 1,
+      "answerRelevance": 0.8,
+      "noiseHit": false,
+      "retrievedTitles": [
+        "poco x4 pro 5g",
+        "OnePlus Nord CE4 5G (Dark Chrome, 8GB RAM, 128GB Storage)",
+        "Noise-Cancelling Carbon-Fiber Smartwatch",
+        "Rugged Aluminum Smartwatch",
+        "Wireless Titanium Earbuds"
+      ]
+    },
+    {
+      "id": "checkout-wallet-pay",
+      "task": "checkout",
+      "hit": true,
+      "precisionAtK": 0.4,
+      "taskSuccess": true,
+      "faithfulness": 1,
+      "answerRelevance": 1,
+      "noiseHit": true,
+      "retrievedTitles": [
+        "Ergonomic Graphite Speaker",
+        "High-Definition Polycarbonate Speaker",
+        "Wireless Titanium Earbuds",
+        "Rugged Carbon-Fiber Earbuds",
+        "Wireless Graphite Headphones"
+      ]
+    }
+  ]
+}

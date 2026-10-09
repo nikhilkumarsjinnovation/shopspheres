@@ -1,0 +1,153 @@
+[
+  {
+    "id": "gift-exploratory-perfume",
+    "task": "gift",
+    "query": "i want to gift something to my female friend, can you suggest some perfume",
+    "noise_query": "i want to gift somethingg to my female freind, can you sugest some perfume please asap tonight",
+    "relevant_title_patterns": ["perfume", "fragrance", "bella vita", "scent"],
+    "expected_router": {
+      "needs_clarification": false,
+      "intent_type": "governed_query"
+    },
+    "gold_answer_keywords": ["perfume", "gift", "fragrance", "suggest"]
+  },
+  {
+    "id": "gift-ambiguous-him",
+    "task": "gift",
+    "query": "send him tribit stormbox micro 2 speaker as gift",
+    "noise_query": "send himm tribit stormbox micro 2 speakr as a giftt please",
+    "relevant_title_patterns": ["tribit", "stormbox", "speaker"],
+    "expected_router": {
+      "needs_clarification": true
+    },
+    "gold_answer_keywords": ["recipient", "friend", "gift", "clarify"]
+  },
+  {
+    "id": "gift-bella-vita-search",
+    "task": "gift",
+    "query": "bella vita perfume for gifting",
+    "noise_query": "bella vitaa perfumee for giftingg under budget maybe",
+    "relevant_title_patterns": ["bella vita", "perfume"],
+    "expected_router": {
+      "needs_clarification": false
+    },
+    "gold_answer_keywords": ["bella", "vita", "perfume", "gift"]
+  },
+  {
+    "id": "gift-health-beauty-suggest",
+    "task": "gift",
+    "query": "suggest a nice gift for my female friend from beauty category",
+    "noise_query": "sugest a nice giftt for my female freind from beauty categorry",
+    "relevant_title_patterns": ["beauty", "perfume", "cream", "serum", "skincare"],
+    "expected_router": {
+      "needs_clarification": false,
+      "intent_type": "governed_query"
+    },
+    "gold_answer_keywords": ["gift", "beauty", "suggest"]
+  },
+  {
+    "id": "gift-speaker-product",
+    "task": "gift",
+    "query": "find tribit speaker to send as a gift",
+    "noise_query": "find tribittt speakr to send as a giftt asap",
+    "relevant_title_patterns": ["tribit", "speaker", "stormbox"],
+    "expected_router": {
+      "needs_clarification": false
+    },
+    "gold_answer_keywords": ["tribit", "speaker", "gift"]
+  },
+  {
+    "id": "gift-confirm-with-history",
+    "task": "gift",
+    "query": "yes, you can send this as gift to her",
+    "noise_query": "yess, you can send thiss as giftt to herr",
+    "relevant_title_patterns": ["bella", "perfume"],
+    "expected_router": {
+      "needs_clarification": false,
+      "intent_type": "action_task",
+      "target_entity": "gift"
+    },
+    "router_history": {
+      "recentTurns": [
+        { "role": "user", "content": "i go with bella vita" },
+        { "role": "assistant", "content": "Great choice. Who should receive this gift?" },
+        { "role": "user", "content": "send to friend@example.com" },
+        { "role": "assistant", "content": "Ready to send Bella Vita to friend@example.com. Confirm?" }
+      ],
+      "previousIntent": {
+        "selected_product_title": "Bella Vita",
+        "recipient_email": "friend@example.com",
+        "target_entity": "gift"
+      }
+    },
+    "gold_answer_keywords": ["gift", "confirm", "send"]
+  },
+  {
+    "id": "checkout-buy-smartwatch",
+    "task": "checkout",
+    "query": "buy this smartwatch now",
+    "noise_query": "buyy this smartwach now please checkout",
+    "relevant_title_patterns": ["watch", "smartwatch"],
+    "expected_router": {
+      "action_requires_agent_mode": true
+    },
+    "router_mode": "chat",
+    "gold_answer_keywords": ["buy", "checkout", "watch"]
+  },
+  {
+    "id": "checkout-purchase-headphones",
+    "task": "checkout",
+    "query": "I want to purchase wireless headphones under 3000",
+    "noise_query": "I want to purchasse wireless headphonees undr 3000 rupees asap",
+    "relevant_title_patterns": ["headphone", "earbud", "earphone", "wireless"],
+    "expected_router": {
+      "needs_clarification": false,
+      "intent_type": "action_task"
+    },
+    "gold_answer_keywords": ["headphone", "purchase", "checkout", "price"]
+  },
+  {
+    "id": "checkout-order-laptop",
+    "task": "checkout",
+    "query": "checkout and pay for a laptop under 50000",
+    "noise_query": "checkotu and payy for a laptopp undr 50000 please",
+    "relevant_title_patterns": ["laptop", "notebook"],
+    "expected_router": {
+      "intent_type": "action_task"
+    },
+    "gold_answer_keywords": ["laptop", "checkout", "pay"]
+  },
+  {
+    "id": "checkout-buy-perfume",
+    "task": "checkout",
+    "query": "buy bella vita perfume for myself",
+    "noise_query": "buyy bella vitaa perfumee for myself checkout now",
+    "relevant_title_patterns": ["bella vita", "perfume"],
+    "expected_router": {
+      "intent_type": "action_task"
+    },
+    "gold_answer_keywords": ["bella", "vita", "buy", "checkout"]
+  },
+  {
+    "id": "checkout-phone-budget",
+    "task": "checkout",
+    "query": "order a smartphone under 20000",
+    "noise_query": "orderr a smartfone undr 20000 rupees checkout",
+    "relevant_title_patterns": ["phone", "smartphone", "mobile"],
+    "expected_router": {
+      "needs_clarification": false
+    },
+    "gold_answer_keywords": ["phone", "smartphone", "order", "20000"]
+  },
+  {
+    "id": "checkout-wallet-pay",
+    "task": "checkout",
+    "query": "prepare wallet checkout for the bluetooth speaker",
+    "noise_query": "prepair wallet checkotu for the bluetooh speakr",
+    "relevant_title_patterns": ["speaker", "bluetooth", "tribit"],
+    "expected_router": {
+      "intent_type": "action_task"
+    },
+    "gold_answer_keywords": ["wallet", "checkout", "speaker"]
+  }
+]
