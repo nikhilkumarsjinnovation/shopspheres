@@ -4,7 +4,13 @@
  */
 
 import { hubSpotUpsertBody, toHubSpotContactProperties, upsertHubSpotContact } from '../src/services/hubspot-sync';
-import { buildPromoEmail, renderShopEmail, sendPromoEmail } from '../src/services/resend-mail';
+import {
+  applyResendSandboxRedirect,
+  buildPromoEmail,
+  renderShopEmail,
+  RESEND_HELLO_TO,
+  sendPromoEmail,
+} from '../src/services/resend-mail';
 import { interpretStripeEvent, persistStripeEvent, signStripePayload, verifyStripeSignature } from '../src/services/stripe-webhook';
 
 function assert(condition: boolean, message: string) {
@@ -94,24 +100,39 @@ async function run() {
   assert(!sentBody.includes('9800000000'), 'HubSpot request body has no phone');
 
   const allowed = buildPromoEmail(
-    { to: 'buyer@example.com', customerName: 'Asha\n<script>', discountPercent: 10 },
+    { to: 'buyer@example.com', customerName: 'Asha\n<script>', discountPercent: 15, promoCode: 'SS15-TEST' },
     'ShopSphere <onboarding@resend.dev>',
   );
   assert(allowed.ok === true && !allowed.message.html.includes('<script>'), 'Promo HTML escapes the customer name');
+  assert(allowed.ok === true && allowed.message.html.includes('SS15-TEST'), 'Promo email includes the redeemable code');
+  assert(allowed.ok === true && allowed.message.html.includes('15%'), 'Promo email states the discount percent');
+  if (allowed.ok) {
+    const redirected = applyResendSandboxRedirect(allowed.message);
+    assert(
+      redirected.to[0] === RESEND_HELLO_TO && redirected.redirectedFrom === 'buyer@example.com',
+      'Onboarding from-address redirects promo mail to the Resend sandbox inbox',
+    );
+    assert(redirected.html.includes('buyer@example.com'), 'Sandbox redirect keeps the intended recipient in the body');
+  }
   const refused = buildPromoEmail(
-    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 20 },
+    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 101, promoCode: 'SS101-BAD' },
     'ShopSphere <onboarding@resend.dev>',
   );
-  assert(refused.ok === false, 'Promo above 15% is refused');
+  assert(refused.ok === false, 'Promo above 100% is refused');
+  const twentyFive = buildPromoEmail(
+    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 25, promoCode: 'SS25-OKAY' },
+    'ShopSphere <onboarding@resend.dev>',
+  );
+  assert(twentyFive.ok === true && twentyFive.message.html.includes('25%'), 'Promo at 25% is allowed');
 
   const missingKey = await sendPromoEmail(
-    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 10 },
+    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 10, promoCode: 'SS10-TEST' },
     'ShopSphere <onboarding@resend.dev>',
     '',
   );
   assert(missingKey.ok === false && missingKey.status === 501, 'Resend without an API key is not configured');
   const sampleKey = await sendPromoEmail(
-    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 10 },
+    { to: 'buyer@example.com', customerName: 'Asha', discountPercent: 10, promoCode: 'SS10-TEST' },
     'ShopSphere <onboarding@resend.dev>',
     're_xxxxxxxxx',
   );

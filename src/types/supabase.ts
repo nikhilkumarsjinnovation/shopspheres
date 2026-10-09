@@ -506,8 +506,7 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
-          deleted_at?: string | null
-          is_published?: boolean
+          deleted_at: string | null
         }
         Insert: {
           ai_categorized?: boolean
@@ -537,7 +536,6 @@ export type Database = {
           title: string
           updated_at?: string
           deleted_at?: string | null
-          is_published?: boolean
         }
         Update: {
           ai_categorized?: boolean
@@ -567,7 +565,6 @@ export type Database = {
           title?: string
           updated_at?: string
           deleted_at?: string | null
-          is_published?: boolean
         }
         Relationships: [
           {
@@ -1466,6 +1463,101 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discount_percent: number
+          id: string
+          name: string
+          promo_code: string | null
+          segment: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discount_percent: number
+          id?: string
+          name: string
+          promo_code?: string | null
+          segment: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          id?: string
+          name?: string
+          promo_code?: string | null
+          segment?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_sends: {
+        Row: {
+          campaign_id: string
+          converted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          opened_at: string | null
+          resend_message_id: string | null
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          converted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          opened_at?: string | null
+          resend_message_id?: string | null
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          converted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          opened_at?: string | null
+          resend_message_id?: string | null
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_sends_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_sends_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

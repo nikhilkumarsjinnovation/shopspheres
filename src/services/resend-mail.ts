@@ -9,12 +9,56 @@ const SAMPLE_RESEND_KEY = 're_xxxxxxxxx';
 export const RESEND_ONBOARDING_FROM = 'onboarding@resend.dev';
 export const RESEND_HELLO_TO = 'nikhil.kumar@sjinnovation.com';
 
-export const MAX_PROMO_DISCOUNT_PERCENT = 15;
+/** Campaign / promo emails: 1–100% (no artificial 15% hackathon cap). */
+export const MAX_PROMO_DISCOUNT_PERCENT = 100;
+
+/** Without a verified domain, Resend only delivers to the account inbox. */
+export function resendSandboxInbox(): string {
+  const configured = (process.env.RESEND_SANDBOX_TO ?? '').trim().toLowerCase();
+  return configured || RESEND_HELLO_TO;
+}
+
+export function isResendOnboardingFrom(from: string): boolean {
+  return from.toLowerCase().includes(RESEND_ONBOARDING_FROM);
+}
+
+/**
+ * Hackathon / free-tier helper: when sending from onboarding@resend.dev, rewrite `to`
+ * to the Resend account inbox and annotate the body with the intended recipient.
+ */
+export function applyResendSandboxRedirect(message: {
+  from: string;
+  to: string[];
+  subject: string;
+  html: string;
+  text?: string;
+}): { from: string; to: string[]; subject: string; html: string; text?: string; redirectedFrom: string | null } {
+  if (!isResendOnboardingFrom(message.from)) {
+    return { ...message, redirectedFrom: null };
+  }
+  const inbox = resendSandboxInbox();
+  const intended = (message.to[0] ?? '').trim().toLowerCase();
+  if (!intended || intended === inbox) {
+    return { ...message, to: intended ? [intended] : [inbox], redirectedFrom: null };
+  }
+  const noteHtml = `<p><em>Resend sandbox redirect:</em> intended for <strong>${escapeHtml(intended)}</strong>; delivered to the account inbox because no custom domain is verified.</p>`;
+  const noteText = `Resend sandbox redirect: intended for ${intended}; delivered to ${inbox}.`;
+  return {
+    from: message.from,
+    to: [inbox],
+    subject: message.subject,
+    html: `${noteHtml}${message.html}`,
+    text: message.text ? `${noteText}\n\n${message.text}` : noteText,
+    redirectedFrom: intended,
+  };
+}
 
 export type PromoEmailInput = {
   to: string;
   customerName: string;
   discountPercent: number;
+  /** Redeemable checkout code, e.g. SS15-A3B7. Auto-generated when omitted. */
+  promoCode?: string;
 };
 
 export type ResendMessage = {
@@ -42,17 +86,22 @@ export function buildPromoEmail(input: PromoEmailInput, from: string): { ok: tru
   if (!Number.isInteger(input.discountPercent) || input.discountPercent < 1 || input.discountPercent > MAX_PROMO_DISCOUNT_PERCENT) {
     return { ok: false, error: `Discount must be an integer from 1 to ${MAX_PROMO_DISCOUNT_PERCENT}.` };
   }
+  const promoCode = (input.promoCode ?? `SS${input.discountPercent}-MAIL`).trim().toUpperCase();
+  if (!promoCode) {
+    return { ok: false, error: 'A promo code is required.' };
+  }
   const name = sanitizeName(input.customerName);
-  const subject = `A ${input.discountPercent}% thank-you from ShopSphere`;
+  const subject = `Your ShopSphere code ${promoCode} — ${input.discountPercent}% off`;
   const safeName = escapeHtml(name);
+  const safeCode = escapeHtml(promoCode);
   return {
     ok: true,
     message: {
       from,
       to: [to],
       subject,
-      html: `<p>Hi ${safeName},</p><p>Here is ${input.discountPercent}% off your next ShopSphere order. Show this email at checkout and ask the assistant to apply the promo.</p>`,
-      text: `Hi ${name}, here is ${input.discountPercent}% off your next ShopSphere order.`,
+      html: `<p>Hi ${safeName},</p><p>You have <strong>${input.discountPercent}% off</strong> your next ShopSphere order.</p><p>Your promo code: <strong style="font-size:1.2em;letter-spacing:0.04em">${safeCode}</strong></p><p>Enter this code at checkout (coupon field), or tell the ShopSphere assistant: “Apply ${safeCode}”.</p>`,
+      text: `Hi ${name}, you have ${input.discountPercent}% off. Promo code: ${promoCode}. Enter it at checkout or ask the assistant to apply ${promoCode}.`,
     },
   };
 }
@@ -123,13 +172,14 @@ async function deliverResendEmail(
       status: 501,
     };
   }
+  const delivered = applyResendSandboxRedirect(message);
   const resend = new Resend(apiKey);
   const { data, error } = await resend.emails.send({
-    from: message.from,
-    to: message.to,
-    subject: message.subject,
-    html: message.html,
-    text: message.text,
+    from: delivered.from,
+    to: delivered.to,
+    subject: delivered.subject,
+    html: delivered.html,
+    text: delivered.text,
   });
   if (error) {
     return { ok: false, error: error.message.slice(0, 300), status: error.statusCode ?? 502 };

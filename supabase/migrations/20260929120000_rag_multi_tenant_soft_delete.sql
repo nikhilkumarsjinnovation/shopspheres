@@ -13,8 +13,9 @@ CREATE INDEX IF NOT EXISTS idx_products_deleted_at
   ON public.products (deleted_at)
   WHERE deleted_at IS NOT NULL;
 
-CREATE INDEX IF NOT EXISTS idx_products_seller_published
-  ON public.products (seller_id, is_published)
+-- is_published was dropped in 20260922000000_enterprise_seller_approval (approval_status).
+CREATE INDEX IF NOT EXISTS idx_products_seller_approval
+  ON public.products (seller_id, approval_status)
   WHERE deleted_at IS NULL;
 
 -- 4. Store-Scoped Similarity Search RPC with Tenant Isolation
@@ -40,7 +41,6 @@ RETURNS TABLE (
   tags text[],
   image_urls text[],
   approval_status approval_status,
-  is_published boolean,
   deleted_at timestamptz,
   similarity double precision
 )
@@ -62,7 +62,6 @@ AS $$
     p.tags,
     p.image_urls,
     p.approval_status,
-    p.is_published,
     p.deleted_at,
     1 - (p.embedding <=> query_embedding::vector) AS similarity
   FROM public.products p

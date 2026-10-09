@@ -218,11 +218,48 @@ export default function CheckoutPage() {
   }, [paymentMethod, walletBalance, finalTotalINR, codInput, codCaptcha]);
 
   // Apply coupon code in Step 1
-  const handleApplyCoupon = (codeToApply: string) => {
+  const handleApplyCoupon = async (codeToApply: string) => {
     setOfferFeedback(null);
     setDisqualificationWarning(null);
     const code = codeToApply.trim().toUpperCase();
     if (!code) return;
+
+    // Campaign codes (SS15-XXXX): redeem against the signed-in user's campaign send
+    if (/^SS([1-9]|[1-9][0-9]|100)-[A-Z0-9]{4}$/.test(code)) {
+      try {
+        const res = await fetchWithCsrf('/api/v1/campaigns/redeem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, subtotal: totalAmount }),
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          error?: string;
+          discountAmount?: number;
+          title?: string;
+          minOrderAmount?: number;
+          code?: string;
+        };
+        if (!res.ok || !data.ok || typeof data.discountAmount !== 'number') {
+          setOfferFeedback({ type: 'error', message: data.error || `Could not apply ${code}.` });
+          return;
+        }
+        setAppliedOffer({
+          code: data.code || code,
+          title: data.title || `Campaign promo (${code})`,
+          discountAmount: data.discountAmount,
+          minOrderAmount: data.minOrderAmount ?? 299,
+        });
+        setCouponInput('');
+        setOfferFeedback({
+          type: 'success',
+          message: `Coupon ${data.code || code} applied! Saved ${formatINR(data.discountAmount)}.`,
+        });
+      } catch {
+        setOfferFeedback({ type: 'error', message: `Could not validate campaign code ${code}.` });
+      }
+      return;
+    }
 
     // Search in behavioral offers or match predefined codes
     const foundOffer = offers.find((o) => o.code.toUpperCase() === code);
