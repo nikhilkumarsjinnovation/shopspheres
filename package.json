@@ -11,13 +11,19 @@
     "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
     "db:link": "supabase link --project-ref lzvvfbaswwxgfdvmqzod",
     "db:push": "supabase db push",
-    "seed": "node scripts/seed_products.mjs"
+    "seed": "node scripts/seed_products.mjs",
+    "test:a3-churn": "tsx scripts/test_a3_churn.ts",
+    "test:a3-unit": "tsx scripts/test_a3_integrations.ts && tsx scripts/test_a3_campaigns.ts && tsx scripts/test_a3_agents.ts && tsx scripts/test_a3_eval_hybrid.ts && tsx scripts/test_a3_churn.ts && tsx scripts/test_a3_platform.ts && tsx scripts/test_a3_demo.ts",
+    "test": "npm run typecheck && npm run test:a3-unit"
   },
   "dependencies": {
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@radix-ui/react-separator": "^1.1.15",
     "@radix-ui/react-tabs": "^1.1.21",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
+    "@sentry/nextjs": "^11.6.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "@upstash/ratelimit": "^2.1.0",
@@ -41,6 +47,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.186.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.3"
   }
 }

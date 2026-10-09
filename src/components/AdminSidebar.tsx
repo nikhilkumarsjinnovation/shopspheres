@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Users, Archive, FileText, Store, ShieldCheck, Brain, Megaphone } from 'lucide-react';
+import { Activity, Users, Archive, FileText, Store, ShieldCheck, Brain, Megaphone, BarChart3 } from 'lucide-react';
 import SignOutButton from '@/components/SignOutButton';
 
 interface AdminSidebarProps {
@@ -19,6 +19,7 @@ const links = [
   { href: '/admin/orders', label: 'Order Ledger', icon: FileText, match: (p: string) => p.startsWith('/admin/orders') },
   { href: '/admin/shops', label: 'Merchant Tenants', icon: Store, match: (p: string) => p.startsWith('/admin/shops') },
   { href: '/admin/logs', label: 'Audit Logs', icon: ShieldCheck, match: (p: string) => p === '/admin/logs' },
+  { href: '/admin/metrics', label: 'Platform Metrics', icon: BarChart3, match: (p: string) => p.startsWith('/admin/metrics') },
 ];
 
 export default function AdminSidebar({ email, role = 'admin' }: AdminSidebarProps) {

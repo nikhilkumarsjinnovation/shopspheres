@@ -7,6 +7,13 @@
 @import './dark-neumorphism.css';
 
 /* --- 1. CSS Custom Properties / Design Tokens --- */
+:root,
+html.ss-root-fonts {
+  /* Self-hosted via @fontsource (avoids next/font Google fetch failures on Vercel) */
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+
 :root {
   /* Color Palette: Magic Lab pastel glass */
   --bg-canvas: #eef1f9;
