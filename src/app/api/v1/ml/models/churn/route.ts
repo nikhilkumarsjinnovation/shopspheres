@@ -3,6 +3,7 @@ import { requireApiVersion } from '@/lib/api-version';
 import { requireActiveAdmin } from '@/lib/admin-guard';
 import { csrfMiddleware } from '@/lib/csrf';
 import { enforceRateLimit, mlModelsLimiter, rateLimitKey } from '@/lib/rate-limiter';
+import { captureRouteError } from '@/lib/sentry';
 import { createClient } from '@/lib/supabase/server';
 import { getCommittedChurnArtifacts } from '@/services/churn-model-artifacts';
 import { fetchChurnModelRows } from '@/services/ml-registry';
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err) {
+    captureRouteError(err, { route: '/api/v1/ml/models/churn', method: 'GET' });
     const message = err instanceof Error ? err.message.slice(0, 300) : 'Failed to load churn models.';
     return NextResponse.json({ error: message }, { status: 500 });
   }

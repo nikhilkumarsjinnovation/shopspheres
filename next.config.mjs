@@ -16,7 +16,7 @@ const nextConfig = {
             "img-src 'self' data: blob: https:",
             "media-src 'self' data: blob:",
             "worker-src 'self' blob:",
-            "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com",
+            "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
             "frame-ancestors 'none'",
           ].join('; '),
         },

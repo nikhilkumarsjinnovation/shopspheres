@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { requireApiVersion } from '@/lib/api-version';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
+import { behaviorLimiter, enforceRateLimit, rateLimitKey } from '@/lib/rate-limiter';
+import { captureRouteError } from '@/lib/sentry';
 import { createClient } from '@/lib/supabase/server';
 import { trackEvent } from '@/services/behavior-service';
 import type { Json } from '@/types/database.types';
@@ -23,6 +25,8 @@ export async function POST(request: NextRequest) {
   try {
     const versionError = requireApiVersion(request);
     if (versionError) return versionError;
+    const limited = await enforceRateLimit(behaviorLimiter, await rateLimitKey(request));
+    if (limited) return limited;
     const csrfError = csrfMiddleware(request);
     if (csrfError) return csrfError;
 
@@ -57,6 +61,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ accepted, failed });
   } catch (error: unknown) {
+    captureRouteError(error, { route: '/api/v1/behavior/events', method: 'POST' });
     const message = error instanceof Error ? error.message : 'Failed to store events.';
     return NextResponse.json({ error: message }, { status: 500 });
   }

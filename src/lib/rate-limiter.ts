@@ -86,6 +86,9 @@ export const visualSearchLimiter = createLimiter(5, 'shopsphere:visual-search');
 export const integrationsLimiter = createLimiter(10, 'shopsphere:integrations');
 export const stripeWebhookLimiter = createLimiter(120, 'shopsphere:stripe-webhook');
 export const mlModelsLimiter = createLimiter(20, 'shopsphere:ml-models');
+export const adminApiLimiter = createLimiter(30, 'shopsphere:admin-api');
+export const ordersLimiter = createLimiter(20, 'shopsphere:orders');
+export const behaviorLimiter = createLimiter(60, 'shopsphere:behavior');
 
 export async function rateLimitKey(request: NextRequest): Promise<string> {
   const supabase = await createClient();
