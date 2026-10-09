@@ -14,8 +14,8 @@ Saved so the branch stack stays the source of truth. Status below is updated as 
 | 2 | `feat/a3-campaigns` | implemented locally, not committed | 15 |
 | 3 | `feat/a3-agents` | not started | 20 |
 | 4 | `feat/a3-eval-hybrid` | implemented locally, not committed | 15 |
-| 5 | `feat/a3-churn` | implemented locally, not committed | 10 |
-| 6 | `feat/a3-platform` | not started | 15 |
+| 5 | `feat/a3-churn` | merged (PR #26) | 10 |
+| 6 | `feat/a3-platform` | implemented locally, not committed | 15 |
 | 7 | `feat/a3-demo` | not started | 5 |
 
 ## What you do
@@ -35,7 +35,7 @@ Already used: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE
 
 Added for this branch: `HUBSPOT_PRIVATE_APP_TOKEN`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `STRIPE_WEBHOOK_SECRET`.
 
-Later branches add: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`.
+Branch 6 adds: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`.
 
 ## Branch 1 — `feat/a3-integrations`
 
@@ -96,6 +96,10 @@ Repeat-purchase and churn from order history. Precision, recall, and F1 for the 
 ## Branch 6 — `feat/a3-platform`
 
 `npm test` plus `.github/workflows/test.yml` on push and pull request (typecheck and the existing `tsx` unit scripts). Sentry on server routes and a small metrics view. RLS advisor findings fixed in a migration once a real advisor dump exists. Extra rate limits where this branch's routes still lack them (the Stripe webhook is already limited).
+
+**Files:** `.github/workflows/test.yml`, `src/instrumentation.ts`, `src/lib/sentry.ts`, `src/app/(admin)/admin/metrics/page.tsx`, rate-limit wires on admin/stats, campaigns list, orders, behavior/events, `scripts/test_a3_platform.ts`, `.env.example` Sentry names.
+
+**RLS advisor:** skipped — no real advisor dump in the repo. Add a migration only after you export one from the Supabase dashboard.
 
 **Depends on:** branch 5. **Done when:** `npm test` exits 0 locally and the workflow lists those commands.
 

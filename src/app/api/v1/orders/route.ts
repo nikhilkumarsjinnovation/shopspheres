@@ -3,6 +3,8 @@ import { requireApiVersion } from '@/lib/api-version';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { csrfMiddleware } from '@/lib/csrf';
+import { enforceRateLimit, ordersLimiter, rateLimitKey } from '@/lib/rate-limiter';
+import { captureRouteError } from '@/lib/sentry';
 import { createOrder, type CreateOrderInput } from '@/services/order-service';
 import { sendEmail } from '@/services/notification-service';
 import { refundWallet } from '@/services/wallet-service';
@@ -11,6 +13,8 @@ export async function POST(request: NextRequest) {
   try {
     const versionError = requireApiVersion(request);
     if (versionError) return versionError;
+    const limited = await enforceRateLimit(ordersLimiter, await rateLimitKey(request));
+    if (limited) return limited;
     const csrfError = csrfMiddleware(request);
     if (csrfError) {
       return csrfError;
@@ -89,6 +93,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err: unknown) {
     console.error('[Create Order API] Exception:', err);
+    captureRouteError(err, { route: '/api/v1/orders', method: 'POST' });
     const msg = err instanceof Error ? err.message : 'Server error while processing order.';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
@@ -97,6 +102,8 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const versionError = requireApiVersion(request);
   if (versionError) return versionError;
+  const limited = await enforceRateLimit(ordersLimiter, await rateLimitKey(request));
+  if (limited) return limited;
   const csrfError = csrfMiddleware(request);
   if (csrfError) return csrfError;
   const supabase = await createClient();

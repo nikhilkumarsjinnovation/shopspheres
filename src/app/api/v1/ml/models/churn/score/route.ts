@@ -3,6 +3,7 @@ import { requireApiVersion } from '@/lib/api-version';
 import { requireActiveAdmin } from '@/lib/admin-guard';
 import { csrfMiddleware } from '@/lib/csrf';
 import { enforceRateLimit, mlModelsLimiter, rateLimitKey } from '@/lib/rate-limiter';
+import { captureRouteError } from '@/lib/sentry';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getCommittedChurnArtifacts } from '@/services/churn-model-artifacts';
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
+    captureRouteError(err, { route: '/api/v1/ml/models/churn/score', method: 'POST' });
     const message = err instanceof Error ? err.message.slice(0, 300) : 'Failed to score user.';
     return NextResponse.json({ error: message }, { status: 500 });
   }
