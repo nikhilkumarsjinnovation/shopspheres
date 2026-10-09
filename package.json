@@ -13,10 +13,12 @@
     "db:push": "supabase db push",
     "seed": "node scripts/seed_products.mjs",
     "test:a3-churn": "tsx scripts/test_a3_churn.ts",
-    "test:a3-unit": "tsx scripts/test_a3_integrations.ts && tsx scripts/test_a3_campaigns.ts && tsx scripts/test_a3_agents.ts && tsx scripts/test_a3_eval_hybrid.ts && tsx scripts/test_a3_churn.ts && tsx scripts/test_a3_platform.ts",
+    "test:a3-unit": "tsx scripts/test_a3_integrations.ts && tsx scripts/test_a3_campaigns.ts && tsx scripts/test_a3_agents.ts && tsx scripts/test_a3_eval_hybrid.ts && tsx scripts/test_a3_churn.ts && tsx scripts/test_a3_platform.ts && tsx scripts/test_a3_demo.ts",
     "test": "npm run typecheck && npm run test:a3-unit"
   },
   "dependencies": {
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@radix-ui/react-separator": "^1.1.15",
     "@radix-ui/react-tabs": "^1.1.21",
     "@react-three/drei": "^9.122.0",
