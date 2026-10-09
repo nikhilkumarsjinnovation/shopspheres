@@ -15,8 +15,8 @@ Saved so the branch stack stays the source of truth. Status below is updated as 
 | 3 | `feat/a3-agents` | not started | 20 |
 | 4 | `feat/a3-eval-hybrid` | implemented locally, not committed | 15 |
 | 5 | `feat/a3-churn` | merged (PR #26) | 10 |
-| 6 | `feat/a3-platform` | implemented locally, not committed | 15 |
-| 7 | `feat/a3-demo` | not started | 5 |
+| 6 | `feat/a3-platform` | merged (PR #27) | 15 |
+| 7 | `feat/a3-demo` | implemented locally, not committed | 5 |
 
 ## What you do
 
@@ -106,6 +106,10 @@ Repeat-purchase and churn from order history. Precision, recall, and F1 for the 
 ## Branch 7 — `feat/a3-demo`
 
 Architecture diagram, eval summary, and a short click-path in the PR body and `scripts/eval/assessment-3-report.md`. Annotated tag `assessment-3` on this tip. `docs/` stays untouched.
+
+**Files:** `scripts/eval/assessment-3-report.md`, `scripts/test_a3_demo.ts`, `package.json` (`test:a3-unit` includes demo smoke).
+
+**Done when:** report has architecture (mermaid), eval summary (hybrid + churn F1), click-path; `npx tsx scripts/test_a3_demo.ts` exits 0; annotated tag `assessment-3` exists on the tip (pushed after merge).
 
 **Depends on:** branch 6.
 
