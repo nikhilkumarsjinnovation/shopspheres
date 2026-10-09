@@ -11,7 +11,8 @@
     "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
     "db:link": "supabase link --project-ref lzvvfbaswwxgfdvmqzod",
     "db:push": "supabase db push",
-    "seed": "node scripts/seed_products.mjs"
+    "seed": "node scripts/seed_products.mjs",
+    "test:a3-churn": "tsx scripts/test_a3_churn.ts"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.15",
