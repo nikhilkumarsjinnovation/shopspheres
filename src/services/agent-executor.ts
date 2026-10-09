@@ -956,7 +956,53 @@ export async function executeAgentTool(
         const isGift = Boolean(order.is_gift);
         const category = items[0]?.products?.category || null;
 
-        const check = calculateWalletCouponDiscount(coupon_code, subtotal, isGift, category);
+        let check = calculateWalletCouponDiscount(coupon_code, subtotal, isGift, category);
+        const normalizedCode = String(coupon_code).trim().toUpperCase();
+        if (!check.valid && /^SS([1-9]|[1-9][0-9]|100)-[A-Z0-9]{4}$/.test(normalizedCode)) {
+          const { data: campaign } = await adminDb
+            .from('campaigns')
+            .select('id, discount_percent, promo_code, name')
+            .eq('promo_code', normalizedCode)
+            .maybeSingle();
+          const { data: send } = campaign
+            ? await adminDb
+                .from('campaign_sends')
+                .select('id, converted_at')
+                .eq('campaign_id', campaign.id)
+                .eq('user_id', userId)
+                .not('sent_at', 'is', null)
+                .maybeSingle()
+            : { data: null };
+          if (campaign && send && !send.converted_at) {
+            const {
+              calculateCampaignDiscount,
+              campaignPromoTitle,
+            } = await import('@/services/campaign-promo');
+            const calc = calculateCampaignDiscount(campaign.discount_percent, subtotal);
+            if (calc.valid) {
+              check = {
+                valid: true,
+                discountAmount: calc.discountAmount,
+                title: campaignPromoTitle(campaign.discount_percent, campaign.promo_code ?? normalizedCode),
+              };
+              await adminDb
+                .from('campaign_sends')
+                .update({ converted_at: new Date().toISOString() })
+                .eq('id', send.id);
+            } else {
+              check = { valid: false, discountAmount: 0, title: '', reason: calc.reason };
+            }
+          } else if (campaign && send?.converted_at) {
+            check = { valid: false, discountAmount: 0, title: '', reason: `Code ${normalizedCode} was already used.` };
+          } else if (campaign) {
+            check = {
+              valid: false,
+              discountAmount: 0,
+              title: '',
+              reason: `Code ${normalizedCode} is not assigned to your account.`,
+            };
+          }
+        }
         if (!check.valid) {
           return {
             toolName,

@@ -10,8 +10,8 @@ Saved so the branch stack stays the source of truth. Status below is updated as 
 
 | Order | Branch | Status | Points |
 | --- | --- | --- | --- |
-| 1 | `feat/a3-integrations` | implemented locally, not committed | 20 |
-| 2 | `feat/a3-campaigns` | not started | 15 |
+| 1 | `feat/a3-integrations` | merged to main (PR #20) | 20 |
+| 2 | `feat/a3-campaigns` | implemented locally, not committed | 15 |
 | 3 | `feat/a3-agents` | not started | 20 |
 | 4 | `feat/a3-eval-hybrid` | not started | 15 |
 | 5 | `feat/a3-churn` | not started | 10 |
@@ -39,13 +39,13 @@ Later branches add: `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`.
 
 ## Branch 1 — `feat/a3-integrations`
 
-Outbound HubSpot contact upsert (email, first name, last name only). Outbound Resend promo send with a 15% discount cap. Inbound `POST /api/v1/webhooks/stripe` verifies the `Stripe-Signature` header and stores the event id, not the raw body.
+Outbound HubSpot contact upsert (email, first name, last name only). Outbound Resend promo send with a 1–100% discount (campaign redeemable codes). Inbound `POST /api/v1/webhooks/stripe` verifies the `Stripe-Signature` header and stores the event id, not the raw body.
 
 **Files:** `src/services/hubspot-sync.ts`, `src/services/resend-mail.ts`, `src/services/stripe-webhook.ts`, `src/app/api/v1/webhooks/stripe/route.ts`, `src/app/api/v1/integrations/hubspot/contacts/route.ts`, `src/app/api/v1/integrations/email/route.ts`, `scripts/test_a3_integrations.ts`, one migration, hand-edited `src/types/supabase.ts`, `.env.example`.
 
 **Tables (new):** `crm_sync_state`, `stripe_webhook_events`. RLS on, admin read, admin write on sync state. Webhook inserts use the service role because Stripe has no user session.
 
-**Done when:** `npx tsx scripts/test_a3_integrations.ts` accepts a valid test signature, rejects a bad one, drops phone and address from the HubSpot payload, and refuses a promo above 15%.
+**Done when:** `npx tsx scripts/test_a3_integrations.ts` accepts a valid test signature, rejects a bad one, drops phone and address from the HubSpot payload, and refuses a promo above 100%.
 
 **Rollback:**
 
@@ -56,9 +56,20 @@ drop table if exists public.crm_sync_state;
 
 ## Branch 2 — `feat/a3-campaigns`
 
-Segments from `orders`: new = 1 paid order, repeat = 2+ orders in 90 days, lapsed = last paid order older than 90 days. One email campaign via the Resend helper. Rows track sent / opened / converted.
+Segments from `orders`: new = 1 paid order, repeat = 2+ orders in 90 days, lapsed = last paid order older than 90 days. Paid = `status NOT IN ('pending','cancelled')`. Exclusive priority: lapsed > repeat > new. One email campaign via the Resend helper with redeemable `SS{pct}-XXXX` codes (discount 1–100%). Rows track sent / opened / converted (`opened_at`/`converted_at` columns only; no open webhook).
 
-**Depends on:** branch 1. **Done when:** a script prints three segment counts and a send writes `sent_at`.
+**Files:** `src/services/campaign-segments.ts`, `src/services/campaign-send.ts`, `src/services/campaign-store.ts`, `src/app/api/v1/campaigns/segments/route.ts`, `src/app/api/v1/campaigns/send/route.ts`, `scripts/test_a3_campaigns.ts`, migration `*_create_campaigns_and_sends.sql`, hand-edited `src/types/supabase.ts`.
+
+**Tables (new):** `campaigns`, `campaign_sends`. RLS on, admin read/write.
+
+**Depends on:** branch 1. **Done when:** `npx tsx scripts/test_a3_campaigns.ts` prints three segment counts and a send writes `sent_at`.
+
+**Rollback:**
+
+```sql
+drop table if exists public.campaign_sends;
+drop table if exists public.campaigns;
+```
 
 ## Branch 3 — `feat/a3-agents`
 
@@ -103,7 +114,7 @@ Twilio, Slack, Google Calendar, HubSpot deals, Resend DNS, live Colab LoRA, a Vi
 
 ## Apply checklist (reviewer)
 
-1. Apply `supabase/migrations/*_create_crm_sync_and_stripe_events.sql` (and later branch SQL, in branch order).
+1. Apply `supabase/migrations/*_create_crm_sync_and_stripe_events.sql`, then `*_create_campaigns_and_sends.sql`, then `*_campaign_sends_customer_inbox.sql`, then `*_campaigns_promo_code.sql`, then `*_campaigns_discount_percent_100.sql` (branch order).
 2. Set the env names on Vercel. Never put `SUPABASE_SERVICE_ROLE_KEY` in a client bundle.
 3. HubSpot private app with contact read/write. Resend sender. Stripe test endpoint and `STRIPE_WEBHOOK_SECRET`.
-4. Re-run `npx tsx scripts/test_a3_integrations.ts` after the migration is applied if you want the database path marked verified. Until then that path is **NOT VERIFIED (pending apply)**.
+4. Re-run `npx tsx scripts/test_a3_integrations.ts` and `npx tsx scripts/test_a3_campaigns.ts` after migrations are applied if you want the database path marked verified. Until then that path is **NOT VERIFIED (pending apply)**.

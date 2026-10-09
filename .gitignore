@@ -31,6 +31,7 @@ yarn-error.log*
 
 # local planning docs (keep on disk, do not track)
 BUILD_PLAN.md
+/AI-help/
 
 # typescript
 *.tsbuildinfo

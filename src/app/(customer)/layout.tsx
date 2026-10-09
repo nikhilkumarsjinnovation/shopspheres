@@ -4,6 +4,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { CartProvider } from '@/context/CartContext';
 import { AgentBackgroundProvider } from '@/context/AgentBackgroundContext';
 import CustomerNavbar from '@/components/CustomerNavbar';
+import CampaignPromoBanner from '@/components/CampaignPromoBanner';
 import PersonalAiAssistant from '@/components/PersonalAiAssistant';
 import BehaviorTracker from '@/components/BehaviorTracker';
 
@@ -28,6 +29,7 @@ export default async function CustomerLayout({
       <AgentBackgroundProvider>
         <div>
           <CustomerNavbar email={session.user.email} />
+          <CampaignPromoBanner />
           <main className="main-content container">{children}</main>
           <PersonalAiAssistant />
           <BehaviorTracker userId={session.user.id} />
